@@ -7,8 +7,7 @@ import { config } from '../config/environment';
 const BasicInfo = () => {
   const [formData, setFormData] = useState({
     fullName: '',
-    email: '',
-    panNumber: ''
+    email: ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -36,12 +35,6 @@ const BasicInfo = () => {
       newErrors.email = 'Please enter a valid email address';
     }
 
-    if (!formData.panNumber.trim()) {
-      newErrors.panNumber = 'PAN number is required';
-    } else if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(formData.panNumber.toUpperCase())) {
-      newErrors.panNumber = 'Please enter a valid PAN number';
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -62,7 +55,7 @@ const BasicInfo = () => {
       
       console.log('API call to:', config.baseURL + '/basic-info', formData);
       localStorage.setItem('basicInfoCompleted', 'true');
-      navigate('/aadhaar-info');
+      navigate('/kyc-details');
     } catch (err) {
       setErrors({ submit: 'Failed to save information. Please try again.' });
     } finally {
@@ -133,25 +126,6 @@ const BasicInfo = () => {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
               />
               {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
-            </div>
-
-            <div>
-              <label htmlFor="panNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                PAN Number *
-              </label>
-              <input
-                id="panNumber"
-                type="text"
-                value={formData.panNumber}
-                onChange={(e) => handleInputChange('panNumber', e.target.value.toUpperCase())}
-                placeholder="Please Enter PAN Number"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                maxLength={10}
-              />
-              {errors.panNumber && <p className="text-red-500 text-sm mt-1">{errors.panNumber}</p>}
-              <div className="flex justify-end mt-1">
-                <button className="text-primary text-sm">Why we need this?</button>
-              </div>
             </div>
 
             {errors.submit && <p className="text-red-500 text-sm text-center">{errors.submit}</p>}

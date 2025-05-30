@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import OTP from "./pages/OTP";
 import BasicInfo from "./pages/BasicInfo";
-import AadhaarInfo from "./pages/AadhaarInfo";
+import KYCDetails from "./pages/KYCDetails";
 import VerificationProcessing from "./pages/VerificationProcessing";
 import KYCVerified from "./pages/KYCVerified";
 import BankInfo from "./pages/BankInfo";
@@ -26,7 +26,7 @@ const App = () => (
           <Route path="/" element={<Login />} />
           <Route path="/otp" element={<OTP />} />
           <Route path="/basic-info" element={<BasicInfo />} />
-          <Route path="/aadhaar-info" element={<AadhaarInfo />} />
+          <Route path="/kyc-details" element={<KYCDetails />} />
           <Route path="/verification-processing" element={<VerificationProcessing />} />
           <Route path="/kyc-verified" element={<KYCVerified />} />
           <Route path="/bank-info" element={<BankInfo />} />
