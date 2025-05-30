@@ -89,83 +89,110 @@ const AadhaarInfo = () => {
     }
   };
 
-  return (
-    <div className="main-layout">
-      <Navbar />
-      <div className="card-container mt-20">
-        <div className="text-center mb-8">
-          <div className="inline-block bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm mb-4">
-            Low CIBIL? No problem
-          </div>
-          <h1 className="text-2xl font-bold mb-2">Aadhaar info</h1>
-        </div>
+  const formatAadhaar = (value: string) => {
+    return value.replace(/(\d{4})(\d{4})(\d{4})/, '$1 $2 $3');
+  };
 
-        <div className="space-y-6">
-          <div className="form-group">
-            <label htmlFor="aadhaar" className="block text-sm font-medium text-gray-700 mb-2">
-              Aadhaar Number *
-            </label>
-            <input
-              id="aadhaar"
-              type="text"
-              value={aadhaarNumber}
-              onChange={(e) => setAadhaarNumber(e.target.value.replace(/\D/g, ''))}
-              placeholder="Please Enter Your Full Name"
-              className="input-field"
-              maxLength={12}
-              disabled={showOTP}
-            />
-            {errors.aadhaar && <p className="error-message">{errors.aadhaar}</p>}
-            
-            {!showOTP && (
-              <div className="flex justify-end mt-2">
-                <button 
-                  onClick={handleSendOTP}
-                  disabled={loading}
-                  className="text-primary text-sm"
-                >
-                  {loading ? 'Sending...' : 'Send OTP'}
-                </button>
+  return (
+    <div className="min-h-screen bg-white flex">
+      <Navbar />
+      
+      {/* Left side - Hero Image */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gray-50 items-center justify-center p-8">
+        <div className="relative">
+          <div className="absolute top-8 left-8">
+            <div className="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm">
+              Low CIBIL?
+            </div>
+            <div className="bg-purple-100 text-green-600 px-3 py-1 rounded-full text-sm mt-1">
+              No problem
+            </div>
+          </div>
+          <img 
+            src="/lovable-uploads/8f598013-7362-496b-96a6-8a285565f544.png" 
+            alt="Happy customer with phone" 
+            className="max-w-full h-auto"
+          />
+        </div>
+      </div>
+
+      {/* Right side - Aadhaar Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8 lg:hidden">
+            <div className="inline-block bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm mb-4">
+              Low CIBIL? No problem
+            </div>
+          </div>
+
+          <h1 className="text-2xl font-bold mb-8 text-center">Aadhaar info</h1>
+
+          <div className="space-y-6">
+            <div>
+              <label htmlFor="aadhaar" className="block text-sm font-medium text-gray-700 mb-2">
+                Aadhaar Number *
+              </label>
+              <div className="relative">
+                <input
+                  id="aadhaar"
+                  type="text"
+                  value={showOTP ? formatAadhaar(aadhaarNumber) : aadhaarNumber}
+                  onChange={(e) => setAadhaarNumber(e.target.value.replace(/\D/g, ''))}
+                  placeholder="Please Enter Your Full Name"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  maxLength={12}
+                  disabled={showOTP}
+                />
+                {!showOTP && (
+                  <button 
+                    onClick={handleSendOTP}
+                    disabled={loading}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary text-sm"
+                  >
+                    {loading ? 'Sending...' : 'Send OTP'}
+                  </button>
+                )}
+              </div>
+              {errors.aadhaar && <p className="text-red-500 text-sm mt-1">{errors.aadhaar}</p>}
+            </div>
+
+            {showOTP && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-4">
+                  Enter OTP
+                </label>
+                <OTPInput 
+                  length={6} 
+                  onComplete={handleOTPComplete}
+                  error={errors.otp}
+                />
+                <div className="text-center mt-4">
+                  <span className="text-sm text-red-500">0:{resendTimer < 10 ? `0${resendTimer}` : resendTimer}</span>
+                  <button
+                    onClick={handleResend}
+                    disabled={resendTimer > 0}
+                    className={`ml-4 text-sm ${resendTimer > 0 ? 'text-gray-400' : 'text-primary'}`}
+                  >
+                    Resend
+                  </button>
+                </div>
               </div>
             )}
+
+            {showOTP && (
+              <button
+                disabled={loading}
+                className="w-full bg-primary text-white font-medium py-3 px-6 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? 'Verifying...' : 'Continue'}
+              </button>
+            )}
+
+            <p className="text-center text-xs text-gray-500">
+              By clicking Continue, you allow us to securely check your credit profile to assess your loan eligibility
+            </p>
           </div>
-
-          {showOTP && (
-            <div className="form-group">
-              <label className="block text-sm font-medium text-gray-700 mb-4">
-                Enter OTP
-              </label>
-              <OTPInput 
-                length={6} 
-                onComplete={handleOTPComplete}
-                error={errors.otp}
-              />
-              <div className="text-center mt-4">
-                <span className="text-sm text-gray-600">0:0{resendTimer > 9 ? resendTimer : `0${resendTimer}`}</span>
-                <button
-                  onClick={handleResend}
-                  disabled={resendTimer > 0}
-                  className={`ml-4 text-sm ${resendTimer > 0 ? 'text-gray-400' : 'text-primary'}`}
-                >
-                  Resend
-                </button>
-              </div>
-            </div>
-          )}
         </div>
-
-        {showOTP && (
-          <button
-            disabled={loading}
-            className="primary-button w-full mt-6"
-          >
-            {loading ? 'Verifying...' : 'Continue'}
-          </button>
-        )}
-
-        <p className="text-center text-xs text-gray-500 mt-4">
-          By clicking Continue, you allow us to securely check your credit profile to assess your loan eligibility
-        </p>
       </div>
     </div>
   );

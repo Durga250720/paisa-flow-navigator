@@ -49,7 +49,7 @@
 
 @layer components {
   .primary-button {
-    @apply bg-primary text-primary-foreground font-medium py-3 px-6 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply bg-primary text-primary-foreground font-medium py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
   }
   
   .input-field {
@@ -71,4 +71,40 @@
   .main-layout {
     @apply min-h-screen bg-gray-50 flex items-center justify-center p-4;
   }
+}
+
+/* Custom primary color - #5D15C1 */
+.bg-primary {
+  background-color: #5D15C1;
+}
+
+.text-primary {
+  color: #5D15C1;
+}
+
+.border-primary {
+  border-color: #5D15C1;
+}
+
+.ring-primary {
+  --tw-ring-color: #5D15C1;
+}
+
+/* Focus ring for inputs */
+.focus\:ring-primary:focus {
+  --tw-ring-color: #5D15C1;
+}
+
+/* Button styles with no hover effects */
+button {
+  @apply transition-none;
+}
+
+button.bg-primary {
+  background-color: #5D15C1;
+}
+
+button.bg-primary:disabled {
+  background-color: #5D15C1;
+  opacity: 0.5;
 }
