@@ -24,7 +24,7 @@ const KYCVerified = () => {
     <div className="min-h-screen bg-white">
       <Navbar />
       <div className="flex items-center justify-center min-h-screen pt-20">
-        <div className="text-center max-w-md mx-auto px-6">
+        <div className="w-full max-w-md h-[85vh] border border-gray-200 shadow-lg rounded-lg p-8 flex flex-col justify-center text-center mx-6">
           <div className="mb-8">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="w-12 h-12 text-green-500" />

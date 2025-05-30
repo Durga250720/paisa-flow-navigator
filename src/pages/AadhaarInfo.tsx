@@ -100,14 +100,6 @@ const AadhaarInfo = () => {
       {/* Left side - Hero Image */}
       <div className="hidden lg:flex lg:w-1/2 bg-gray-50 items-center justify-center p-8">
         <div className="relative">
-          <div className="absolute top-8 left-8">
-            <div className="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm">
-              Low CIBIL?
-            </div>
-            <div className="bg-purple-100 text-green-600 px-3 py-1 rounded-full text-sm mt-1">
-              No problem
-            </div>
-          </div>
           <img 
             src="/lovable-uploads/8f598013-7362-496b-96a6-8a285565f544.png" 
             alt="Happy customer with phone" 
@@ -118,13 +110,7 @@ const AadhaarInfo = () => {
 
       {/* Right side - Aadhaar Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8 lg:hidden">
-            <div className="inline-block bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm mb-4">
-              Low CIBIL? No problem
-            </div>
-          </div>
-
+        <div className="w-full max-w-md h-[85vh] border border-gray-200 shadow-lg rounded-lg p-8 flex flex-col justify-center">
           <h1 className="text-2xl font-bold mb-8 text-center">Aadhaar info</h1>
 
           <div className="space-y-6">
@@ -132,28 +118,27 @@ const AadhaarInfo = () => {
               <label htmlFor="aadhaar" className="block text-sm font-medium text-gray-700 mb-2">
                 Aadhaar Number *
               </label>
-              <div className="relative">
-                <input
-                  id="aadhaar"
-                  type="text"
-                  value={showOTP ? formatAadhaar(aadhaarNumber) : aadhaarNumber}
-                  onChange={(e) => setAadhaarNumber(e.target.value.replace(/\D/g, ''))}
-                  placeholder="Please Enter Your Full Name"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                  maxLength={12}
-                  disabled={showOTP}
-                />
-                {!showOTP && (
-                  <button 
-                    onClick={handleSendOTP}
-                    disabled={loading}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-primary text-sm"
-                  >
-                    {loading ? 'Sending...' : 'Send OTP'}
-                  </button>
-                )}
-              </div>
+              <input
+                id="aadhaar"
+                type="text"
+                value={showOTP ? formatAadhaar(aadhaarNumber) : aadhaarNumber}
+                onChange={(e) => setAadhaarNumber(e.target.value.replace(/\D/g, ''))}
+                placeholder="Enter Your Aadhaar Number"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                maxLength={12}
+                disabled={showOTP}
+              />
               {errors.aadhaar && <p className="text-red-500 text-sm mt-1">{errors.aadhaar}</p>}
+              
+              {!showOTP && (
+                <button 
+                  onClick={handleSendOTP}
+                  disabled={loading}
+                  className="w-full mt-4 bg-primary text-white font-medium py-3 px-6 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? 'Sending...' : 'Send OTP'}
+                </button>
+              )}
             </div>
 
             {showOTP && (

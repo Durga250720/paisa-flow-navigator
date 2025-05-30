@@ -28,7 +28,7 @@ const VerificationProcessing = () => {
     <div className="min-h-screen bg-white">
       <Navbar />
       <div className="flex items-center justify-center min-h-screen pt-20">
-        <div className="text-center max-w-md mx-auto px-6">
+        <div className="w-full max-w-md h-[85vh] border border-gray-200 shadow-lg rounded-lg p-8 flex flex-col justify-center text-center mx-6">
           <div className="mb-8">
             <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
             <h1 className="text-2xl font-bold text-primary mb-4">We're verifying your documents</h1>
