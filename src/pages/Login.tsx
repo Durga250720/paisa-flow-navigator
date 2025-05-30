@@ -11,12 +11,15 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user already has authToken
-    const authToken = localStorage.getItem('authToken');
-    if (authToken) {
-      navigate('/otp');
-    }
-  }, [navigate]);
+    // Clear any existing auth tokens when landing on login page
+    // This ensures we start fresh
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('phoneNumber');
+    localStorage.removeItem('otpVerified');
+    localStorage.removeItem('basicInfoCompleted');
+    localStorage.removeItem('aadhaarVerified');
+    localStorage.removeItem('kycVerified');
+  }, []);
 
   const validatePhoneNumber = (phone: string) => {
     const phoneRegex = /^[6-9]\d{9}$/;
@@ -63,14 +66,6 @@ const Login = () => {
       {/* Left side - Hero Image */}
       <div className="hidden lg:flex lg:w-1/2 bg-gray-50 items-center justify-center p-8">
         <div className="relative">
-          <div className="absolute top-8 left-8">
-            <div className="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm">
-              Low CIBIL?
-            </div>
-            <div className="bg-purple-100 text-green-600 px-3 py-1 rounded-full text-sm mt-1">
-              No problem
-            </div>
-          </div>
           <img 
             src="/lovable-uploads/8f598013-7362-496b-96a6-8a285565f544.png" 
             alt="Happy customer with phone" 
@@ -82,12 +77,6 @@ const Login = () => {
       {/* Right side - Login Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
-          <div className="text-center mb-8 lg:hidden">
-            <div className="inline-block bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm mb-4">
-              Low CIBIL? No problem
-            </div>
-          </div>
-
           <h1 className="text-2xl font-bold mb-8 text-center">Login</h1>
 
           <div className="space-y-6">
