@@ -41,6 +41,7 @@ body,html{
     --text-1: #64748B;
     --text-2: #020817;
     --text-3: #000000;
+    --primary-color:#5D15C1;
 
     --radius: 0.5rem;
   }
@@ -125,4 +126,14 @@ button.bg-primary:disabled {
 
 .inputOtp{
   @apply w-[50px] h-[50px] text-[14px]
+}
+sup{
+  color: red;
+}
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    margin: 0; 
 }

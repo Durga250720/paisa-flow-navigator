@@ -32,7 +32,7 @@
 }
 
 .heading {
-  @apply text-2xl font-medium mb-8 text-center;
+  @apply text-2xl font-normal mb-8 text-center;
 }
 
 .formFieldsContainer {

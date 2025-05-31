@@ -40,7 +40,7 @@ const OTP = () => {
   const handleOTPComplete = (completedOtp: string) => {
     setOtp(completedOtp);
     setIsOtpComplete(true);
-    setError(''); // Clear any previous errors when OTP is complete
+    setError('');
   };
 
   const handleLoginClick = async () => {
@@ -57,7 +57,8 @@ const OTP = () => {
 
       // Store verification status
       localStorage.setItem('otpVerified', 'true');
-      navigate('/basic-info');
+      // navigate('/basic-info');
+      navigate('/kyc-details')
     } catch (err) {
       setError('Invalid OTP. Please try again.');
     } finally {
@@ -154,7 +155,7 @@ const OTP = () => {
 
               <button
                 onClick={handleLoginClick}
-                disabled={!isOtpComplete || loading}
+                disabled={!isOtpComplete || otp.length != 6 ||loading}
                 className={styles.submitButton}
               >
                 {loading ? 'Verifying...' : 'Login'}

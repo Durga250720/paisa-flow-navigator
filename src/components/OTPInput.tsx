@@ -5,7 +5,6 @@ interface OTPInputProps {
   length: number;
   onComplete?: (otp: string) => void;
   error?: string;
-  autoFocus?: boolean
 }
 
 const OTPInput: React.FC<OTPInputProps> = ({ length, onComplete, error }) => {
@@ -25,12 +24,10 @@ const OTPInput: React.FC<OTPInputProps> = ({ length, onComplete, error }) => {
     newOtp[index] = value;
     setOtp(newOtp);
 
-    // Move to next input
     if (value && index < length - 1) {
       inputRefs.current[index + 1]?.focus();
     }
 
-    // Call onComplete if all fields are filled
     if (newOtp.every(digit => digit !== '')) {
       onComplete(newOtp.join(''));
     }
@@ -65,7 +62,7 @@ const OTPInput: React.FC<OTPInputProps> = ({ length, onComplete, error }) => {
           <input
             key={index}
             ref={el => inputRefs.current[index] = el}
-            type="text"
+            type="number"
             value={digit}
             onChange={e => handleChange(index, e.target.value)}
             onKeyDown={e => handleKeyDown(index, e)}
