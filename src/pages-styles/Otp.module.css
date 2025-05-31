@@ -1,0 +1,112 @@
+.container {
+  @apply min-h-screen bg-white flex bg-gray-50;
+  height: calc(100vh - 0px);
+}
+
+.navbarWrapper {
+    height: 9%;
+}
+
+.leftPanel {
+  @apply hidden lg:flex lg:w-1/2 items-center justify-center;
+}
+
+.imageWrapper {
+  @apply relative;
+}
+
+.mainContainer{
+     @apply flex h-[calc(100%-9%)] p-8;
+}
+
+.badgeContainer {
+  @apply absolute top-8 left-8;
+}
+
+.badgeBase {
+  @apply px-3 py-1 rounded-full text-sm;
+}
+
+.badgePurple {
+  @apply bg-purple-100 text-purple-600;
+}
+
+.badgeGreen {
+  @apply bg-purple-100 text-green-600 mt-1; /* Assuming you meant green text on purple bg based on OTP.tsx */
+}
+
+.heroImage {
+  @apply max-w-[85%] h-auto;
+}
+
+.rightPanel {
+  @apply w-full lg:w-1/2 flex items-center justify-center;
+}
+
+.formContainer {
+  @apply w-full max-w-md flex lg:bg-white h-[85%] flex-col lg:p-7 flex-col justify-center;
+}
+
+.mobileBadgeContainer {
+  @apply text-center mb-8 lg:hidden;
+}
+
+.mobileBadge {
+  @apply inline-block bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm mb-4;
+}
+
+.heading {
+  @apply text-2xl font-bold mb-8 text-center;
+}
+
+.fieldsWrapper {
+  @apply space-y-6;
+}
+
+.infoTextContainer {
+  @apply text-center;
+}
+
+.infoTextPrimary {
+  @apply text-sm text-gray-600 mb-4;
+}
+
+.infoTextSecondary {
+  @apply text-sm font-medium;
+}
+
+.otpLabel {
+  @apply block text-sm font-medium text-gray-700 mb-4 text-center;
+}
+
+.resendContainer {
+  @apply text-center flex justify-between;
+}
+
+.timerText {
+  @apply text-sm text-red-500;
+}
+
+.resendButton {
+  @apply ml-4 text-sm;
+}
+
+.resendButtonActive {
+  @apply text-primary;
+}
+
+.resendButtonDisabled {
+  @apply text-gray-400;
+}
+
+.submitButton {
+  @apply primary-button w-full text-[14px];
+}
+
+.termsText {
+  @apply text-center text-xs text-gray-500;
+}
+
+.termsLink {
+  @apply text-primary;
+}

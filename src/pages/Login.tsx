@@ -4,11 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { config } from '../config/environment';
 import styles from '../pages-styles/Login.module.css';
+import { CheckCircle } from 'lucide-react';
 
 const Login = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [name, setName] = useState('');
-  const [error, setError] = useState('');
+  const [uName, setName] = useState('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -29,17 +30,27 @@ const Login = () => {
   };
 
   const handleGetOTP = async () => {
-    setError('');
+    const newErrors: Record<string, string> = {};
 
     if (!phoneNumber) {
-      setError('Please enter your phone number');
+      newErrors.phoneNumber = 'Please enter your phone number';
+    }
+
+    if (!uName) {
+      newErrors.name = 'Please enter your name';
+    }
+
+    if (phoneNumber && !validatePhoneNumber(phoneNumber)) {
+      newErrors.phoneNumber = 'Please enter a valid 10-digit mobile number';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
-    if (!validatePhoneNumber(phoneNumber)) {
-      setError('Please enter a valid 10-digit mobile number');
-      return;
-    }
+    // Clear errors if validation passes
+    setErrors({});
 
     setLoading(true);
 
@@ -55,7 +66,7 @@ const Login = () => {
       console.log('API call to:', config.baseURL + '/send-otp');
       navigate('/otp');
     } catch (err) {
-      setError('Failed to send OTP. Please try again.');
+      setErrors({ submit: 'Failed to send OTP. Please try again.' });
     } finally {
       setLoading(false);
     }
@@ -80,21 +91,21 @@ const Login = () => {
 
         <div className={styles.rightPanel}>
           <div className={styles.formWrapper}>
-            <h1 className={styles.heading}>Login</h1>
+            <div className={styles.heading}>Login</div>
 
             <div className={styles.fieldGroup}>
               <label htmlFor="phone" className={styles.label}>
-                Name
+                Full Name
               </label>
               <input
                 id="name"
                 type="text"
-                value={name}
+                value={uName}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Please Enter Your Full Name"
                 className='inputField'
               />
-              {error && <p className={styles.errorMessage}>{error}</p>}
+              {errors.name && <p className={styles.errorMessage}>{errors.name}</p>}
             </div>
 
             <div className={`${styles.formFieldsContainer} mt-4`}>
@@ -111,7 +122,7 @@ const Login = () => {
                   className='inputField'
                   maxLength={10}
                 />
-                {error && <p className={styles.errorMessage}>{error}</p>}
+                {errors.phoneNumber && <p className={styles.errorMessage}>{errors.phoneNumber}</p>}
               </div>
 
 
@@ -128,7 +139,7 @@ const Login = () => {
               </p>
 
               <div className={styles.secureInfoContainer}>
-                <div className={styles.secureInfoDot}></div>
+                <CheckCircle className="w-5 h-5 fill-green-500 text-white mr-2" />
                 Secure, simple, 100% paperless
               </div>
             </div>

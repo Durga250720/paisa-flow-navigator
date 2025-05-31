@@ -3,8 +3,9 @@ import React, { useState, useRef, useEffect } from 'react';
 
 interface OTPInputProps {
   length: number;
-  onComplete: (otp: string) => void;
+  onComplete?: (otp: string) => void;
   error?: string;
+  autoFocus?: boolean
 }
 
 const OTPInput: React.FC<OTPInputProps> = ({ length, onComplete, error }) => {
@@ -59,7 +60,7 @@ const OTPInput: React.FC<OTPInputProps> = ({ length, onComplete, error }) => {
 
   return (
     <div className="space-y-2">
-      <div className="flex justify-center gap-3">
+      <div className="flex justify-between gap-3">
         {otp.map((digit, index) => (
           <input
             key={index}
@@ -69,7 +70,7 @@ const OTPInput: React.FC<OTPInputProps> = ({ length, onComplete, error }) => {
             onChange={e => handleChange(index, e.target.value)}
             onKeyDown={e => handleKeyDown(index, e)}
             onPaste={handlePaste}
-            className={`w-12 h-12 text-center text-lg font-semibold border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
+            className={`w-12 h-12 text-center text-lg font-normal border-2 rounded-lg focus:outline-none inputOtp ${
               error ? 'border-red-500' : 'border-gray-300'
             }`}
             maxLength={1}

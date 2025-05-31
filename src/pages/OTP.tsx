@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import OTPInput from '../components/OTPInput';
 import { config } from '../config/environment';
+import styles from '../pages-styles/OTP.module.css';
+import { Pencil } from 'lucide-react';
 
 const OTP = () => {
   const [error, setError] = useState('');
@@ -40,9 +42,9 @@ const OTP = () => {
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       console.log('API call to:', config.baseURL + '/verify-otp', { otp });
-      
+
       // Store verification status
       localStorage.setItem('otpVerified', 'true');
       navigate('/basic-info');
@@ -55,7 +57,7 @@ const OTP = () => {
 
   const handleResend = async () => {
     if (resendTimer > 0) return;
-    
+
     try {
       console.log('API call to:', config.baseURL + '/resend-otp', { phoneNumber });
       setResendTimer(30);
@@ -71,84 +73,85 @@ const OTP = () => {
     return phone;
   };
 
+  const handleEditPhoneNumber = () => {
+    navigate('/'); // Navigate to the Login page
+  };
+
   return (
-    <div className="min-h-screen bg-white flex">
-      <Navbar />
-      
-      {/* Left side - Hero Image */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gray-50 items-center justify-center p-8">
-        <div className="relative">
-          <div className="absolute top-8 left-8">
-            <div className="bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm">
-              Low CIBIL?
-            </div>
-            <div className="bg-purple-100 text-green-600 px-3 py-1 rounded-full text-sm mt-1">
-              No problem
-            </div>
-          </div>
-          <img 
-            src="/lovable-uploads/8f598013-7362-496b-96a6-8a285565f544.png" 
-            alt="Happy customer with phone" 
-            className="max-w-full h-auto"
-          />
-        </div>
+    <div className={`${styles.container} block`}>
+      <div className={styles.navbarWrapper}>
+        <Navbar />
       </div>
 
-      {/* Right side - OTP Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8 lg:hidden">
-            <div className="inline-block bg-purple-100 text-purple-600 px-3 py-1 rounded-full text-sm mb-4">
-              Low CIBIL? No problem
-            </div>
+      <div className={`${styles.mainContainer}`}>
+        {/* Left side - Hero Image */}
+        <div className={styles.leftPanel}>
+          <div className={styles.imageWrapper}>
+            <img
+              src="/lovable-uploads/8f598013-7362-496b-96a6-8a285565f544.png"
+              alt="Happy customer with phone"
+              className={styles.heroImage}
+            />
           </div>
+        </div>
 
-          <h1 className="text-2xl font-bold mb-8 text-center">OTP</h1>
+        {/* Right side - OTP Form */}
+        <div className={styles.rightPanel}>
+          <div className={styles.formContainer}>
 
-          <div className="space-y-6">
-            <div className="text-center">
-              <p className="text-sm text-gray-600 mb-4">
-                Enter the code which we sent to OTP sent to
-              </p>
-              <p className="text-sm font-medium">
-                +91 {formatPhoneNumber(phoneNumber)} ✓
-              </p>
-            </div>
+            <h1 className={styles.heading}>OTP</h1>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-4 text-center">
-                Enter OTP
-              </label>
-              <OTPInput 
-                length={6} 
-                onComplete={handleOTPComplete}
-                error={error}
-              />
-            </div>
+            <div className={styles.fieldsWrapper}>
+              <div className={styles.infoTextContainer}>
+                <p className={styles.infoTextPrimary}>
+                  Enter the code which we sent to
+                </p>
+                <div className="flex items-center justify-center">
+                  <p className={styles.infoTextSecondary}>
+                    +91 {formatPhoneNumber(phoneNumber)}
+                  </p>
+                  <button onClick={handleEditPhoneNumber} className="ml-2 text-primary hover:text-primary-dark">
+                    <Pencil size={16} />
+                  </button>
+                </div>
+              </div>
 
-            <div className="text-center">
-              <span className="text-sm text-red-500">0:{resendTimer < 10 ? `0${resendTimer}` : resendTimer}</span>
+              <div>
+                <label className={styles.otpLabel}>
+                  Enter OTP
+                </label>
+                <OTPInput
+                  length={6}
+                  // onComplete={handleOTPComplete}
+                  error={error}
+                />
+              </div>
+
+              <div className={styles.resendContainer}>
+                <div className={styles.timerText}>0:{resendTimer < 10 ? `0${resendTimer}` : resendTimer}</div>
+                <button
+                  onClick={handleResend}
+                  disabled={resendTimer > 0}
+                  className={`${styles.resendButton} ${resendTimer > 0 ? styles.resendButtonDisabled : styles.resendButtonActive}`}
+                >
+                  Resend
+                </button>
+              </div>
+
               <button
-                onClick={handleResend}
-                disabled={resendTimer > 0}
-                className={`ml-4 text-sm ${resendTimer > 0 ? 'text-gray-400' : 'text-primary'}`}
+                // onClick will be handled by the form submission if type="submit" or by onComplete of OTPInput
+                disabled={loading}
+                className={styles.submitButton} // This button seems to be for visual purposes or might need an onClick
               >
-                Resend
+                {loading ? 'Verifying...' : 'Login'}
               </button>
+
+              <p className={styles.termsText}>
+                By Clicking login you will be accepting{' '}
+                <span className={styles.termsLink}>Terms and Conditions</span> and{' '}
+                <span className={styles.termsLink}>Privacy Policy</span>
+              </p>
             </div>
-
-            <button
-              disabled={loading}
-              className="w-full bg-primary text-white font-medium py-3 px-6 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Verifying...' : 'Login'}
-            </button>
-
-            <p className="text-center text-xs text-gray-500">
-              By Clicking login you will be accepting{' '}
-              <span className="text-primary">Terms and Conditions</span> and{' '}
-              <span className="text-primary">Privacy Policy</span>
-            </p>
           </div>
         </div>
       </div>

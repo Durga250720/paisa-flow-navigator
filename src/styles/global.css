@@ -38,6 +38,10 @@ body,html{
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
+    --text-1: #64748B;
+    --text-2: #020817;
+    --text-3: #000000;
+
     --radius: 0.5rem;
   }
 }
@@ -116,5 +120,9 @@ button.bg-primary:disabled {
 }
 
 .inputField {
-  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none outline-none h-[45px] text-[#64748B] text-[14px]
+  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none outline-none h-[45px]  text-[14px]
+}
+
+.inputOtp{
+  @apply w-[50px] h-[50px] text-[14px]
 }
