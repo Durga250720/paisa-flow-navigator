@@ -213,7 +213,7 @@ const KYCDetails = () => {
 
             <div>
               <label htmlFor="panNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                PAN Number *
+                PAN Number <sup>*</sup>
               </label>
               <input
                 id="panNumber"
