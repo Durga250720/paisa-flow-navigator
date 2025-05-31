@@ -3,6 +3,12 @@
 @tailwind components;
 @tailwind utilities;
 
+body,html{
+  height: calc(100vh - 0px);
+  width: 100%;
+  overflow: hidden;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -107,4 +113,8 @@ button.bg-primary {
 button.bg-primary:disabled {
   background-color: #5D15C1;
   opacity: 0.5;
+}
+
+.inputField {
+  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none outline-none h-[45px] text-[#64748B] text-[14px]
 }
