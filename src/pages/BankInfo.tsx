@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -81,7 +80,7 @@ const BankInfo = () => {
         files 
       });
       localStorage.setItem('bankInfoCompleted', 'true');
-      // Navigate to success or next step
+      navigate('/employment-info');
     } catch (err) {
       setErrors({ submit: 'Failed to save bank information. Please try again.' });
     } finally {
