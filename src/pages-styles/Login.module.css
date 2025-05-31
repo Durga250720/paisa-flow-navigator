@@ -28,7 +28,7 @@
 }
 
 .formWrapper {
-  @apply w-full max-w-md flex lg:bg-white h-[75%] flex-col lg:p-7;
+  @apply w-full max-w-md flex lg:bg-white h-[85%] flex-col lg:p-7 flex-col justify-center;
 }
 
 .heading {
