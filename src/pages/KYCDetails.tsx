@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -13,6 +12,7 @@ const KYCDetails = () => {
     panNumber: ''
   });
   const [showOTP, setShowOTP] = useState(false);
+  const [isAadhaarVerified, setIsAadhaarVerified] = useState(false); // New state
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
@@ -20,7 +20,7 @@ const KYCDetails = () => {
 
   useEffect(() => {
     const authToken = localStorage.getItem('authToken');
-    const basicInfoCompleted = localStorage.getItem('basicInfoCompleted');
+    // const basicInfoCompleted = localStorage.getItem('basicInfoCompleted'); // Not used, can be removed if not needed elsewhere
 
     if (!authToken) {
       navigate('/');
@@ -58,11 +58,12 @@ const KYCDetails = () => {
 
     setLoading(true);
     try {
+      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       console.log('API call to:', config.baseURL + '/send-aadhaar-otp', { aadhaarNumber: formData.aadhaarNumber });
       setShowOTP(true);
-      setResendTimer(30);
+      setResendTimer(30); // Start resend timer
     } catch (err) {
       setErrors({ aadhaar: 'Failed to send OTP. Please try again.' });
     } finally {
@@ -75,6 +76,7 @@ const KYCDetails = () => {
     setLoading(true);
 
     try {
+      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       console.log('API call to:', config.baseURL + '/verify-aadhaar-otp', {
@@ -82,6 +84,8 @@ const KYCDetails = () => {
         otp
       });
       localStorage.setItem('aadhaarVerified', 'true');
+      setIsAadhaarVerified(true); // Aadhaar is verified
+      // setShowOTP(false); // OTP section will hide due to conditional rendering
     } catch (err) {
       setErrors({ otp: 'Invalid OTP. Please try again.' });
     } finally {
@@ -104,6 +108,7 @@ const KYCDetails = () => {
 
     setLoading(true);
     try {
+      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       console.log('API call to:', config.baseURL + '/kyc-details', formData);
@@ -118,8 +123,11 @@ const KYCDetails = () => {
 
   const handleResend = async () => {
     if (resendTimer > 0) return;
+    setErrors(prev => ({ ...prev, otp: '' })); // Clear previous OTP error
 
     try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
       console.log('API call to:', config.baseURL + '/resend-aadhaar-otp', { aadhaarNumber: formData.aadhaarNumber });
       setResendTimer(30);
     } catch (err) {
@@ -128,11 +136,20 @@ const KYCDetails = () => {
   };
 
   const formatAadhaar = (value: string) => {
-    return value.replace(/(\d{4})(\d{4})(\d{4})/, '$1 $2 $3');
+    // Remove non-digits and then format
+    const digitsOnly = value.replace(/\D/g, '');
+    return digitsOnly.replace(/(\d{4})(\d{4})(\d{4})/, '$1 $2 $3').trim();
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    let processedValue = value;
+    if (field === 'aadhaarNumber') {
+      processedValue = value.replace(/\D/g, ''); // Allow only digits for Aadhaar
+    } else if (field === 'panNumber') {
+      processedValue = value.toUpperCase(); // Convert PAN to uppercase
+    }
+
+    setFormData(prev => ({ ...prev, [field]: processedValue }));
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
@@ -167,20 +184,20 @@ const KYCDetails = () => {
                 </label>
                 <input
                   id="aadhaar"
-                  type="text"
-                  value={showOTP ? formatAadhaar(formData.aadhaarNumber) : formData.aadhaarNumber}
-                  onChange={(e) => handleInputChange('aadhaarNumber', e.target.value.replace(/\D/g, ''))}
+                  type="text" // Keep as text to allow custom formatting and digit filtering
+                  value={showOTP || isAadhaarVerified ? formatAadhaar(formData.aadhaarNumber) : formData.aadhaarNumber}
+                  onChange={(e) => handleInputChange('aadhaarNumber', e.target.value)}
                   placeholder="Enter Your Aadhaar Number"
                   className='inputField'
-                  maxLength={12}
-                  disabled={showOTP}
+                  maxLength={14} // 12 digits + 2 spaces
+                  disabled={showOTP || isAadhaarVerified} // Disable if OTP shown or Aadhaar verified
                 />
                 {errors.aadhaar && <p className="text-red-500 text-sm mt-1">{errors.aadhaar}</p>}
 
-                {!showOTP && (
+                {!showOTP && !isAadhaarVerified && (
                   <button
                     onClick={handleSendOTP}
-                    disabled={loading}
+                    disabled={loading || !formData.aadhaarNumber || !validateAadhaar(formData.aadhaarNumber.replace(/\s/g, ''))}
                     className={`${styles.sendBtn} mt-4`}
                   >
                     {loading ? 'Sending...' : 'Send OTP'}
@@ -191,58 +208,65 @@ const KYCDetails = () => {
               {showOTP && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-4">
-                    Enter OTP
+                    Enter OTP sent to your Aadhaar registered mobile number
                   </label>
                   <OTPInput
                     length={6}
                     onComplete={handleOTPComplete}
                     error={errors.otp}
+                    // disabled={isAadhaarVerified} // Disable OTP input after verification
                   />
-                  <div className="text-center mt-4 flex justify-between items-center">
-                    <div className="text-sm text-red-500">0:{resendTimer < 10 ? `0${resendTimer}` : resendTimer}</div>
-                    <button
-                      onClick={handleResend}
-                      disabled={resendTimer > 0}
-                      className={`ml-4 text-sm ${resendTimer > 0 ? 'text-gray-400' : 'text-primary'}`}
-                    >
-                      Resend
-                    </button>
-                  </div>
+                  {!isAadhaarVerified && ( // Show resend option only if Aadhaar is not yet verified
+                    <div className="text-center mt-4 flex justify-between items-center">
+                      <div className={`text-sm ${errors.otp ? 'text-red-500' : 'text-gray-500'}`}>
+                        {resendTimer > 0 ? `Resend OTP in 0:${resendTimer < 10 ? `0${resendTimer}` : resendTimer}` : 'Didn\'t receive OTP?'}
+                      </div>
+                      <button
+                        onClick={handleResend}
+                        disabled={resendTimer > 0 || loading}
+                        className={`ml-4 text-sm font-medium ${resendTimer > 0 || loading ? 'text-gray-400 cursor-not-allowed' : 'text-primary hover:text-primary-dark'}`}
+                      >
+                        Resend OTP
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
+              {isAadhaarVerified && (
+                <>
+                  <div>
+                    <label htmlFor="panNumber" className="block text-sm font-medium text-gray-700 mb-2">
+                      PAN Number <sup>*</sup>
+                    </label>
+                    <input
+                      id="panNumber"
+                      type="text"
+                      value={formData.panNumber}
+                      onChange={(e) => handleInputChange('panNumber', e.target.value)}
+                      placeholder="Please Enter PAN Number"
+                      className="inputField"
+                      maxLength={10}
+                    />
+                    {errors.pan && <p className="text-red-500 text-sm mt-1">{errors.pan}</p>}
+                    <div className="flex justify-end mt-1">
+                      <button className="text-primary text-sm">Why we need this?</button>
+                    </div>
+                  </div>
 
-            <div>
-              <label htmlFor="panNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                PAN Number <sup>*</sup>
-              </label>
-              <input
-                id="panNumber"
-                type="text"
-                value={formData.panNumber}
-                onChange={(e) => handleInputChange('panNumber', e.target.value.toUpperCase())}
-                placeholder="Please Enter PAN Number"
-                className="inputField"
-                maxLength={10}
-              />
-              {errors.pan && <p className="text-red-500 text-sm mt-1">{errors.pan}</p>}
-              <div className="flex justify-end mt-1">
-                <button className="text-primary text-sm">Why we need this?</button>
-              </div>
-            </div>
+                  {errors.submit && <p className="text-red-500 text-sm text-center">{errors.submit}</p>}
 
-            {errors.submit && <p className="text-red-500 text-sm text-center">{errors.submit}</p>}
-
-              <button
-                onClick={handleContinue}
-                disabled={loading}
-                className={styles.primaryButton}
-              >
-                {loading ? 'Verifying...' : 'Continue'}
-              </button>
-
-              <p className="text-center text-xs text-gray-500">
-                By clicking Continue, you allow us to securely check your credit profile to assess your loan eligibility
-              </p>
+                  <button
+                    onClick={handleContinue}
+                    disabled={loading || !validatePAN(formData.panNumber)}
+                    className={styles.primaryButton}
+                  >
+                    {loading ? 'Verifying...' : 'Continue'}
+                  </button>
+                  <p className="text-center text-xs text-gray-500">
+                    By clicking Continue, you allow us to securely check your credit profile to assess your loan eligibility
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>
