@@ -12,6 +12,8 @@ const OTP = () => {
   const [loading, setLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(30);
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [otp, setOtp] = useState('');
+  const [isOtpComplete, setIsOtpComplete] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -35,7 +37,15 @@ const OTP = () => {
     return () => clearInterval(timer);
   }, [navigate]);
 
-  const handleOTPComplete = async (otp: string) => {
+  const handleOTPComplete = (completedOtp: string) => {
+    setOtp(completedOtp);
+    setIsOtpComplete(true);
+    setError(''); // Clear any previous errors when OTP is complete
+  };
+
+  const handleLoginClick = async () => {
+    if (!isOtpComplete || loading) return;
+
     setError('');
     setLoading(true);
 
@@ -61,6 +71,10 @@ const OTP = () => {
     try {
       console.log('API call to:', config.baseURL + '/resend-otp', { phoneNumber });
       setResendTimer(30);
+      // Reset OTP state when resending
+      setOtp('');
+      setIsOtpComplete(false);
+      setError('');
     } catch (err) {
       setError('Failed to resend OTP. Please try again.');
     }
@@ -122,7 +136,7 @@ const OTP = () => {
                 </label>
                 <OTPInput
                   length={6}
-                  // onComplete={handleOTPComplete}
+                  onComplete={handleOTPComplete}
                   error={error}
                 />
               </div>
@@ -139,9 +153,9 @@ const OTP = () => {
               </div>
 
               <button
-                // onClick will be handled by the form submission if type="submit" or by onComplete of OTPInput
-                disabled={loading}
-                className={styles.submitButton} // This button seems to be for visual purposes or might need an onClick
+                onClick={handleLoginClick}
+                disabled={!isOtpComplete || loading}
+                className={styles.submitButton}
               >
                 {loading ? 'Verifying...' : 'Login'}
               </button>
