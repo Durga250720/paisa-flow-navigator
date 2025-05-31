@@ -49,7 +49,7 @@ body,html{
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Lexend', system-ui, sans-serif;
+    font-family: 'Lexend';
   }
 }
 
