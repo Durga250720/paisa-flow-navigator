@@ -30,6 +30,9 @@
 .kycFormContainer {
   @apply w-full max-w-md flex lg:bg-white h-auto flex-col lg:p-7 flex-col justify-center;
 }
+.kycVerifyContainer{
+  @apply w-full max-w-md flex lg:bg-white h-[85%] flex-col lg:p-7 flex-col justify-center gap-10;
+}
 
 .kycHeading {
   @apply text-2xl font-normal mb-8 text-center;
@@ -59,5 +62,24 @@
 }
 
 .sendBtn{
-  @apply font-normal text-sm float-right text-[var(--primary-color)]
+  @apply font-normal text-sm float-right text-[var(--primary-color)];
+}
+.titleContainer{
+  @apply text-xl font-normal text-center text-[var(--primary-color)];
+}
+.titleContainer1{
+  @apply text-lg font-normal text-center text-[var(--primary-color)] flex items-center justify-center;
+}
+.descriptionContainer{
+  @apply  font-normal text-center text-[var(--text-2)] mt-3 text-[0.8rem] leading-5
+}
+
+.gifImageContainer{
+  @apply flex items-center justify-center;
+}
+.verificationGif{
+  @apply w-[25%]
+}
+.continueButton{
+  @apply bg-primary text-white font-medium py-3 px-20 rounded-lg transition-colors disabled:opacity-5;
 }

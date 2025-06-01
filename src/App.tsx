@@ -17,8 +17,10 @@ import Congratulations from "./pages/Congratulations";
 import LoanDetails from "./pages/LoanDetails";
 import TransferSuccess from "./pages/TransferSuccess";
 import Dashboard from "./pages/Dashboard";
+import KYCVerification from "./pages/KYCVerification";
 import NotFound from "./pages/NotFound";
 import "./styles/global.css";
+
 
 const queryClient = new QueryClient();
 
@@ -34,6 +36,7 @@ const App = () => (
           <Route path="/basic-info" element={<BasicInfo />} />
           <Route path="/kyc-details" element={<KYCDetails />} />
           <Route path="/verification-processing" element={<VerificationProcessing />} />
+          <Route path="/kyc-verification" element={<KYCVerification />} />
           <Route path="/kyc-verified" element={<KYCVerified />} />
           <Route path="/bank-info" element={<BankInfo />} />
           <Route path="/employment-info" element={<EmploymentInfo />} />

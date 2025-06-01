@@ -1,55 +1,170 @@
-
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import OTPInput from '../components/OTPInput';
+import { config } from '../config/environment';
+import styles from '../pages-styles/KYCDetails.module.css';
 import { CheckCircle } from 'lucide-react';
 
-const KYCVerified = () => {
+
+const KYCDetails = () => {
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
     const authToken = localStorage.getItem('authToken');
-    const kycVerified = localStorage.getItem('kycVerified');
-    
-    if (!authToken || !kycVerified) {
+
+    if (!authToken) {
       navigate('/');
     }
-  }, [navigate]);
 
-  const handleApplyLoan = () => {
-    navigate('/bank-info');
+    // Timer for resend
+    if (resendTimer > 0) {
+      const timer = setInterval(() => {
+        setResendTimer(prev => prev - 1);
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [navigate, resendTimer]);
+
+  const validateAadhaar = (aadhaar: string) => {
+    return /^\d{12}$/.test(aadhaar);
+  };
+
+  const validatePAN = (pan: string) => {
+    return /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(pan.toUpperCase());
+  };
+
+  const handleSendOTP = async () => {
+    setErrors({});
+
+
+    setLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      setResendTimer(30); // Start resend timer
+    } catch (err) {
+      setErrors({ aadhaar: 'Failed to send OTP. Please try again.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOTPComplete = async (otp: string) => {
+    setErrors({});
+    setLoading(true);
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // setShowOTP(false); // OTP section will hide due to conditional rendering
+    } catch (err) {
+      setErrors({ otp: 'Invalid OTP. Please try again.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleContinue = async () => {
+    setErrors({});
+
+    setLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      localStorage.setItem('kycVerified', 'true');
+      navigate('/bank-info');
+    } catch (err) {
+      setErrors({ submit: 'Failed to save KYC details. Please try again.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    if (resendTimer > 0) return;
+    setErrors(prev => ({ ...prev, otp: '' }));
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setResendTimer(30);
+    } catch (err) {
+      setErrors({ otp: 'Failed to resend OTP. Please try again.' });
+    }
+  };
+
+  const formatAadhaar = (value: string) => {
+    // Remove non-digits and then format
+    const digitsOnly = value.replace(/\D/g, '');
+    return digitsOnly.replace(/(\d{4})(\d{4})(\d{4})/, '$1 $2 $3').trim();
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    let processedValue = value;
+    if (field === 'aadhaarNumber') {
+      processedValue = value.replace(/\D/g, ''); // Allow only digits for Aadhaar
+    } else if (field === 'panNumber') {
+      processedValue = value.toUpperCase(); // Convert PAN to uppercase
+    }
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <Navbar />
-      <div className="flex items-center justify-center min-h-screen pt-20">
-        <div className="w-full max-w-md h-[85vh] border border-gray-200 shadow-lg rounded-lg p-8 flex flex-col justify-center text-center mx-6">
-          <div className="mb-8">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-12 h-12 text-green-500" />
-            </div>
-            
-            <div className="flex items-center justify-center mb-4">
-              <CheckCircle className="w-5 h-5 text-green-500 mr-2" />
-              <span className="text-lg font-semibold text-green-500">KYC Verified !</span>
-            </div>
-            
-            <p className="text-gray-600">
-              Congrats! Your KYC Got Verified, You can Apply for loan
-            </p>
-          </div>
+    <div className={`${styles.container} block`}>
+      <div className={styles.navbarWrapper}>
+        <Navbar />
+      </div>
 
-          <button 
-            onClick={handleApplyLoan}
-            className="w-full bg-primary text-white font-medium py-3 px-6 rounded-lg"
-          >
-            Apply Laon
-          </button>
+      <div className={`${styles.mainContainer}`}>
+        <div className={styles.leftPanel}>
+          <div className={styles.imageContainer}>
+            <img
+              src="/lovable-uploads/8f598013-7362-496b-96a6-8a285565f544.png"
+              alt="Happy customer with phone"
+              className={styles.heroImage}
+            />
+          </div>
+        </div>
+
+        {/* Right side - KYC Details Form */}
+        <div className={styles.rightPanel}>
+          <div className={`${styles.kycVerifyContainer}`}>
+            <div className={`${styles.gifImageContainer}`}>
+              <img
+                src="docsImages/success.gif"
+                alt="Verification in progress"
+                className={`${styles.verificationGif}`}
+              />
+            </div>
+            <div className={`${styles.textContainer}`}>
+              <div className={`${styles.titleContainer1}`}>
+                <CheckCircle className="w-5 h-5 fill-green-500 text-white mr-2" />
+                KYC Verified
+              </div>
+              <div className={`${styles.descriptionContainer} mt-10`}>
+                Congrats! Your KYC Got Verified, You can Apply for loan
+              </div>
+            </div>
+            <div className={`${styles.buttonContainer} text-center mt-6`}>
+            <button
+              onClick={handleContinue}
+              className={styles.continueButton}
+            >
+              {loading ? 'Verifying...' : 'Continue'}
+            </button>
+          </div>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default KYCVerified;
+export default KYCDetails;

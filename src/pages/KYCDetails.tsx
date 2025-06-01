@@ -112,8 +112,8 @@ const KYCDetails = () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       console.log('API call to:', config.baseURL + '/kyc-details', formData);
-      localStorage.setItem('kycVerified', 'true');
-      navigate('/kyc-verified');
+      localStorage.setItem('kycVerification', 'true');
+      navigate('/kyc-verification');
     } catch (err) {
       setErrors({ submit: 'Failed to save KYC details. Please try again.' });
     } finally {
@@ -257,7 +257,7 @@ const KYCDetails = () => {
 
                   <button
                     onClick={handleContinue}
-                    disabled={loading || !validatePAN(formData.panNumber)}
+                    // disabled={loading || !validatePAN(formData.panNumber)}
                     className={styles.primaryButton}
                   >
                     {loading ? 'Verifying...' : 'Continue'}
