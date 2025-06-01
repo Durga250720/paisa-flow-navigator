@@ -112,7 +112,7 @@ const BankInfo = () => {
       </div>
       <div className={`${styles.mainContainer}`}>
         <div className="flex items-center justify-center">
-          <div className="bg-white rounded-xl shadow-lg p-6 max-w-4xl w-full mx-auto">
+          <div className="bg-white rounded-xl shadow-lg p-6 max-w-6xl w-full mx-auto h-100">
             <div className="text-center mb-8">
               <div className={styles.heading}>Bank Info</div>
               <p className={styles.description}>To deposit your approved amount and enable auto-repayment</p>

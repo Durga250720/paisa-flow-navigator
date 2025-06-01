@@ -8,7 +8,7 @@
 }
 
 .mainContainer {
-    @apply flex h-[calc(100%-9%)] p-8 flex justify-center items-center;
+    @apply flex h-[calc(100%-9%)] flex justify-center items-center;
 }
 
 .heading {
