@@ -1,0 +1,42 @@
+.container {
+    @apply min-h-screen bg-white bg-gray-50;
+    height: calc(100vh - 0px);
+}
+
+.navbarWrapper {
+    height: 9%;
+}
+
+.mainContainer {
+    @apply flex h-[calc(100%-9%)] lg:p-8;
+}
+
+.innerContainer {
+    @apply lg:m-auto lg:w-[65%] ;
+    @apply w-[100%];
+}
+
+@screen lg {
+    .innerContainer {
+        @apply m-auto w-[65%]; /* Styles for lg screens and up */
+    }
+}
+
+.heading {
+    @apply text-xl font-normal mb-2 text-center text-[var(--primary-color)] mt-10 lg:w-[60%] lg:m-auto;
+    margin-top: 2rem !important;
+}
+
+.description {
+    @apply font-normal mb-2 text-center text-[var(--text-2)] text-[0.8rem] mt-10 lg:m-auto lg:w-[65%];
+    margin-top: 2rem !important;
+}
+.gifImageContainer{
+    @apply flex items-center justify-center;
+}
+.verificationGif{
+    @apply lg:w-[10%] w-[30%]
+}
+.applyBtn{
+    @apply px-20 text-[14px]
+}

@@ -22,14 +22,6 @@
 .label {
     @apply block text-sm font-medium text-gray-700;
 }
-
-.uploadText {
-    @apply text-xs font-medium text-gray-500
-}
-
-.uploadContainer {
-    width: 400px;
-}
 .innerContainer{
-    @apply sm:w-[100%]
+    @apply sm:w-[100%] sm:h-[100%]
 }

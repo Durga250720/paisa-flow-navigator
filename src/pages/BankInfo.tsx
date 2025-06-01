@@ -113,14 +113,14 @@ const BankInfo = () => {
       </div>
       <div className={`${styles.mainContainer}`}>
         <div className="flex items-center justify-center h-full">
-          <div className="bg-white rounded-xl shadow-lg p-6 w-auto max-w-7xl mx-auto h-[95%] flex flex-col">
+          <div className={`${styles.innerContainer} w-full lg:bg-white lg:rounded-xl lg:shadow-lg p-6 lg:w-[70rem] max-w-7xl mx-auto h-[95%] flex flex-col`}>
             <div className="text-center mb-6 flex-shrink-0">
               <div className={styles.heading}>Bank Info</div>
               <p className={styles.description}>To deposit your approved amount and enable auto-repayment</p>
             </div>
 
             <div className="flex-1 min-h-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full overflow-y-auto">
                 <div className="space-y-6">
                   <div className="form-group">
                     <label htmlFor="bankAccountNumber" className={styles.label}>
@@ -219,7 +219,7 @@ const BankInfo = () => {
                     )}
 
                     {files.payslips.length > 0 && (
-                      <div className="grid grid-cols-2 gap-2 mb-4">
+                      <div className="grid grid-cols-3 gap-2 mb-4">
                         {files.payslips.map((file, index) => (
                           <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border">
                             <div className="flex items-center space-x-2 flex-1 min-w-0">
@@ -227,7 +227,11 @@ const BankInfo = () => {
                                 <Check className="w-4 h-4 text-white" />
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className="text-xs font-medium text-gray-900 truncate">{file.name}</p>
+                                <p className="text-xs font-medium text-gray-900 truncate" title={file.name}>
+                                  {file.name.length > 20
+                                    ? `${file.name.substring(0, 20)}...`
+                                    : file.name}
+                                </p>
                                 <p className="text-xs text-gray-500">{(file.size / 1024).toFixed(1)} KB</p>
                               </div>
                             </div>
