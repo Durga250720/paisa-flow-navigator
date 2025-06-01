@@ -113,14 +113,14 @@ const BankInfo = () => {
       </div>
       <div className={`${styles.mainContainer}`}>
         <div className="flex items-center justify-center h-full">
-          <div className="bg-white rounded-xl shadow-lg p-6 max-w-7xl w-full mx-auto h-[95%] flex flex-col overflow-hidden">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-[85%] mx-auto h-[95%] flex flex-col">
             <div className="text-center mb-6 flex-shrink-0">
               <div className={styles.heading}>Bank Info</div>
               <p className={styles.description}>To deposit your approved amount and enable auto-repayment</p>
             </div>
 
-            <div className="flex-1 overflow-y-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 min-h-full">
+            <div className="flex-1 min-h-0">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-full">
                 <div className="space-y-6">
                   <div className="form-group">
                     <label htmlFor="bankAccountNumber" className={styles.label}>
@@ -219,33 +219,30 @@ const BankInfo = () => {
                     )}
 
                     {files.payslips.length > 0 && (
-                      <div className="space-y-2 max-h-60 overflow-y-auto">
+                      <div className="grid grid-cols-2 gap-2 mb-4">
                         {files.payslips.map((file, index) => (
                           <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border">
-                            <div className="flex items-center space-x-3 flex-1 min-w-0">
+                            <div className="flex items-center space-x-2 flex-1 min-w-0">
                               <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
                                 <Check className="w-4 h-4 text-white" />
                               </div>
                               <div className="min-w-0 flex-1">
-                                <p className="text-sm font-medium text-gray-900 truncate">{file.name}</p>
+                                <p className="text-xs font-medium text-gray-900 truncate">{file.name}</p>
                                 <p className="text-xs text-gray-500">{(file.size / 1024).toFixed(1)} KB</p>
                               </div>
                             </div>
-                            <div className="flex items-center space-x-2 flex-shrink-0">
-                              <span className="text-xs text-blue-600 cursor-pointer hover:underline">Change</span>
-                              <button
-                                onClick={() => removePayslip(index)}
-                                className="text-red-500 hover:text-red-700"
-                              >
-                                <X className="w-4 h-4" />
-                              </button>
-                            </div>
+                            <button
+                              onClick={() => removePayslip(index)}
+                              className="text-red-500 hover:text-red-700 flex-shrink-0 ml-2"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
                           </div>
                         ))}
                       </div>
                     )}
                     
-                    <p className="text-xs text-gray-500 mt-2">
+                    <p className="text-xs text-gray-500">
                       {files.payslips.length}/6 payslips uploaded
                     </p>
                   </div>
