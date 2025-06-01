@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { Upload } from 'lucide-react';
+import { Upload, X, Check } from 'lucide-react';
 import { config } from '../config/environment';
 import styles from '../pages-styles/BankInfo.module.css';
 
@@ -13,7 +13,7 @@ const BankInfo = () => {
     accountHolderName: ''
   });
   const [files, setFiles] = useState({
-    payslip: null as File | null,
+    payslips: [] as File[],
     bankStatement: null as File | null
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -65,8 +65,24 @@ const BankInfo = () => {
     }
   };
 
-  const handleFileUpload = (type: 'payslip' | 'bankStatement', file: File) => {
-    setFiles(prev => ({ ...prev, [type]: file }));
+  const handlePayslipUpload = (file: File) => {
+    if (files.payslips.length < 6) {
+      setFiles(prev => ({ 
+        ...prev, 
+        payslips: [...prev.payslips, file] 
+      }));
+    }
+  };
+
+  const removePayslip = (index: number) => {
+    setFiles(prev => ({
+      ...prev,
+      payslips: prev.payslips.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleBankStatementUpload = (file: File) => {
+    setFiles(prev => ({ ...prev, bankStatement: file }));
   };
 
   const handleContinue = async () => {
@@ -167,51 +183,87 @@ const BankInfo = () => {
               </div>
 
               <div className="space-y-6">
-                <div className={`${styles.uploadContainer} form-group`}>
+                <div className="form-group">
                   <label className={styles.label}>
-                    Upload Payslip
+                    Upload Payslips (Maximum 6)
                   </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary transition-colors">
-                    <input
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleFileUpload('payslip', file);
-                      }}
-                      className="hidden"
-                      id="payslip-upload"
-                    />
-                    <label htmlFor="payslip-upload" className="cursor-pointer">
-                      <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                      {files.payslip ? (
-                        <p className="text-green-600">{files.payslip.name}</p>
-                      ) : (
+                  
+                  {files.payslips.length < 6 && (
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors mb-4">
+                      <input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handlePayslipUpload(file);
+                          e.target.value = '';
+                        }}
+                        className="hidden"
+                        id="payslip-upload"
+                      />
+                      <label htmlFor="payslip-upload" className="cursor-pointer">
+                        <Upload className="w-6 h-6 mx-auto mb-2 text-gray-400" />
                         <p className={styles.uploadText}>Upload or Drag your Pay slip here</p>
-                      )}
-                    </label>
-                  </div>
+                      </label>
+                    </div>
+                  )}
+
+                  {files.payslips.length > 0 && (
+                    <div className="space-y-2">
+                      {files.payslips.map((file, index) => (
+                        <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                              <Check className="w-4 h-4 text-white" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">{file.name}</p>
+                              <p className="text-xs text-gray-500">{(file.size / 1024).toFixed(1)} KB</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xs text-blue-600 cursor-pointer hover:underline">Change</span>
+                            <button
+                              onClick={() => removePayslip(index)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  <p className="text-xs text-gray-500 mt-2">
+                    {files.payslips.length}/6 payslips uploaded
+                  </p>
                 </div>
 
                 <div className="form-group">
                   <label className={styles.label}>
                     Upload Bank Statement
                   </label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary transition-colors">
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
                     <input
                       type="file"
                       accept=".pdf,.jpg,.jpeg,.png"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
-                        if (file) handleFileUpload('bankStatement', file);
+                        if (file) handleBankStatementUpload(file);
                       }}
                       className="hidden"
                       id="bank-statement-upload"
                     />
                     <label htmlFor="bank-statement-upload" className="cursor-pointer">
-                      <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                      <Upload className="w-6 h-6 mx-auto mb-2 text-gray-400" />
                       {files.bankStatement ? (
-                        <p className="text-green-600">{files.bankStatement.name}</p>
+                        <div className="flex items-center justify-center space-x-2">
+                          <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                            <Check className="w-4 h-4 text-white" />
+                          </div>
+                          <p className="text-green-600 text-sm">{files.bankStatement.name}</p>
+                        </div>
                       ) : (
                         <p className={styles.uploadText}>Upload or Drag your Bank Statement here</p>
                       )}
