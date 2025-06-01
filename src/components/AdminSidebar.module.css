@@ -1,0 +1,22 @@
+.logoContainer{
+    @apply h-[6%]
+}
+.bottomContainer{
+    height: calc(100% - 6%);
+    /* overflow-y : scroll; */
+}
+.itemTitle{
+    @apply text-[14px] font-normal text-[var(--text-4)];
+}
+.activeItemTitle{
+    @apply text-[14px] font-normal text-[var(--primary-color)];
+}
+.activeItemBg{
+    background-color : #F1E8FC !important
+}
+.tabItem{
+    height: 40px;
+}
+.iconActiveColor{
+    color: var(--primary-color);
+}

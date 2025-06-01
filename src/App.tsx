@@ -16,10 +16,10 @@ import LoanApplicationStatus from "./pages/LoanApplicationStatus";
 import Congratulations from "./pages/Congratulations";
 import LoanDetails from "./pages/LoanDetails";
 import TransferSuccess from "./pages/TransferSuccess";
-import Dashboard from "./pages/Dashboard";
 import KYCVerification from "./pages/KYCVerification";
 import NotFound from "./pages/NotFound";
 import "./styles/global.css";
+import Admin from "./pages/Admin";
 
 
 const queryClient = new QueryClient();
@@ -44,7 +44,7 @@ const App = () => (
           <Route path="/congratulations" element={<Congratulations />} />
           <Route path="/loan-details" element={<LoanDetails />} />
           <Route path="/transfer-success" element={<TransferSuccess />} />
-          <Route path="/dashboard/*" element={<Dashboard />} />
+          <Route path="/admin/*" element={<Admin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

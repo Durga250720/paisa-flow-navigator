@@ -1,0 +1,23 @@
+.container {
+    @apply min-h-screen bg-gray-50 flex;
+    height: calc(100vh - 0px);
+}
+
+.leftPanel {
+    @apply w-[255px]
+}
+
+.rightRenderingPanel {
+    width: calc(100% - 255px);
+    height: 100%;
+}
+
+.navContainer {
+    @apply h-[8%]
+}
+.renderingContainer{
+    height: calc(100% - 8%);
+}
+.helpButton{
+    @apply font-normal text-[14px] text-[var(--text-4)]
+}

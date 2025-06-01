@@ -6,7 +6,10 @@ body,html{
   height: calc(100vh - 0px);
   width: 100%;
   overflow: hidden;
+   scrollbar-width: none; /* For Firefox */
+  -ms-overflow-style: none;
 }
+
 
 @layer base {
   :root {
@@ -41,6 +44,7 @@ body,html{
     --text-1: #64748B;
     --text-2: #020817;
     --text-3: #000000;
+    --text-4 : #4B5563;
     --primary-color:#5D15C1;
 
     --radius: 0.5rem;

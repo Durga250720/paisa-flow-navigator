@@ -5,10 +5,10 @@ import MyApplicationContent from './MyApplicationContent';
 import MyBorrowingsContent from './MyBorrowingsContent';
 import RepaymentsContent from './RepaymentsContent';
 
-const DashboardOutlet = () => {
+const AdminOutlet  = () => {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/dashboard/my-application" replace />} />
+      <Route path="/" element={<Navigate to="/admin/my-application" replace />} />
       <Route path="/my-application" element={<MyApplicationContent />} />
       <Route path="/my-borrowings" element={<MyBorrowingsContent />} />
       <Route path="/my-repayments" element={<RepaymentsContent />} />
@@ -16,4 +16,4 @@ const DashboardOutlet = () => {
   );
 };
 
-export default DashboardOutlet;
+export default AdminOutlet ;
