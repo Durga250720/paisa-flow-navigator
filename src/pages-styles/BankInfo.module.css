@@ -18,12 +18,15 @@
 .description {
     @apply font-normal mb-2 text-center text-[var(--text-2)] text-[0.8rem];
 }
+
 .label {
-  @apply block text-sm font-medium text-gray-700;
+    @apply block text-sm font-medium text-gray-700;
 }
-.uploadText{
+
+.uploadText {
     @apply text-xs font-medium text-gray-500
 }
-.uploadContainer{
+
+.uploadContainer {
     width: 400px;
 }
