@@ -68,7 +68,7 @@ body,html{
   }
   
   .error-message {
-    @apply text-red-500 text-sm mt-1;
+    @apply text-red-500 text-[0.7rem] mt-1;
   }
   
   .form-group {

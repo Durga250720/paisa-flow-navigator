@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { Upload } from 'lucide-react';
 import { config } from '../config/environment';
+import styles from '../pages-styles/BankInfo.module.css';
 
 const BankInfo = () => {
   const [formData, setFormData] = useState({
@@ -22,7 +23,7 @@ const BankInfo = () => {
   useEffect(() => {
     const authToken = localStorage.getItem('authToken');
     const kycVerified = localStorage.getItem('kycVerified');
-    
+
     if (!authToken || !kycVerified) {
       navigate('/');
     }
@@ -74,10 +75,10 @@ const BankInfo = () => {
     setLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      console.log('API call to:', config.baseURL + '/bank-info', { 
-        ...formData, 
-        files 
+
+      console.log('API call to:', config.baseURL + '/bank-info', {
+        ...formData,
+        files
       });
       localStorage.setItem('bankInfoCompleted', 'true');
       navigate('/employment-info');
@@ -89,143 +90,149 @@ const BankInfo = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <div className="flex items-center justify-center min-h-screen pt-20 p-4">
-        <div className="bg-white rounded-xl shadow-lg p-8 max-w-4xl w-full mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold mb-2">Bank Info</h1>
-            <p className="text-gray-600">To deposit your approved amount and enable auto-repayment</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-6">
-              <div className="form-group">
-                <label htmlFor="bankAccountNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                  Bank Account Number *
-                </label>
-                <input
-                  id="bankAccountNumber"
-                  type="text"
-                  value={formData.bankAccountNumber}
-                  onChange={(e) => handleInputChange('bankAccountNumber', e.target.value.replace(/\D/g, ''))}
-                  placeholder="Please Enter Bank Account Number"
-                  className="input-field"
-                />
-                {errors.bankAccountNumber && <p className="error-message">{errors.bankAccountNumber}</p>}
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="confirmBankAccountNumber" className="block text-sm font-medium text-gray-700 mb-2">
-                  Re-Enter Bank Account Number *
-                </label>
-                <input
-                  id="confirmBankAccountNumber"
-                  type="text"
-                  value={formData.confirmBankAccountNumber}
-                  onChange={(e) => handleInputChange('confirmBankAccountNumber', e.target.value.replace(/\D/g, ''))}
-                  placeholder="Please Re-Enter Bank Account Number"
-                  className="input-field"
-                />
-                {errors.confirmBankAccountNumber && <p className="error-message">{errors.confirmBankAccountNumber}</p>}
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="ifscCode" className="block text-sm font-medium text-gray-700 mb-2">
-                  IFSC Code *
-                </label>
-                <input
-                  id="ifscCode"
-                  type="text"
-                  value={formData.ifscCode}
-                  onChange={(e) => handleInputChange('ifscCode', e.target.value.toUpperCase())}
-                  placeholder="Please Enter IFSC Code"
-                  className="input-field"
-                  maxLength={11}
-                />
-                {errors.ifscCode && <p className="error-message">{errors.ifscCode}</p>}
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="accountHolderName" className="block text-sm font-medium text-gray-700 mb-2">
-                  Account Holder Name *
-                </label>
-                <input
-                  id="accountHolderName"
-                  type="text"
-                  value={formData.accountHolderName}
-                  onChange={(e) => handleInputChange('accountHolderName', e.target.value)}
-                  placeholder="Please Enter Account Holder Name"
-                  className="input-field"
-                />
-                {errors.accountHolderName && <p className="error-message">{errors.accountHolderName}</p>}
-              </div>
+    <div className={`${styles.container}`}>
+      <div className={styles.navbarWrapper}>
+        <Navbar />
+      </div>
+      <div className={`${styles.mainContainer}`}>
+        <div className="flex items-center justify-center">
+          <div className="bg-white rounded-xl shadow-lg p-6 max-w-4xl w-full mx-auto">
+            <div className="text-center mb-8">
+              <div className={styles.heading}>Bank Info</div>
+              <p className={styles.description}>To deposit your approved amount and enable auto-repayment</p>
             </div>
 
-            <div className="space-y-6">
-              <div className="form-group">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Upload Payslip
-                </label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary transition-colors">
-                  <input
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleFileUpload('payslip', file);
-                    }}
-                    className="hidden"
-                    id="payslip-upload"
-                  />
-                  <label htmlFor="payslip-upload" className="cursor-pointer">
-                    <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                    {files.payslip ? (
-                      <p className="text-green-600">{files.payslip.name}</p>
-                    ) : (
-                      <p className="text-gray-500">Upload or Drag your Pay slip here</p>
-                    )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-6">
+                <div className="form-group">
+                  <label htmlFor="bankAccountNumber" className={styles.label}>
+                    Bank Account Number <sup>*</sup>
                   </label>
+                  <input
+                    id="bankAccountNumber"
+                    type="text"
+                    value={formData.bankAccountNumber}
+                    onChange={(e) => handleInputChange('bankAccountNumber', e.target.value.replace(/\D/g, ''))}
+                    placeholder="Please Enter Bank Account Number"
+                    className="inputField"
+                  />
+                  {errors.bankAccountNumber && <p className="error-message">{errors.bankAccountNumber}</p>}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="confirmBankAccountNumber" className={styles.label}>
+                    Re-Enter Bank Account Number <sup>*</sup>
+                  </label>
+                  <input
+                    id="confirmBankAccountNumber"
+                    type="text"
+                    value={formData.confirmBankAccountNumber}
+                    onChange={(e) => handleInputChange('confirmBankAccountNumber', e.target.value.replace(/\D/g, ''))}
+                    placeholder="Please Re-Enter Bank Account Number"
+                    className="inputField"
+                  />
+                  {errors.confirmBankAccountNumber && <p className="error-message">{errors.confirmBankAccountNumber}</p>}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="ifscCode" className={styles.label}>
+                    IFSC Code <sup>*</sup>
+                  </label>
+                  <input
+                    id="ifscCode"
+                    type="text"
+                    value={formData.ifscCode}
+                    onChange={(e) => handleInputChange('ifscCode', e.target.value.toUpperCase())}
+                    placeholder="Please Enter IFSC Code"
+                    className="inputField"
+                    maxLength={11}
+                  />
+                  {errors.ifscCode && <p className="error-message">{errors.ifscCode}</p>}
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="accountHolderName" className={styles.label}>
+                    Account Holder Name <sup>*</sup>
+                  </label>
+                  <input
+                    id="accountHolderName"
+                    type="text"
+                    value={formData.accountHolderName}
+                    onChange={(e) => handleInputChange('accountHolderName', e.target.value)}
+                    placeholder="Please Enter Account Holder Name"
+                    className="inputField"
+                  />
+                  {errors.accountHolderName && <p className="error-message">{errors.accountHolderName}</p>}
                 </div>
               </div>
 
-              <div className="form-group">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Upload Bank Statement
-                </label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary transition-colors">
-                  <input
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleFileUpload('bankStatement', file);
-                    }}
-                    className="hidden"
-                    id="bank-statement-upload"
-                  />
-                  <label htmlFor="bank-statement-upload" className="cursor-pointer">
-                    <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
-                    {files.bankStatement ? (
-                      <p className="text-green-600">{files.bankStatement.name}</p>
-                    ) : (
-                      <p className="text-gray-500">Upload or Drag your Bank Statement here</p>
-                    )}
+              <div className="space-y-6">
+                <div className={`${styles.uploadContainer} form-group`}>
+                  <label className={styles.label}>
+                    Upload Payslip
                   </label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary transition-colors">
+                    <input
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFileUpload('payslip', file);
+                      }}
+                      className="hidden"
+                      id="payslip-upload"
+                    />
+                    <label htmlFor="payslip-upload" className="cursor-pointer">
+                      <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                      {files.payslip ? (
+                        <p className="text-green-600">{files.payslip.name}</p>
+                      ) : (
+                        <p className={styles.uploadText}>Upload or Drag your Pay slip here</p>
+                      )}
+                    </label>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className={styles.label}>
+                    Upload Bank Statement
+                  </label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary transition-colors">
+                    <input
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFileUpload('bankStatement', file);
+                      }}
+                      className="hidden"
+                      id="bank-statement-upload"
+                    />
+                    <label htmlFor="bank-statement-upload" className="cursor-pointer">
+                      <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                      {files.bankStatement ? (
+                        <p className="text-green-600">{files.bankStatement.name}</p>
+                      ) : (
+                        <p className={styles.uploadText}>Upload or Drag your Bank Statement here</p>
+                      )}
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
+
+            {errors.submit && <p className="error-message text-center mt-4">{errors.submit}</p>}
+
+            <div className='flex items-center justify-center'>
+              <button
+                onClick={handleContinue}
+                disabled={loading}
+                className="primary-button w-max mt-8 px-20"
+              >
+                {loading ? 'Saving...' : 'Continue'}
+              </button>
+            </div>
           </div>
-
-          {errors.submit && <p className="error-message text-center mt-4">{errors.submit}</p>}
-
-          <button
-            onClick={handleContinue}
-            disabled={loading}
-            className="primary-button w-full mt-8"
-          >
-            {loading ? 'Saving...' : 'Continue'}
-          </button>
         </div>
       </div>
     </div>

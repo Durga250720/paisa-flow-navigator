@@ -1,0 +1,29 @@
+.container {
+    @apply min-h-screen bg-white bg-gray-50;
+    height: calc(100vh - 0px);
+}
+
+.navbarWrapper {
+    height: 9%;
+}
+
+.mainContainer {
+    @apply flex h-[calc(100%-9%)] p-8 flex justify-center items-center;
+}
+
+.heading {
+    @apply text-lg font-normal mb-2 text-center text-[var(--text-2)];
+}
+
+.description {
+    @apply font-normal mb-2 text-center text-[var(--text-2)] text-[0.8rem];
+}
+.label {
+  @apply block text-sm font-medium text-gray-700;
+}
+.uploadText{
+    @apply text-xs font-medium text-gray-500
+}
+.uploadContainer{
+    width: 400px;
+}
