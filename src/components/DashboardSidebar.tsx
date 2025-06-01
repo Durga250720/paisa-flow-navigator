@@ -20,17 +20,17 @@ const DashboardSidebar = () => {
     {
       title: "My Application",
       icon: FileText,
-      path: '/dashboard/application'
+      path: '/dashboard/my-application'
     },
     {
       title: "My Borrowings",
       icon: CreditCard,
-      path: '/dashboard/borrowings'
+      path: '/dashboard/my-borrowings'
     },
     {
       title: "Repayments",
       icon: Repeat,
-      path: '/dashboard/repayments'
+      path: '/dashboard/my-repayments'
     }
   ];
 

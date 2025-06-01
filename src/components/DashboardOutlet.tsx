@@ -8,10 +8,10 @@ import RepaymentsContent from './RepaymentsContent';
 const DashboardOutlet = () => {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/dashboard/application" replace />} />
-      <Route path="/application" element={<MyApplicationContent />} />
-      <Route path="/borrowings" element={<MyBorrowingsContent />} />
-      <Route path="/repayments" element={<RepaymentsContent />} />
+      <Route path="/" element={<Navigate to="/dashboard/my-application" replace />} />
+      <Route path="/my-application" element={<MyApplicationContent />} />
+      <Route path="/my-borrowings" element={<MyBorrowingsContent />} />
+      <Route path="/my-repayments" element={<RepaymentsContent />} />
     </Routes>
   );
 };
