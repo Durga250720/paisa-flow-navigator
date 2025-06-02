@@ -6,27 +6,35 @@ import OTPInput from '../components/OTPInput';
 import { config } from '../config/environment';
 import styles from '../pages-styles/OTP.module.css';
 import { Pencil } from 'lucide-react';
+import { set } from 'date-fns';
 
 const OTP = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(30);
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [name, setName] = useState('');
   const [otp, setOtp] = useState('');
   const [isOtpComplete, setIsOtpComplete] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     // Check if user has authToken
-    const authToken = localStorage.getItem('authToken');
     const storedPhone = localStorage.getItem('phoneNumber');
-    if (!authToken) {
-      navigate('/');
+    const storedName = localStorage.getItem('name');
+    const authToken = localStorage.getItem('authToken');
+
+    if (authToken) {
       return;
     }
 
+
     if (storedPhone) {
       setPhoneNumber(storedPhone);
+    }
+
+    if (storedName) {
+      setName(storedName);
     }
 
     // Start resend timer
@@ -50,34 +58,112 @@ const OTP = () => {
     setLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch(config.baseURL + 'api/auth/verify-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          mobile: phoneNumber,
+          name: name,
+          otp: otp
+        }),
+      });
 
-      console.log('API call to:', config.baseURL + '/verify-otp', { otp });
+      if (!response.ok) {
+        let errorMessage = 'Invalid OTP. Please try again.';
+        try {
+          const errorData = await response.json();
+          if (errorData && errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } catch (parseError) {
+          // Ignore if error response is not JSON
+        }
+        throw new Error(errorMessage);
+      }
 
-      // Store verification status
+      const res = await response.json();
+
+      localStorage.setItem('authToken', res.data.id);
+      // setAuthToken(res.data.id);
       localStorage.setItem('otpVerified', 'true');
-      // navigate('/basic-info');
-      navigate('/kyc-details')
+      // navigate('/kyc-details');
+      handleFetchDetails(res.data.id)
     } catch (err) {
-      setError('Invalid OTP. Please try again.');
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
+      setLoading(false);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleFetchDetails = async (token:string) => {
+    console.log(token)
+    try {
+      const response = await fetch(config.baseURL + `borrower/${token}/profile`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        let errorMessage = 'Invalid OTP. Please try again.';
+        try {
+          const errorData = await response.json();
+          if (errorData && errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } catch (parseError) {
+          // Ignore if error response is not JSON
+        }
+        throw new Error(errorMessage);
+      }
+
+      const res = await response.json();
+      navigate('/kyc-details');
+    } catch (err) {
+      setLoading(false);
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const handleResend = async () => {
     if (resendTimer > 0) return;
 
     try {
-      console.log('API call to:', config.baseURL + '/resend-otp', { phoneNumber });
-      setResendTimer(30);
-      // Reset OTP state when resending
-      setOtp('');
-      setIsOtpComplete(false);
-      setError('');
+      const response = await fetch(config.baseURL + 'api/auth/send-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          mobile: phoneNumber,
+          name: name,
+        }),
+      });
+
+      if (!response.ok) {
+        // Attempt to parse error message from API if available
+        let errorMessage = 'Failed to send OTP. Please try again.';
+        try {
+          const errorData = await response.json();
+          if (errorData && errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } catch (parseError) {
+          // Ignore if error response is not JSON or doesn't have a message
+        }
+        throw new Error(errorMessage);
+      }
+      navigate('/otp'); // Navigate only on successful OTP send
     } catch (err) {
-      setError('Failed to resend OTP. Please try again.');
+      // setErrors({ submit: err instanceof Error ? err.message : 'An unexpected error occurred.' });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -155,7 +241,7 @@ const OTP = () => {
 
               <button
                 onClick={handleLoginClick}
-                disabled={!isOtpComplete || otp.length != 6 ||loading}
+                disabled={!isOtpComplete || otp.length != 6 || loading}
                 className={styles.submitButton}
               >
                 {loading ? 'Verifying...' : 'Login'}

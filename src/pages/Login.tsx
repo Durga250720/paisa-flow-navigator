@@ -55,18 +55,37 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch(config.baseURL + 'api/auth/send-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          mobile: phoneNumber,
+          name: uName,
+        }),
+      });
 
-      // Generate and store authToken
-      const authToken = Math.random().toString(36).substr(2, 9);
-      localStorage.setItem('authToken', authToken);
-      localStorage.setItem('phoneNumber', phoneNumber);
+      if (!response.ok) {
+        // Attempt to parse error message from API if available
+        let errorMessage = 'Failed to send OTP. Please try again.';
+        try {
+          const errorData = await response.json();
+          if (errorData && errorData.message) {
+            errorMessage = errorData.message;
+          }
+        } catch (parseError) {
+          // Ignore if error response is not JSON or doesn't have a message
+        }
+        throw new Error(errorMessage);
+      }
 
-      console.log('API call to:', config.baseURL + '/send-otp');
-      navigate('/otp');
+      // If API call is successful
+      localStorage.setItem('phoneNumber', phoneNumber); 
+      localStorage.setItem('name',uName);
+      navigate('/otp'); // Navigate only on successful OTP send
     } catch (err) {
-      setErrors({ submit: 'Failed to send OTP. Please try again.' });
+      setErrors({ submit: err instanceof Error ? err.message : 'An unexpected error occurred.' });
     } finally {
       setLoading(false);
     }

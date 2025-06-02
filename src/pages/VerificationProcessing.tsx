@@ -18,7 +18,7 @@ const VerificationProcessing = () => {
     // Simulate processing time
     const timer = setTimeout(() => {
       localStorage.setItem('kycVerified', 'true');
-      navigate('/dashboard');
+      navigate('/admin/my-application');
     }, 3000);
 
     return () => clearTimeout(timer);
