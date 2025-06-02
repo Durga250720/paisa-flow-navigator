@@ -3,10 +3,10 @@ import React from 'react';
 
 const RepaymentsContent = () => {
   return (
-    <div className="p-4">
+    <div className="p-4 h-full">
       <h1 className="text-2xl font-bold mb-6">Repayment Management</h1>
       
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden" style={{height:'92%'}}>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="bg-gray-50">
