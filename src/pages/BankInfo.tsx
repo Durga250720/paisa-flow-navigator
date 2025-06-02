@@ -118,59 +118,59 @@ const BankInfo = () => {
         credentials,
       });
 
-      const uploadFileToS3 = async (file: File, fileType: 'payslip' | 'bank_statement'): Promise<string> => {
-        const timestamp = Date.now();
-        const randomId = Math.random().toString(36).substring(2, 15);
-        // Sanitize filename by replacing spaces with underscores
-        const sanitizedFileName = file.name.replace(/\s+/g, '_');
-        const key = `${authToken}/${fileType}/${timestamp}-${randomId}-${sanitizedFileName}`;
+      // const uploadFileToS3 = async (file: File, fileType: 'payslip' | 'bank_statement'): Promise<string> => {
+      //   const timestamp = Date.now();
+      //   const randomId = Math.random().toString(36).substring(2, 15);
+      //   // Sanitize filename by replacing spaces with underscores
+      //   const sanitizedFileName = file.name.replace(/\s+/g, '_');
+      //   const key = `${authToken}/${fileType}/${timestamp}-${randomId}-${sanitizedFileName}`;
 
-        console.log(`Uploading ${fileType}:`, sanitizedFileName, 'to key:', key);
+      //   console.log(`Uploading ${fileType}:`, sanitizedFileName, 'to key:', key);
 
-        const putObjectCommand = new PutObjectCommand({
-          Bucket: s3Bucket,
-          Key: key,
-          Body: file,
-          ContentType: file.type,
-        });
+      //   const putObjectCommand = new PutObjectCommand({
+      //     Bucket: s3Bucket,
+      //     Key: key,
+      //     Body: file,
+      //     ContentType: file.type,
+      //   });
 
-        await s3Client.send(putObjectCommand);
-        const url = `https://${s3Bucket}.s3.${s3Region}.amazonaws.com/${key}`;
-        console.log(`Successfully uploaded ${fileType}:`, url);
-        return url;
-      };
+      //   await s3Client.send(putObjectCommand);
+      //   const url = `https://${s3Bucket}.s3.${s3Region}.amazonaws.com/${key}`;
+      //   console.log(`Successfully uploaded ${fileType}:`, url);
+      //   return url;
+      // };
 
-      // Upload all payslips
-      const payslipUrls: string[] = [];
-      console.log('Starting payslip uploads...');
-      
-      for (let i = 0; i < files.payslips.length; i++) {
-        const payslipFile = files.payslips[i];
-        console.log(`Uploading payslip ${i + 1}/${files.payslips.length}:`, payslipFile.name);
-        try {
-          const url = await uploadFileToS3(payslipFile, 'payslip');
-          payslipUrls.push(url);
-          console.log(`Payslip ${i + 1} uploaded successfully:`, url);
-        } catch (error) {
-          console.error(`Failed to upload payslip ${i + 1}:`, error);
-          throw new Error(`Failed to upload payslip: ${payslipFile.name}`);
-        }
-      }
+      // // Upload all payslips
+      // const payslipUrls: string[] = [];
+      // console.log('Starting payslip uploads...');
 
-      console.log('All payslips uploaded. URLs:', payslipUrls);
+      // for (let i = 0; i < files.payslips.length; i++) {
+      //   const payslipFile = files.payslips[i];
+      //   console.log(`Uploading payslip ${i + 1}/${files.payslips.length}:`, payslipFile.name);
+      //   try {
+      //     const url = await uploadFileToS3(payslipFile, 'payslip');
+      //     payslipUrls.push(url);
+      //     console.log(`Payslip ${i + 1} uploaded successfully:`, url);
+      //   } catch (error) {
+      //     console.error(`Failed to upload payslip ${i + 1}:`, error);
+      //     throw new Error(`Failed to upload payslip: ${payslipFile.name}`);
+      //   }
+      // }
 
-      // Upload bank statement
-      let bankStatementUrl: string | null = null;
-      if (files.bankStatement) {
-        console.log('Uploading bank statement...');
-        try {
-          bankStatementUrl = await uploadFileToS3(files.bankStatement, 'bank_statement');
-          console.log('Bank statement uploaded successfully:', bankStatementUrl);
-        } catch (error) {
-          console.error('Failed to upload bank statement:', error);
-          throw new Error('Failed to upload bank statement');
-        }
-      }
+      // console.log('All payslips uploaded. URLs:', payslipUrls);
+
+      // // Upload bank statement
+      // let bankStatementUrl: string | null = null;
+      // if (files.bankStatement) {
+      //   console.log('Uploading bank statement...');
+      //   try {
+      //     bankStatementUrl = await uploadFileToS3(files.bankStatement, 'bank_statement');
+      //     console.log('Bank statement uploaded successfully:', bankStatementUrl);
+      //   } catch (error) {
+      //     console.error('Failed to upload bank statement:', error);
+      //     throw new Error('Failed to upload bank statement');
+      //   }
+      // }
 
       // Construct payload for bank-detail API
       const payload = {
@@ -178,8 +178,8 @@ const BankInfo = () => {
         accountNumber: formData.bankAccountNumber,
         ifscNumber: formData.ifscCode.toUpperCase(),
         accountHolderName: formData.accountHolderName,
-        payslips: payslipUrls,
-        bankStatement: bankStatementUrl ? [bankStatementUrl] : [],
+        payslips: [],
+        bankStatement: [],
       };
 
       console.log('API payload:', payload);
@@ -197,18 +197,17 @@ const BankInfo = () => {
       });
 
       console.log('API response status:', response.status);
-navigate('/employment-info');
       if (!response.ok) {
         const errorText = await response.text();
         console.error('API error response:', errorText);
-        
+
         let errorData;
         try {
           errorData = JSON.parse(errorText);
         } catch {
           errorData = { message: 'Failed to save bank information. Please try again.' };
         }
-        
+
         throw new Error(errorData.message || 'Failed to save bank information.');
       }
 

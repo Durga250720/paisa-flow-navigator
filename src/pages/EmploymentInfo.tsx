@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { config } from '../config/environment';
-import styles from '../pages-styles/EmployemntInfo.module.css'
+import styles from '../pages-styles/EmployemntInfo.module.css';
+import { toast } from "sonner";
 
 const EmploymentInfo = () => {
   const [formData, setFormData] = useState({
@@ -51,13 +52,38 @@ const EmploymentInfo = () => {
   const handleContinue = async () => {
     if (!validateForm()) return;
 
+    const authToken = localStorage.getItem('authToken');
     setLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
+      const payload = {
+        employmentType: formData.employmentType,
+        industry: formData.industry,
+        companyName: formData.companyName,
+        designation: formData.jobRole, // Map jobRole to designation
+        takeHomeSalary: parseInt(formData.monthlyIncome, 10) || 0, // Convert to number
+        totalExperienceInMonths: parseInt(formData.workExperience, 10) || 0 // Convert to number, assuming experience is in months
+      };
 
-      console.log('API call to:', config.baseURL + '/employment-info', formData);
+      // console.log('API call to:', config.baseURL + '/employment-info', formData);
+      const response = await fetch(config.baseURL + `borrower/${authToken}/update-employment`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) {
+        let errorMessage = 'Failed to save employment information. Please try again.';
+        throw new Error(errorMessage);
+      }
+
+      toast.success("Employment information saved successfully!");
       localStorage.setItem('employmentInfoCompleted', 'true');
-      navigate('/loan-application-status');
+      navigate('/verification-processing');
     } catch (err) {
       setErrors({ submit: 'Failed to save employment information. Please try again.' });
     } finally {
@@ -89,8 +115,8 @@ const EmploymentInfo = () => {
                   className="inputField"
                 >
                   <option value="">Select Employment type</option>
-                  <option value="salaried">Salaried</option>
-                  <option value="self-employed">Self Employed</option>
+                  <option value="SALARIED">Salaried</option>
+                  <option value="SELF_EMPLOYED">Self Employed</option>
                 </select>
                 {errors.employmentType && <p className="error-message">{errors.employmentType}</p>}
               </div>
