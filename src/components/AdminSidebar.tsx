@@ -10,7 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { FileText, CreditCard, Repeat } from 'lucide-react';
+import { FileText, CreditCard, Repeat, Shield } from 'lucide-react';
 import styles from './AdminSidebar.module.css';
 
 const AdminSidebar = () => {
@@ -36,6 +36,12 @@ const AdminSidebar = () => {
       icon: Repeat,
       path: '/admin/my-repayments',
       isActive: location.pathname === '/admin/my-repayments'
+    },
+    {
+      title: "KYC Documents",
+      icon: Shield,
+      path: '/admin/kyc-documents',
+      isActive: location.pathname === '/admin/kyc-documents'
     }
   ];
 
