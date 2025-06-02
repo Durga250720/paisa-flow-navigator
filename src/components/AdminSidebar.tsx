@@ -20,10 +20,10 @@ const AdminSidebar = () => {
   // Determine active status directly in the array definition
   const sidebarItems = [
     {
-      title: "My Application",
-      icon: FileText,
-      path: '/admin/my-application',
-      isActive: location.pathname === '/admin/my-application'
+      title: "KYC Documents",
+      icon: Shield,
+      path: '/admin/kyc-documents',
+      isActive: location.pathname === '/admin/kyc-documents'
     },
     {
       title: "My Borrowings",
@@ -38,10 +38,10 @@ const AdminSidebar = () => {
       isActive: location.pathname === '/admin/my-repayments'
     },
     {
-      title: "KYC Documents",
-      icon: Shield,
-      path: '/admin/kyc-documents',
-      isActive: location.pathname === '/admin/kyc-documents'
+      title: "My Application",
+      icon: FileText,
+      path: '/admin/my-application',
+      isActive: location.pathname === '/admin/my-application'
     }
   ];
 

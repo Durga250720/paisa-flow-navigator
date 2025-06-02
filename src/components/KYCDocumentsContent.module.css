@@ -1,0 +1,23 @@
+.borrowerTitle{
+    @apply text-[16px] font-normal text-gray-900;
+}
+.userName{
+    @apply text-gray-900 font-normal text-[14px];
+}
+.id{
+    @apply text-[13px] font-normal text-[var(--text-4)]
+}
+.firstContainer{
+    /* @apply w-[50%] margin-auto; */
+    width: 50%;
+    margin: 0 auto;
+    margin-bottom: 15px !important;
+}
+.activeStatusValue{
+@apply text-green-600 bg-green-50;
+width:85px
+}
+.inActiveStatusValue{
+    @apply text-red-600 bg-red-50;
+    width:85px
+}
