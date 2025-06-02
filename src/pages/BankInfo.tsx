@@ -9,6 +9,7 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { CognitoIdentityClient } from "@aws-sdk/client-cognito-identity";
 import { fromCognitoIdentityPool } from "@aws-sdk/credential-provider-cognito-identity";
 import { toast } from "sonner";
+
 const BankInfo = () => {
   const [formData, setFormData] = useState({
     bankAccountNumber: '',
@@ -96,13 +97,16 @@ const BankInfo = () => {
 
     setLoading(true);
     try {
+      console.log('Starting file uploads...');
+      console.log('Number of payslips to upload:', files.payslips.length);
+      console.log('Bank statement to upload:', files.bankStatement ? 'Yes' : 'No');
+
       const s3Config = config.componentImageUploading;
       const cognitoPoolId = s3Config.CredentialsProvider.CognitoIdentity.Default.PoolId;
       const cognitoRegion = s3Config.CredentialsProvider.CognitoIdentity.Default.Region;
       const s3Bucket = s3Config.S3TransferUtility.Default.Bucket;
       const s3Region = s3Config.S3TransferUtility.Default.Region;
 
-      
       // Initialize S3 client with Cognito credentials
       const credentials = fromCognitoIdentityPool({
         client: new CognitoIdentityClient({ region: cognitoRegion }),
@@ -116,9 +120,12 @@ const BankInfo = () => {
 
       const uploadFileToS3 = async (file: File, fileType: 'payslip' | 'bank_statement'): Promise<string> => {
         const timestamp = Date.now();
+        const randomId = Math.random().toString(36).substring(2, 15);
         // Sanitize filename by replacing spaces with underscores
         const sanitizedFileName = file.name.replace(/\s+/g, '_');
-        const key = `${authToken}/${fileType}/${timestamp}-${sanitizedFileName}`;
+        const key = `${authToken}/${fileType}/${timestamp}-${randomId}-${sanitizedFileName}`;
+
+        console.log(`Uploading ${fileType}:`, sanitizedFileName, 'to key:', key);
 
         const putObjectCommand = new PutObjectCommand({
           Bucket: s3Bucket,
@@ -128,20 +135,41 @@ const BankInfo = () => {
         });
 
         await s3Client.send(putObjectCommand);
-        return `https://${s3Bucket}.s3.${s3Region}.amazonaws.com/${key}`;
+        const url = `https://${s3Bucket}.s3.${s3Region}.amazonaws.com/${key}`;
+        console.log(`Successfully uploaded ${fileType}:`, url);
+        return url;
       };
 
+      // Upload all payslips
       const payslipUrls: string[] = [];
-      for (const payslipFile of files.payslips) {
-        const url = await uploadFileToS3(payslipFile, 'payslip');
-        payslipUrls.push(url);
+      console.log('Starting payslip uploads...');
+      
+      for (let i = 0; i < files.payslips.length; i++) {
+        const payslipFile = files.payslips[i];
+        console.log(`Uploading payslip ${i + 1}/${files.payslips.length}:`, payslipFile.name);
+        try {
+          const url = await uploadFileToS3(payslipFile, 'payslip');
+          payslipUrls.push(url);
+          console.log(`Payslip ${i + 1} uploaded successfully:`, url);
+        } catch (error) {
+          console.error(`Failed to upload payslip ${i + 1}:`, error);
+          throw new Error(`Failed to upload payslip: ${payslipFile.name}`);
+        }
       }
 
+      console.log('All payslips uploaded. URLs:', payslipUrls);
+
       // Upload bank statement
-      let bankStatementUrls: string[] = [];
+      let bankStatementUrl: string | null = null;
       if (files.bankStatement) {
-        const url = await uploadFileToS3(files.bankStatement, 'bank_statement');
-        bankStatementUrls.push(url);
+        console.log('Uploading bank statement...');
+        try {
+          bankStatementUrl = await uploadFileToS3(files.bankStatement, 'bank_statement');
+          console.log('Bank statement uploaded successfully:', bankStatementUrl);
+        } catch (error) {
+          console.error('Failed to upload bank statement:', error);
+          throw new Error('Failed to upload bank statement');
+        }
       }
 
       // Construct payload for bank-detail API
@@ -151,11 +179,16 @@ const BankInfo = () => {
         ifscNumber: formData.ifscCode.toUpperCase(),
         accountHolderName: formData.accountHolderName,
         payslips: payslipUrls,
-        bankStatement: bankStatementUrls,
+        bankStatement: bankStatementUrl ? [bankStatementUrl] : [],
       };
 
+      console.log('API payload:', payload);
+
       // API call to bank-detail
-      const response = await fetch(config.baseURL+`bank-detail`, {
+      const apiUrl = `${config.baseURL}bank-detail`;
+      console.log('Making API call to:', apiUrl);
+
+      const response = await fetch(apiUrl, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -163,16 +196,33 @@ const BankInfo = () => {
         body: JSON.stringify(payload),
       });
 
+      console.log('API response status:', response.status);
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Failed to save bank information. Please try again.' }));
+        const errorText = await response.text();
+        console.error('API error response:', errorText);
+        
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { message: 'Failed to save bank information. Please try again.' };
+        }
+        
         throw new Error(errorData.message || 'Failed to save bank information.');
       }
 
+      const responseData = await response.json();
+      console.log('API success response:', responseData);
+
       toast.success("Bank details saved successfully!");
       localStorage.setItem('bankInfoCompleted', 'true');
-      // navigate('/employment-info');
+      navigate('/employment-info');
     } catch (err) {
-      setErrors({ submit: 'Failed to save bank information. Please try again.' });
+      console.error('Error in handleContinue:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save bank information. Please try again.';
+      setErrors({ submit: errorMessage });
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
