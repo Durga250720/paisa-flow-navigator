@@ -219,7 +219,7 @@ const BankInfo = () => {
       localStorage.setItem('bankInfoCompleted', 'true');
       navigate('/employment-info');
     } catch (err) {
-      console.error('Error in handleContinue:', err);
+      setLoading(false);
       const errorMessage = err instanceof Error ? err.message : 'Failed to save bank information. Please try again.';
       setErrors({ submit: errorMessage });
       toast.error(errorMessage);
