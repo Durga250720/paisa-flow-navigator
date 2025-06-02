@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -14,15 +13,22 @@ const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Clear any existing auth tokens when landing on login page
-    // This ensures we start fresh
+    // Check if user is already authenticated
+    const authToken = localStorage.getItem('authToken');
+    if (authToken) {
+      // Redirect to admin dashboard if already logged in
+      navigate('/admin');
+      return;
+    }
+
+    // Clear any existing auth tokens when landing on login page for new session
     localStorage.removeItem('authToken');
     localStorage.removeItem('phoneNumber');
     localStorage.removeItem('otpVerified');
     localStorage.removeItem('basicInfoCompleted');
     localStorage.removeItem('aadhaarVerified');
     localStorage.removeItem('kycVerified');
-  }, []);
+  }, [navigate]);
 
   const validatePhoneNumber = (phone: string) => {
     const phoneRegex = /^[6-9]\d{9}$/;

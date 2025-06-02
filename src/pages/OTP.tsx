@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -19,15 +18,23 @@ const OTP = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user has authToken
-    const storedPhone = localStorage.getItem('phoneNumber');
-    const storedName = localStorage.getItem('name');
+    // Check if user is already authenticated
     const authToken = localStorage.getItem('authToken');
-
     if (authToken) {
+      // Redirect to admin dashboard if already logged in
+      navigate('/admin');
       return;
     }
 
+    // Check if user has phoneNumber from login flow
+    const storedPhone = localStorage.getItem('phoneNumber');
+    const storedName = localStorage.getItem('name');
+
+    if (!storedPhone || !storedName) {
+      // If no phone number or name in storage, redirect to login
+      navigate('/');
+      return;
+    }
 
     if (storedPhone) {
       setPhoneNumber(storedPhone);
