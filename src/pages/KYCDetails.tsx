@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import OTPInput from '../components/OTPInput';
 import { config } from '../config/environment';
 import styles from '../pages-styles/KYCDetails.module.css';
+import { toast } from "sonner";
 
 
 const KYCDetails = () => {
@@ -15,6 +16,7 @@ const KYCDetails = () => {
   const [isAadhaarVerified, setIsAadhaarVerified] = useState(false); // New state
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [authToken, setAuthToken] = useState('');
   const [resendTimer, setResendTimer] = useState(0);
   const navigate = useNavigate();
 
@@ -23,6 +25,7 @@ const KYCDetails = () => {
     // const basicInfoCompleted = localStorage.getItem('basicInfoCompleted'); // Not used, can be removed if not needed elsewhere
 
     if (!authToken) {
+      setAuthToken(authToken)
       navigate('/');
     }
 
@@ -55,16 +58,28 @@ const KYCDetails = () => {
       setErrors({ aadhaar: 'Please enter a valid 12-digit Aadhaar number' });
       return;
     }
+    const aadhaarForApi = formData.aadhaarNumber.replace(/\s/g, ''); // Ensure no spaces
 
     setLoading(true);
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch(`${config.baseURL}borrower/aadhaar-otp?aadhaar=${aadhaarForApi}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-      console.log('API call to:', config.baseURL + '/send-aadhaar-otp', { aadhaarNumber: formData.aadhaarNumber });
+      if (!response.ok) {
+        let errorMessage = 'Failed to send OTP. Please try again.';
+        throw new Error(errorMessage);
+      }
+      toast.success("Aadhaar OTP sent to your registered mobile number.");
       setShowOTP(true);
       setResendTimer(30); // Start resend timer
     } catch (err) {
+      setLoading(false);
       setErrors({ aadhaar: 'Failed to send OTP. Please try again.' });
     } finally {
       setLoading(false);
@@ -73,20 +88,34 @@ const KYCDetails = () => {
 
   const handleOTPComplete = async (otp: string) => {
     setErrors({});
+    const aadhaarForApi = formData.aadhaarNumber.replace(/\s/g, '');
+    const authToken1 = localStorage.getItem('authToken');
     setLoading(true);
+
 
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch(
+        `${config.baseURL}borrower/${authToken1}/add-aadhaar?aadhaarNumber=${aadhaarForApi}&otp=${otp}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
-      console.log('API call to:', config.baseURL + '/verify-aadhaar-otp', {
-        aadhaarNumber: formData.aadhaarNumber,
-        otp
-      });
+      if (!response.ok) {
+        let errorMessage = 'Invalid OTP or failed to verify Aadhaar. Please try again.';
+        throw new Error(errorMessage);
+      }
+
+      toast.success("Aadhaar verified successfully!");
       localStorage.setItem('aadhaarVerified', 'true');
-      setIsAadhaarVerified(true); // Aadhaar is verified
-      // setShowOTP(false); // OTP section will hide due to conditional rendering
+      setIsAadhaarVerified(true);
     } catch (err) {
+      setLoading(false);
       setErrors({ otp: 'Invalid OTP. Please try again.' });
     } finally {
       setLoading(false);
@@ -106,15 +135,31 @@ const KYCDetails = () => {
       return;
     }
 
+    const panForApi = formData.panNumber.toUpperCase();
+    const authToken1 = localStorage.getItem('authToken');
     setLoading(true);
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch(
+        `${config.baseURL}borrower/${authToken1}/add-pan?panNumber=${panForApi}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      if (!response.ok) {
+        let errorMessage = 'Failed to verify PAN number. Please try again.';
+        throw new Error(errorMessage);
+      }
 
-      console.log('API call to:', config.baseURL + '/kyc-details', formData);
+      toast.success("PAN verified successfully!");
       localStorage.setItem('kycVerification', 'true');
       navigate('/kyc-verification');
     } catch (err) {
+      setLoading(false);
       setErrors({ submit: 'Failed to save KYC details. Please try again.' });
     } finally {
       setLoading(false);
@@ -214,7 +259,7 @@ const KYCDetails = () => {
                     length={6}
                     onComplete={handleOTPComplete}
                     error={errors.otp}
-                    // disabled={isAadhaarVerified} // Disable OTP input after verification
+                  // disabled={isAadhaarVerified} // Disable OTP input after verification
                   />
                   {!isAadhaarVerified && ( // Show resend option only if Aadhaar is not yet verified
                     <div className="text-center mt-4 flex justify-between items-center">

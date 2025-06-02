@@ -91,7 +91,6 @@ const EmploymentInfo = () => {
                   <option value="">Select Employment type</option>
                   <option value="salaried">Salaried</option>
                   <option value="self-employed">Self Employed</option>
-                  <option value="business">Business</option>
                 </select>
                 {errors.employmentType && <p className="error-message">{errors.employmentType}</p>}
               </div>

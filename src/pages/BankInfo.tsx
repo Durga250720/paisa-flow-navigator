@@ -5,7 +5,10 @@ import Navbar from '../components/Navbar';
 import { Upload, X, Check } from 'lucide-react';
 import { config } from '../config/environment';
 import styles from '../pages-styles/BankInfo.module.css';
-
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { CognitoIdentityClient } from "@aws-sdk/client-cognito-identity";
+import { fromCognitoIdentityPool } from "@aws-sdk/credential-provider-cognito-identity";
+import { toast } from "sonner";
 const BankInfo = () => {
   const [formData, setFormData] = useState({
     bankAccountNumber: '',
@@ -68,9 +71,9 @@ const BankInfo = () => {
 
   const handlePayslipUpload = (file: File) => {
     if (files.payslips.length < 6) {
-      setFiles(prev => ({ 
-        ...prev, 
-        payslips: [...prev.payslips, file] 
+      setFiles(prev => ({
+        ...prev,
+        payslips: [...prev.payslips, file]
       }));
     }
   };
@@ -89,16 +92,85 @@ const BankInfo = () => {
   const handleContinue = async () => {
     if (!validateForm()) return;
 
+    const authToken = localStorage.getItem('authToken');
+
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const s3Config = config.componentImageUploading;
+      const cognitoPoolId = s3Config.CredentialsProvider.CognitoIdentity.Default.PoolId;
+      const cognitoRegion = s3Config.CredentialsProvider.CognitoIdentity.Default.Region;
+      const s3Bucket = s3Config.S3TransferUtility.Default.Bucket;
+      const s3Region = s3Config.S3TransferUtility.Default.Region;
 
-      console.log('API call to:', config.baseURL + '/bank-info', {
-        ...formData,
-        files
+      
+      // Initialize S3 client with Cognito credentials
+      const credentials = fromCognitoIdentityPool({
+        client: new CognitoIdentityClient({ region: cognitoRegion }),
+        identityPoolId: cognitoPoolId,
       });
+
+      const s3Client = new S3Client({
+        region: s3Region,
+        credentials,
+      });
+
+      const uploadFileToS3 = async (file: File, fileType: 'payslip' | 'bank_statement'): Promise<string> => {
+        const timestamp = Date.now();
+        // Sanitize filename by replacing spaces with underscores
+        const sanitizedFileName = file.name.replace(/\s+/g, '_');
+        const key = `${authToken}/${fileType}/${timestamp}-${sanitizedFileName}`;
+
+        const putObjectCommand = new PutObjectCommand({
+          Bucket: s3Bucket,
+          Key: key,
+          Body: file,
+          ContentType: file.type,
+        });
+
+        await s3Client.send(putObjectCommand);
+        return `https://${s3Bucket}.s3.${s3Region}.amazonaws.com/${key}`;
+      };
+
+      const payslipUrls: string[] = [];
+      for (const payslipFile of files.payslips) {
+        const url = await uploadFileToS3(payslipFile, 'payslip');
+        payslipUrls.push(url);
+      }
+
+      // Upload bank statement
+      let bankStatementUrls: string[] = [];
+      if (files.bankStatement) {
+        const url = await uploadFileToS3(files.bankStatement, 'bank_statement');
+        bankStatementUrls.push(url);
+      }
+
+      // Construct payload for bank-detail API
+      const payload = {
+        borrowerId: authToken,
+        accountNumber: formData.bankAccountNumber,
+        ifscNumber: formData.ifscCode.toUpperCase(),
+        accountHolderName: formData.accountHolderName,
+        payslips: payslipUrls,
+        bankStatement: bankStatementUrls,
+      };
+
+      // API call to bank-detail
+      const response = await fetch(config.baseURL+`bank-detail`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Failed to save bank information. Please try again.' }));
+        throw new Error(errorData.message || 'Failed to save bank information.');
+      }
+
+      toast.success("Bank details saved successfully!");
       localStorage.setItem('bankInfoCompleted', 'true');
-      navigate('/employment-info');
+      // navigate('/employment-info');
     } catch (err) {
       setErrors({ submit: 'Failed to save bank information. Please try again.' });
     } finally {
@@ -197,7 +269,7 @@ const BankInfo = () => {
                     <label className={styles.label}>
                       Upload Payslips (Maximum 6)
                     </label>
-                    
+
                     {files.payslips.length < 6 && (
                       <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors mb-4">
                         <input
@@ -245,7 +317,7 @@ const BankInfo = () => {
                         ))}
                       </div>
                     )}
-                    
+
                     <p className="text-xs text-gray-500">
                       {files.payslips.length}/6 payslips uploaded
                     </p>
