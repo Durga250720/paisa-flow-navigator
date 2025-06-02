@@ -38,7 +38,7 @@ const Admin = () => {
       </div>
       <div className={`${styles.rightRenderingPanel}`}>
         <nav className={`${styles.navContainer} bg-white shadow-sm z-50 px-6 py-4 flex justify-end items-center`}>
-          <div className='flex justify-end w-full'>
+          <div className='flex justify-end w-full gap-3'>
             <button className={`${styles.helpButton} flex items-center gap-2`} onClick={handleHelpClick}>
               <div className="w-8 h-8 border border-gray-300 rounded-full flex items-center justify-center text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50">
                 <span className="font-semibold text-lg">?</span>
