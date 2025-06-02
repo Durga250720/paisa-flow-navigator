@@ -197,7 +197,7 @@ const BankInfo = () => {
       });
 
       console.log('API response status:', response.status);
-
+navigate('/employment-info');
       if (!response.ok) {
         const errorText = await response.text();
         console.error('API error response:', errorText);
