@@ -27,8 +27,8 @@ const CreateMyBorrowing = () => {
     <div className={`${styles.mainContainer} p-4 bg-white border-t`}>
       <div className={`${styles.innerContainer} h-full rounded-lg shadow-sm`}>
         {/* Header */}
-        <div className="flex items-center p-4">
-          <button onClick={handleBack} className="mr-4">
+        <div className="flex items-center p-4 cursor-pointer w-max" onClick={handleBack}>
+          <button className="mr-4">
             <ArrowLeft className="w-5 h-5 text-gray-600" />
           </button>
           <span className="text-gray-600 font-medium">Back</span>
