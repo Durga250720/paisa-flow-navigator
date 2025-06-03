@@ -9,7 +9,7 @@ import KYCDocumentsContent from './KYCDocumentsContent';
 const AdminOutlet  = () => {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/admin/my-application" replace />} />
+      <Route path="/" element={<Navigate to="/admin/kyc-documents" replace />} />
       <Route path="/my-application" element={<MyApplicationContent />} />
       <Route path="/my-borrowings" element={<MyBorrowingsContent />} />
       <Route path="/my-repayments" element={<RepaymentsContent />} />
