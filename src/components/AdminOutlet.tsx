@@ -6,6 +6,7 @@ import MyBorrowingsContent from './MyBorrowingsContent';
 import RepaymentsContent from './RepaymentsContent';
 import KYCDocumentsContent from './KYCDocumentsContent';
 import PrivacyPolicyContent from './PrivacyPolicyContent';
+import CreateMyBorrowing from './CreateMyBorrowing';
 
 const AdminOutlet  = () => {
   return (
@@ -16,6 +17,7 @@ const AdminOutlet  = () => {
       <Route path="/my-repayments" element={<RepaymentsContent />} />
       <Route path="/kyc-documents" element={<KYCDocumentsContent />} />
       <Route path="/privacy-policy" element={<PrivacyPolicyContent />} />
+      <Route path="/create-borrowing" element={<CreateMyBorrowing />} />
     </Routes>
   );
 };
