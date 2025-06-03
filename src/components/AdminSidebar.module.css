@@ -1,22 +1,36 @@
-.logoContainer{
+.logoContainer {
     @apply h-[6%]
 }
-.bottomContainer{
+
+.bottomContainer {
     height: calc(100% - 6%);
-    /* overflow-y : scroll; */
 }
-.itemTitle{
+
+.itemTitle {
     @apply text-[14px] font-normal text-[var(--text-4)];
 }
-.activeItemTitle{
+
+.activeItemTitle {
     @apply text-[14px] font-normal text-[var(--primary-color)];
 }
-.activeItemBg{
-    background-color : #F1E8FC !important
+
+.activeItemBg {
+    background-color: #F1E8FC !important
 }
-.tabItem{
+
+.tabItem {
     height: 40px;
 }
-.iconActiveColor{
+
+.iconActiveColor {
     color: var(--primary-color);
+}
+
+.bottomContainer1 {
+    height: 80%;
+}
+
+.bottomContainer2 {
+    height: 20%;
+    @apply border-t border-gray-300;
 }

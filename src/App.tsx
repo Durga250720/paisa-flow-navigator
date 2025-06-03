@@ -21,6 +21,8 @@ import KYCVerification from "./pages/KYCVerification";
 import NotFound from "./pages/NotFound";
 import "./styles/global.css";
 import Admin from "./pages/Admin";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsConditions from "./pages/TermsConditions";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +47,8 @@ const App = () => (
           <Route path="/congratulations" element={<Congratulations />} />
           <Route path="/loan-details" element={<LoanDetails />} />
           <Route path="/transfer-success" element={<TransferSuccess />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-conditions" element={<TermsConditions />} />
           <Route path="/admin/*" element={<Admin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

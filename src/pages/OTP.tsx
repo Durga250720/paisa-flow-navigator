@@ -185,6 +185,15 @@ const OTP = () => {
     navigate('/'); // Navigate to the Login page
   };
 
+  const handleTermsClick = () => {
+        window.open('/terms-conditions', '_blank');
+  }
+
+  const handlePrivacyClick = () => {
+    window.open('/privacy-policy', '_blank');
+  }
+
+
   return (
     <div className={`${styles.container} block`}>
       <div className={styles.navbarWrapper}>
@@ -256,8 +265,8 @@ const OTP = () => {
 
               <p className={styles.termsText}>
                 By Clicking login you will be accepting{' '}
-                <span className={styles.termsLink}>Terms and Conditions</span> and{' '}
-                <span className={styles.termsLink}>Privacy Policy</span>
+                <span className={`${styles.termsLink} cursor-pointer`} onClick={handleTermsClick}>Terms and Conditions</span> and{' '}
+                <span className={`${styles.termsLink} cursor-pointer`} onClick={handlePrivacyClick}>Privacy Policy</span>
               </p>
             </div>
           </div>

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import styles from '../pages-styles/LoanAmount.module.css';
+import { config } from '../config/environment';
 
 const LoanAmount = () => {
   const [loanAmount, setLoanAmount] = useState('');
@@ -49,11 +50,37 @@ const LoanAmount = () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      localStorage.setItem('loanAmount', loanAmount);
-      localStorage.setItem('loanPurpose', purpose);
+      const payload = {
+        borrower: {
+          id: localStorage.getItem('authToken'),
+          name: localStorage.getItem('name'),
+        },
+        email: localStorage.getItem('email'),
+        phone: localStorage.getItem('phoneNumber'),
+        loanAmount: parseFloat(loanAmount) || 0,
+        loanPurpose: purpose,
+      };
+
+      const response = await fetch(config.baseURL + 'loan-application/apply', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Failed to submit loan application. Please try again.' }));
+        throw new Error(errorData.message || 'Failed to submit loan application.');
+      }
+
+      // const responseData = await response.json(); // If you need to use the response data
+      // localStorage.setItem('loanAmount', loanAmount);
+      // localStorage.setItem('loanPurpose', purpose);
       navigate('/bank-info');
     } catch (err) {
-      setErrors({ submit: 'Failed to save loan details. Please try again.' });
+      setLoading(false);
+      setErrors({ submit: err instanceof Error ? err.message : 'An unexpected error occurred.' });
     } finally {
       setLoading(false);
     }

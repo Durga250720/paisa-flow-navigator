@@ -45,6 +45,20 @@ const AdminSidebar = () => {
     }
   ];
 
+  const footerBarItems = [
+    {
+      title: "Privacy Policy",
+      icon: Shield,
+      path: '/admin/privacy-policy',
+      isActive: location.pathname === '/admin/privacy-policy'
+    },
+    {
+      title: "Terms & Conditions",
+      icon: FileText,
+      path: '/admin/terms-conditions',
+      isActive: location.pathname === '/admin/terms-conditions'
+    }
+  ]
   const handleItemClick = (path: string) => {
     navigate(path);
   };
@@ -60,31 +74,60 @@ const AdminSidebar = () => {
           />
         </div>
         <div className={`${styles.bottomContainer}`}>
-          <SidebarGroup className='h-full overflow-auto'>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {sidebarItems.map((item) => (
-                  <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton
-                      onClick={() => handleItemClick(item.path)}
-                      isActive={item.isActive} // Use the isActive from the item object
-                      className={`
+          <div className={`${styles.bottomContainer1}`}>
+            <SidebarGroup className='h-full overflow-auto'>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {sidebarItems.map((item) => (
+                    <SidebarMenuItem key={item.path}>
+                      <SidebarMenuButton
+                        onClick={() => handleItemClick(item.path)}
+                        isActive={item.isActive} // Use the isActive from the item object
+                        className={`
                         w-full justify-start mb-2
                         ${styles.tabItem}
                         ${item.isActive
-                          ? styles.activeItemBg
-                          : '' // Default hover for non-active
-                        }
+                            ? styles.activeItemBg
+                            : '' // Default hover for non-active
+                          }
                       `}
-                    >
-                      <item.icon className={`${item.isActive ? styles.iconActiveColor : ''} mr-2 h-4 w-4`}/>
-                      <span className={`${item.isActive ? styles.activeItemTitle : styles.itemTitle}`}>{item.title}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+                      >
+                        <item.icon className={`${item.isActive ? styles.iconActiveColor : ''} mr-2 h-4 w-4`} />
+                        <span className={`${item.isActive ? styles.activeItemTitle : styles.itemTitle}`}>{item.title}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </div>
+          {/* <div className={`${styles.bottomContainer2}`}>
+            <SidebarGroup className='h-full overflow-auto'>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {footerBarItems.map((item) => (
+                    <SidebarMenuItem key={item.path}>
+                      <SidebarMenuButton
+                        onClick={() => handleItemClick(item.path)}
+                        isActive={item.isActive} // Use the isActive from the item object
+                        className={`
+                        w-full justify-start mb-2
+                        ${styles.tabItem}
+                        ${item.isActive
+                            ? styles.activeItemBg
+                            : '' // Default hover for non-active
+                          }
+                      `}
+                      >
+                        <item.icon className={`${item.isActive ? styles.iconActiveColor : ''} mr-2 h-4 w-4`} />
+                        <span className={`${item.isActive ? styles.activeItemTitle : styles.itemTitle}`}>{item.title}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </div> */}
         </div>
       </SidebarContent>
     </Sidebar>

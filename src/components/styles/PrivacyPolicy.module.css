@@ -1,0 +1,40 @@
+.mainContainer{
+    @apply bg-[var(--bg-color)] p-4 flex;
+}
+.innerContainer{
+    @apply w-[60%] h-[95%] m-auto;
+}
+.containerTitle{
+    @apply text-2xl text-[var(--text-5)] font-medium text-center;
+}
+.privacyRenderingContainer{
+    @apply h-[95%] overflow-auto;
+}
+.sectionTitle{
+    @apply text-[16px] text-[var(--primary-color)] font-medium
+}
+.point{
+    @apply text-[14px] text-[var(#020817)] font-normal
+}
+.subPointItem{
+    @apply text-[14px] text-[var(#020817)] font-normal
+}
+.privacyRenderingContainer {
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: #F0F0F0;
+        border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--primary-color);
+        border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-color);
+    }
+}
