@@ -68,10 +68,6 @@ const LoanAmount = () => {
       <div className={`${styles.mainContainer}`}>
         <div className={styles.leftPanel}>
           <div className={styles.imageContainer}>
-            <div className={styles.cibilBadge}>
-              <div className={styles.cibilText}>Low CIBIL?</div>
-              <div className={styles.noProblemText}>No problem</div>
-            </div>
             <img
               src="/lovable-uploads/8f598013-7362-496b-96a6-8a285565f544.png"
               alt="Happy customer with phone"
@@ -93,7 +89,7 @@ const LoanAmount = () => {
             <div className={styles.formFieldsContainer}>
               <div className={styles.fieldGroup}>
                 <label htmlFor="loanAmount" className={styles.label}>
-                  Enter the amount to be borrowed *
+                  Enter the amount to be borrowed <sup>*</sup>
                 </label>
                 <input
                   id="loanAmount"
@@ -101,14 +97,14 @@ const LoanAmount = () => {
                   value={loanAmount}
                   onChange={(e) => setLoanAmount(e.target.value)}
                   placeholder="Enter the amount to be borrowed"
-                  className={styles.inputField}
+                  className="inputField"
                 />
                 {errors.loanAmount && <p className={styles.errorMessage}>{errors.loanAmount}</p>}
               </div>
 
               <div className={styles.fieldGroup}>
                 <label htmlFor="purpose" className={styles.label}>
-                  Purpose of Borrowing *
+                  Purpose of Borrowing <sup>*</sup>
                 </label>
                 <input
                   id="purpose"
@@ -116,7 +112,7 @@ const LoanAmount = () => {
                   value={purpose}
                   onChange={(e) => setPurpose(e.target.value)}
                   placeholder="Enter the amount to be borrowed"
-                  className={styles.inputField}
+                  className="inputField"
                 />
                 {errors.purpose && <p className={styles.errorMessage}>{errors.purpose}</p>}
               </div>
