@@ -5,7 +5,6 @@ import { format } from 'date-fns';
 import { ChevronRight } from 'lucide-react'; // Import the icon
 import styles from './styles/MyBorrowingsContent.module.css';
 
-
 const MyBorrowingsContent = () => {
   const [borrowings, setBorrowings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -16,6 +15,10 @@ const MyBorrowingsContent = () => {
   const navigate = useNavigate();
 
   const ITEMS_PER_PAGE = 10; // Or your desired page size
+
+  const handleBorrowClick = () => {
+    navigate('/admin/create-borrowing');
+  };
 
   useEffect(() => {
     const fetchBorrowingsData = async (page: number) => {
@@ -87,7 +90,12 @@ const MyBorrowingsContent = () => {
       <div className={`${styles.firstContainer} flex justify-between items-center`}>
         <div className={`${styles.titleContainer}`}>My Borrowings</div>
         <div className={`${styles.buttonContainer}`}>
-          <button className={`${styles.borrowContainer}`}>Borrow</button>
+          <button 
+            className={`${styles.borrowContainer}`}
+            onClick={handleBorrowClick}
+          >
+            Borrow
+          </button>
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-2 mt-2">
