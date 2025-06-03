@@ -10,6 +10,7 @@ import BasicInfo from "./pages/BasicInfo";
 import KYCDetails from "./pages/KYCDetails";
 import VerificationProcessing from "./pages/VerificationProcessing";
 import KYCVerified from "./pages/KYCVerified";
+import LoanAmount from "./pages/LoanAmount";
 import BankInfo from "./pages/BankInfo";
 import EmploymentInfo from "./pages/EmploymentInfo";
 import LoanApplicationStatus from "./pages/LoanApplicationStatus";
@@ -20,7 +21,6 @@ import KYCVerification from "./pages/KYCVerification";
 import NotFound from "./pages/NotFound";
 import "./styles/global.css";
 import Admin from "./pages/Admin";
-
 
 const queryClient = new QueryClient();
 
@@ -38,6 +38,7 @@ const App = () => (
           <Route path="/verification-processing" element={<VerificationProcessing />} />
           <Route path="/kyc-verification" element={<KYCVerification />} />
           <Route path="/kyc-verified" element={<KYCVerified />} />
+          <Route path="/loan-amount" element={<LoanAmount />} />
           <Route path="/bank-info" element={<BankInfo />} />
           <Route path="/employment-info" element={<EmploymentInfo />} />
           <Route path="/loan-application-status" element={<LoanApplicationStatus />} />

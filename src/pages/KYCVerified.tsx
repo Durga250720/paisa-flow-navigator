@@ -6,7 +6,6 @@ import { config } from '../config/environment';
 import styles from '../pages-styles/KYCDetails.module.css';
 import { CheckCircle } from 'lucide-react';
 
-
 const KYCDetails = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -39,13 +38,10 @@ const KYCDetails = () => {
 
   const handleSendOTP = async () => {
     setErrors({});
-
-
     setLoading(true);
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-
       setResendTimer(30); // Start resend timer
     } catch (err) {
       setErrors({ aadhaar: 'Failed to send OTP. Please try again.' });
@@ -57,11 +53,9 @@ const KYCDetails = () => {
   const handleOTPComplete = async (otp: string) => {
     setErrors({});
     setLoading(true);
-
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-
       // setShowOTP(false); // OTP section will hide due to conditional rendering
     } catch (err) {
       setErrors({ otp: 'Invalid OTP. Please try again.' });
@@ -78,7 +72,7 @@ const KYCDetails = () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       localStorage.setItem('kycVerified', 'true');
-      navigate('/bank-info');
+      navigate('/loan-amount');
     } catch (err) {
       setErrors({ submit: 'Failed to save KYC details. Please try again.' });
     } finally {

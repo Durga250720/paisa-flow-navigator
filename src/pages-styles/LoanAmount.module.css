@@ -1,0 +1,77 @@
+
+.container {
+  @apply min-h-screen bg-white bg-gray-50;
+  height: calc(100vh - 0px);
+}
+
+.navbarWrapper {
+  height: 9%;
+}
+
+.mainContainer {
+  @apply flex h-[calc(100%-9%)] lg:p-8;
+}
+
+.leftPanel {
+  @apply hidden lg:flex lg:w-1/2 items-center justify-center relative;
+}
+
+.imageContainer {
+  @apply relative;
+}
+
+.cibilBadge {
+  @apply absolute top-4 left-4 bg-white rounded-lg p-3 shadow-md z-10;
+}
+
+.cibilText {
+  @apply text-sm text-gray-600 mb-1;
+}
+
+.noProblemText {
+  @apply text-sm font-semibold text-green-600;
+}
+
+.heroImage {
+  @apply max-w-[85%] h-auto;
+}
+
+.rightPanel {
+  @apply w-full lg:w-1/2 flex items-center justify-center;
+}
+
+.formWrapper {
+  @apply w-full max-w-md flex lg:bg-white lg:shadow-sm lg:rounded-lg h-auto flex-col lg:p-8 justify-center;
+}
+
+.heading {
+  @apply text-xl font-semibold mb-4 text-center text-gray-900;
+}
+
+.subHeading {
+  @apply text-sm text-gray-600 mb-8 text-center leading-relaxed;
+}
+
+.formFieldsContainer {
+  @apply space-y-6;
+}
+
+.fieldGroup {
+  @apply space-y-2;
+}
+
+.label {
+  @apply block text-sm font-medium text-gray-700;
+}
+
+.inputField {
+  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-colors;
+}
+
+.errorMessage {
+  @apply text-red-500 text-sm mt-1;
+}
+
+.continueButton {
+  @apply w-full bg-primary text-white font-medium py-3 px-6 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+}
