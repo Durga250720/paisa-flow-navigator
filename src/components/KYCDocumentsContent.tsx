@@ -4,14 +4,6 @@ import { FileText, CheckCircle, User, XCircle } from 'lucide-react';
 import styles from './KYCDocumentsContent.module.css';
 import { config } from '../config/environment'; // Assuming config is here
 
-interface BorrowerProfile {
-  name?: string; // Assuming API returns fullName
-  displayId?: string; // Assuming API returns displayId or similar
-  cibilScore?: number;
-  employmentType?: string;
-  monthlyIncome?: number;
-  // Add other fields as per your API response
-}
 
 const KYCDocumentsContent = () => {
   const [profileData, setProfileData] = useState<any | null>(null);
@@ -125,7 +117,7 @@ const KYCDocumentsContent = () => {
               </div>
               <div>
                 <div className="text-sm text-gray-600">Employment</div>
-                <div className="text-sm font-medium">{profileData.employmentDetails.employmentType || 'N/A'}</div>
+                <div className="text-sm font-medium">{profileData.employmentDetails ? profileData.employmentDetails.employmentType : 'N/A'}</div>
               </div>
               <div>
                 <div className="text-sm text-gray-600">Monthly Income</div>

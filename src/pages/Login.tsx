@@ -8,6 +8,7 @@ import { CheckCircle } from 'lucide-react';
 const Login = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [uName, setName] = useState('');
+  const [uMail, setMailId] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -44,6 +45,10 @@ const Login = () => {
 
     if (!uName) {
       newErrors.name = 'Please enter your name';
+    }
+
+    if (!uMail) {
+      newErrors.uMail = 'Please enter E-mail ID';
     }
 
     if (phoneNumber && !validatePhoneNumber(phoneNumber)) {
@@ -87,8 +92,9 @@ const Login = () => {
       }
 
       // If API call is successful
-      localStorage.setItem('phoneNumber', phoneNumber); 
-      localStorage.setItem('name',uName);
+      localStorage.setItem('phoneNumber', phoneNumber);
+      localStorage.setItem('name', uName);
+      localStorage.setItem('email', uMail)
       navigate('/otp'); // Navigate only on successful OTP send
     } catch (err) {
       setErrors({ submit: err instanceof Error ? err.message : 'An unexpected error occurred.' });
@@ -120,7 +126,7 @@ const Login = () => {
 
             <div className={styles.fieldGroup}>
               <label htmlFor="phone" className={styles.label}>
-                Full Name
+                Full Name <sup>*</sup>
               </label>
               <input
                 id="name"
@@ -133,41 +139,57 @@ const Login = () => {
               {errors.name && <p className={styles.errorMessage}>{errors.name}</p>}
             </div>
 
-            <div className={`${styles.formFieldsContainer} mt-4`}>
-              <div className={styles.fieldGroup}>
-                <label htmlFor="phone" className={styles.label}>
-                  Phone Number
-                </label>
-                <input
-                  id="phone"
-                  type="tel"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  placeholder="Please Enter Your Phone number"
-                  className='inputField'
-                  maxLength={10}
-                />
-                {errors.phoneNumber && <p className={styles.errorMessage}>{errors.phoneNumber}</p>}
-              </div>
 
-
-              <button
-                onClick={handleGetOTP}
-                disabled={loading}
-                className={styles.submitButton}
-              >
-                {loading ? 'Sending...' : 'Get OTP'}
-              </button>
-
-              <p className={styles.infoText}>
-                Paisa108 Get instant personal loan up to ₹ 25000
-              </p>
-
-              <div className={styles.secureInfoContainer}>
-                <CheckCircle className="w-5 h-5 fill-green-500 text-white mr-2" />
-                Secure, simple, 100% paperless
-              </div>
+            {/* <div className={`${styles.formFieldsContainer} mt-4`}> */}
+            <div className={`${styles.fieldGroup} mt-4`}>
+              <label htmlFor="phone" className={styles.label}>
+                Phone Number <sup>*</sup>
+              </label>
+              <input
+                id="phone"
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="Please Enter Your Phone number"
+                className='inputField'
+                maxLength={10}
+              />
+              {errors.phoneNumber && <p className={styles.errorMessage}>{errors.phoneNumber}</p>}
             </div>
+
+            <div className={`${styles.fieldGroup} mt-4`}>
+              <label htmlFor="phone" className={styles.label}>
+                E-mail ID <sup>*</sup>
+              </label>
+              <input
+                id="name"
+                type="mail"
+                value={uMail}
+                onChange={(e) => setMailId(e.target.value)}
+                placeholder="Please Enter E-mail ID"
+                className='inputField'
+              />
+              {errors.uMail && <p className={styles.errorMessage}>{errors.uMail}</p>}
+            </div>
+
+
+            <button
+              onClick={handleGetOTP}
+              disabled={loading}
+              className={`${styles.submitButton} mt-4`}
+            >
+              {loading ? 'Sending...' : 'Get OTP'}
+            </button>
+
+            <p className={styles.infoText}>
+              Paisa108 Get instant personal loan up to ₹ 25000
+            </p>
+
+            <div className={styles.secureInfoContainer}>
+              <CheckCircle className="w-5 h-5 fill-green-500 text-white mr-2" />
+              Secure, simple, 100% paperless
+            </div>
+            {/* </div> */}
           </div>
         </div>
       </div>
