@@ -106,7 +106,6 @@ const OTP = () => {
   };
 
   const handleFetchDetails = async (token:string) => {
-    console.log(token)
     try {
       const response = await fetch(config.baseURL + `borrower/${token}/profile`, {
         method: 'GET',
@@ -129,7 +128,13 @@ const OTP = () => {
       }
 
       const res = await response.json();
-      navigate('/kyc-details');
+      // navigate('/kyc-details');
+      if(res.data.aadhaarVerified && res.data.panVerified){
+        navigate('/admin/kyc-documents') 
+      }
+      else{
+        navigate('/kyc-details');
+      }
     } catch (err) {
       setLoading(false);
       setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
@@ -168,6 +173,7 @@ const OTP = () => {
       }
       navigate('/otp'); // Navigate only on successful OTP send
     } catch (err) {
+      setLoading(false);
       // setErrors({ submit: err instanceof Error ? err.message : 'An unexpected error occurred.' });
     } finally {
       setLoading(false);

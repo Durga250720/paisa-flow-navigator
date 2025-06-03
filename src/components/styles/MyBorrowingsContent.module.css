@@ -1,0 +1,35 @@
+.mainContainer{
+    @apply w-full h-full
+}
+.titleContainer{
+    @apply text-lg font-medium text-primary
+}
+.borrowContainer{
+    @apply text-white bg-[var(--primary-color)] text-[14px] px-8 py-2 rounded-md;
+}
+.loadingSection{
+    @apply h-[55vh] flex justify-center items-center;
+}
+.tableContainer{
+    @apply h-[45vh]
+}
+
+.tableContainer {
+    &::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: #F0F0F0;
+        border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--primary-color);
+        border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-color);
+    }
+}

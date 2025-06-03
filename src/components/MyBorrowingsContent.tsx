@@ -1,29 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { config } from '../config/environment';
-import { format } from 'date-fns'; // For formatting dates
+import { format } from 'date-fns';
+import { ChevronRight } from 'lucide-react'; // Import the icon
+import styles from './styles/MyBorrowingsContent.module.css';
 
-interface BorrowingDetails {
-  displayId: string;
-  loanAmount: number;
-  disburseDate: string; // Assuming date is a string, adjust if it's a Date object
-  dueDate: string;      // Assuming date is a string
-  loanStatus: string;
-  paidTo: string; // Or a more specific type if you have one for bank details
-  // Add any other relevant fields from your API response
-}
 
 const MyBorrowingsContent = () => {
-  const [borrowings, setBorrowings] = useState<BorrowingDetails[]>([]);
+  const [borrowings, setBorrowings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(0); // 0-indexed for API
+  const [hasMorePages, setHasMorePages] = useState(true);
+  const [totalItems, setTotalItems] = useState(0);
   const navigate = useNavigate();
 
+  const ITEMS_PER_PAGE = 10; // Or your desired page size
+
   useEffect(() => {
-    const fetchBorrowingsData = async () => {
+    const fetchBorrowingsData = async (page: number) => {
       const authToken = localStorage.getItem('authToken');
       if (!authToken) {
-        navigate('/'); // Redirect to login if no token
+        navigate('/');
         return;
       }
 
@@ -37,8 +35,8 @@ const MyBorrowingsContent = () => {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            pageNo: 0,
-            pageSize: 10,
+            pageNo: page,
+            pageSize: ITEMS_PER_PAGE,
             searchText: ""
           }),
         });
@@ -48,43 +46,72 @@ const MyBorrowingsContent = () => {
           throw new Error(errorData.message || 'Failed to fetch borrowing history.');
         }
 
-        const res = await response.json();        
+        const res = await response.json();
+        if (res.data && Array.isArray(res.data.data)) {
+          setTotalItems(res.data.count || 0);
           setBorrowings(res.data.data);
+          setHasMorePages(res.data.data.length === ITEMS_PER_PAGE);
+        } else {
+          setBorrowings([]);
+          setTotalItems(0);
+          setHasMorePages(false);
+          console.error("Unexpected API response structure:", res);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
-        setBorrowings([]); // Ensure borrowings is an empty array on error
+        setBorrowings([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchBorrowingsData();
-  }, [navigate]);
+    fetchBorrowingsData(currentPage);
+  }, [navigate, currentPage, ITEMS_PER_PAGE]);
+
+  const handlePreviousPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(prevPage => prevPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (hasMorePages) {
+      setCurrentPage(prevPage => prevPage + 1);
+    }
+  };
+
+  const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
   return (
-    <div className="p-4">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow-sm">
-          <div className="text-sm text-gray-600 mb-2">Available Limit</div>
-          <div className="text-2xl font-bold">₹25,000</div>
+    <div className={`${styles.mainContainer} p-4`}>
+      <div className={`${styles.firstContainer} flex justify-between items-center`}>
+        <div className={`${styles.titleContainer}`}>My Borrowings</div>
+        <div className={`${styles.buttonContainer}`}>
+          <button className={`${styles.borrowContainer}`}>Borrow</button>
         </div>
-        
-        <div className="bg-white p-6 rounded-lg shadow-sm">
-          <div className="text-sm text-gray-600 mb-2">Total Borrowed</div>
-          <div className="text-2xl font-bold">9,000</div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-2 mt-2">
+        <div className="bg-white p-4 rounded-lg shadow-sm">
+          <div className="text-xs text-gray-600 mb-2">Available Limit</div>
+          <div className="text-lg font-medium">₹25,000</div>
         </div>
-        
+
         <div className="bg-white p-6 rounded-lg shadow-sm">
-          <div className="text-sm text-gray-600 mb-2">Auto Pay</div>
-          <div className="text-lg font-medium">XXXX XXXX 17490</div>
+          <div className="text-xs text-gray-600 mb-2">Total Borrowed</div>
+          <div className="text-lg font-medium">9,000</div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+          <div className="text-xs text-gray-600 mb-2">Auto Pay</div>
+          <div className="text-base font-medium">XXXX XXXX 17490</div>
           <div className="text-xs text-gray-500">ICICI Bank</div>
-          <button className="text-primary text-sm mt-1">Change Bank</button>
+          <button className="text-primary text-xs mt-1 float-right">Change Bank</button>
         </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm overflow-hidden">
         <div className="p-4 border-b flex items-center justify-between">
-          <h2 className="font-medium">Loan History</h2>
+          <div className="text-base font-medium">Loan History</div>
           <div className="flex items-center gap-2">
             <button className="text-sm text-gray-600">Filters</button>
             <select className="text-sm border rounded px-2 py-1">
@@ -92,44 +119,46 @@ const MyBorrowingsContent = () => {
             </select>
           </div>
         </div>
-        
-        {loading && <div className="p-4 text-center col-span-full">Loading loan history...</div>}
+
+        {loading && <div className={`${styles.loadingSection} p-4 text-center col-span-full`}>Fetching borrowing history...</div>}
         {error && <div className="p-4 text-center text-red-500 col-span-full">Error: {error}</div>}
-        
+
         {!loading && !error && (
-          <div className="overflow-x-auto">
+          <div className={`${styles.tableContainer} overflow-x-auto`}>
             <table className="w-full text-sm">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="text-left p-3">Loan ID</th>
-                  <th className="text-left p-3">Loan Amount</th>
-                  <th className="text-left p-3">Disburse Date</th>
-                  <th className="text-left p-3">Due Date</th>
-                  <th className="text-left p-3">Loan Status</th>
-                  <th className="text-left p-3">Paid To</th>
-                  <th className="text-left p-3">Action</th>
+                  <th className="sticky top-0 z-10 bg-primary-50 text-primary text-sm font-medium text-left p-3">Loan ID</th>
+                  <th className="sticky top-0 z-10 bg-primary-50 text-primary text-sm font-medium text-left p-3">Loan Amount</th>
+                  <th className="sticky top-0 z-10 bg-primary-50 text-primary text-sm font-medium text-left p-3">Disburse Date</th>
+                  <th className="sticky top-0 z-10 bg-primary-50 text-primary text-sm font-medium text-left p-3">Due Date</th>
+                  <th className="sticky top-0 z-10 bg-primary-50 text-primary text-sm font-medium text-left p-3">Loan Status</th>
+                  <th className="sticky top-0 z-10 bg-primary-50 text-primary text-sm font-medium text-left p-3">Paid To</th>
+                  <th className="sticky top-0 z-10 bg-primary-50 text-primary text-sm font-medium text-left p-3">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {borrowings.length > 0 ? (
                   borrowings.map((borrowing) => (
                     <tr key={borrowing.displayId} className="border-b">
-                      <td className="p-3">{borrowing.displayId || 'N/A'}</td>
-                      <td className="p-3">₹ {borrowing.loanAmount?.toLocaleString('en-IN') || 0}</td>
-                      <td className="p-3">
+                      <td className="text-xs font-normal p-3">{borrowing.displayId || 'N/A'}</td>
+                      <td className="text-xs font-normal p-3">₹ {borrowing.loanAmount?.toLocaleString('en-IN') || 0}</td>
+                      <td className="text-xs font-normal p-3">
                         {borrowing.disburseDate ? format(new Date(borrowing.disburseDate), 'd MMM yy') : 'N/A'}
                       </td>
-                      <td className="p-3">
+                      <td className="text-xs font-normal p-3">
                         {borrowing.dueDate ? format(new Date(borrowing.dueDate), 'd MMM yy') : 'N/A'}
                       </td>
-                      <td className="p-3">
+                      <td className="text-xs font-normal p-3">
                         <span className={`px-2 py-1 rounded text-xs ${borrowing.loanStatus === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                           {borrowing.loanStatus || 'N/A'}
                         </span>
                       </td>
-                      <td className="p-3">{borrowing.paidTo || 'N/A'}</td>
-                      <td className="p-3">
-                        <button className="text-primary">→</button>
+                      <td className="text-xs font-normal p-3">{borrowing.paidTo || 'N/A'}</td>
+                      <td className="text-xs font-normal p-3">
+                        <button className="text-gray-700">
+                          <ChevronRight size={18} />
+                        </button>
                       </td>
                     </tr>
                   ))
@@ -140,6 +169,27 @@ const MyBorrowingsContent = () => {
                 )}
               </tbody>
             </table>
+          </div>
+        )}
+        {!loading && !error && borrowings.length > 0 && (
+          <div className="flex justify-between items-center p-4 border-t">
+            <button
+              onClick={handlePreviousPage}
+              disabled={totalPages <= 1 || currentPage === 0 || loading}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Previous
+            </button>
+            <span className="text-sm text-primary">
+              Page {currentPage + 1} of {totalPages > 0 ? totalPages : 1}
+            </span>
+            <button
+              onClick={handleNextPage}
+              disabled={totalPages <= 1 || !hasMorePages || loading}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next
+            </button>
           </div>
         )}
       </div>

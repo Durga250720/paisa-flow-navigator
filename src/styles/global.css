@@ -94,6 +94,9 @@ body,html{
 .bg-primary {
   background-color: #5D15C1;
 }
+.bg-primary-50{
+  background-color: #F1E8FC;
+}
 
 .text-primary {
   color: #5D15C1;
