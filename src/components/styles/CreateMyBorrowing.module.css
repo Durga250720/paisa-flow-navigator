@@ -1,0 +1,6 @@
+.mainContainer{
+    @apply h-full w-full
+}
+.innerContainer{
+    @apply bg-[var(--bg-color)]
+}
