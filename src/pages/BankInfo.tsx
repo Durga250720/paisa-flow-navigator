@@ -65,52 +65,62 @@ const BankInfo = () => {
         if (!validateForm()) return;
 
         const authToken = localStorage.getItem('authToken');
-
+navigate('/income-verification');
         setLoading(true);
-        try {
-            console.log('API payload:', payload);
+        // try {
+        //     navigate('/income-verification');
+        //     const payload = {
+        //         borrowerId: authToken,
+        //         accountNumber: formData.bankAccountNumber,
+        //         ifscNumber: formData.ifscCode.toUpperCase(),
+        //         accountHolderName: formData.accountHolderName,
+        //         payslips: [],
+        //         bankStatement: [],
+        //     };
 
-            // API call to bank-detail
-            const apiUrl = `${config.baseURL}bank-detail`;
-            console.log('Making API call to:', apiUrl);
+        //     console.log('API payload:', payload);
 
-            const response = await fetch(apiUrl, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
-            });
+        //     // API call to bank-detail
+        //     const apiUrl = `${config.baseURL}bank-detail`;
+        //     console.log('Making API call to:', apiUrl);
 
-            console.log('API response status:', response.status);
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('API error response:', errorText);
+        //     const response = await fetch(apiUrl, {
+        //         method: 'PUT',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //         },
+        //         body: JSON.stringify(payload),
+        //     });
 
-                let errorData;
-                try {
-                    errorData = JSON.parse(errorText);
-                } catch {
-                    errorData = { message: 'Failed to save bank information. Please try again.' };
-                }
+        //     console.log('API response status:', response.status);
+        //     if (!response.ok) {
+        //         const errorText = await response.text();
+        //         console.error('API error response:', errorText);
 
-                throw new Error(errorData.message || 'Failed to save bank information.');
-            }
+        //         let errorData;
+        //         try {
+        //             errorData = JSON.parse(errorText);
+        //         } catch {
+        //             errorData = { message: 'Failed to save bank information. Please try again.' };
+        //         }
 
-            const responseData = await response.json();
-            console.log('API success response:', responseData);
+        //         throw new Error(errorData.message || 'Failed to save bank information.');
+        //     }
 
-            toast.success("Bank details saved successfully!");
-            localStorage.setItem('bankInfoCompleted', 'true');
-            navigate('/income-verification');
-        } catch (err) {
-            setLoading(false);
-            const errorMessage = err instanceof Error ? err.message : 'Failed to save bank information. Please try again.';
-            setErrors({ submit: errorMessage });
-            toast.error(errorMessage);
-        } finally {
-            setLoading(false);
-        }
+        //     const responseData = await response.json();
+        //     console.log('API success response:', responseData);
+
+        //     toast.success("Bank details saved successfully!");
+        //     localStorage.setItem('bankInfoCompleted', 'true');
+        //     navigate('/employment-info');
+        // } catch (err) {
+        //     setLoading(false);
+        //     const errorMessage = err instanceof Error ? err.message : 'Failed to save bank information. Please try again.';
+        //     setErrors({ submit: errorMessage });
+        //     toast.error(errorMessage);
+        // } finally {
+        //     setLoading(false);
+        // }
     };
 
     return (

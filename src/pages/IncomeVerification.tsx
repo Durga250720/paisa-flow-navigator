@@ -18,13 +18,11 @@ const IncomeVerification = () => {
 
     useEffect(() => {
         const authToken = localStorage.getItem('authToken');
-        const bankInfoCompleted = localStorage.getItem('bankInfoCompleted');
+        // const bankInfoCompleted = localStorage.getItem('bankInfoCompleted');
 
         if (!authToken) {
             navigate('/');
-        } else if (!bankInfoCompleted) {
-            navigate('/bank-info');
-        }
+        } 
     }, [navigate]);
 
     const validateFiles = () => {
