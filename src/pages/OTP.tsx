@@ -129,12 +129,12 @@ const OTP = () => {
 
       const res = await response.json();
       // navigate('/kyc-details');
-      if(res.data.aadhaarVerified && res.data.panVerified){
-        navigate('/admin/kyc-documents') 
-      }
-      else{
+      // if(res.data.aadhaarVerified && res.data.panVerified){
+      //   navigate('/admin/kyc-documents') 
+      // }
+      // else{
         navigate('/kyc-details');
-      }
+      // }
     } catch (err) {
       setLoading(false);
       setError(err instanceof Error ? err.message : 'An unexpected error occurred.');

@@ -28,7 +28,7 @@
 }
 
 .kycFormContainer {
-  @apply w-full max-w-md flex lg:bg-white h-auto flex-col lg:p-7 flex-col justify-center;
+  @apply w-full max-w-md flex lg:bg-white h-[85%] flex-col lg:p-7 flex-col justify-start;
 }
 .kycVerifyContainer{
   @apply w-full max-w-md flex lg:bg-white h-[85%] flex-col lg:p-7 flex-col justify-center gap-10;
@@ -48,14 +48,11 @@
 .primaryButton {
   width: 100%;
   background-color: #4f46e5;
-  /* Example primary color, adjust as needed */
+  font-size: 14px;  
   color: white;
   font-weight: 500;
-  /* Corresponds to Tailwind's font-medium */
-  padding: 0.75rem 1.5rem;
-  /* Corresponds to Tailwind's py-3 px-6 */
+  padding: 0.75rem 1.5rem;  
   border-radius: 0.5rem;
-  /* Corresponds to Tailwind's rounded-lg */
   border: none;
   cursor: pointer;
   transition: background-color 0.2s, opacity 0.2s;
@@ -82,4 +79,7 @@
 }
 .continueButton{
   @apply bg-primary text-white font-medium py-3 px-20 rounded-lg transition-colors disabled:opacity-5;
+}
+.resendOtp{
+  background: transparent !important;
 }

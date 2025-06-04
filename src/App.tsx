@@ -23,6 +23,7 @@ import "./styles/global.css";
 import Admin from "./pages/Admin";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
+import PANInfo from "./pages/PANInfo";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/otp" element={<OTP />} />
           <Route path="/basic-info" element={<BasicInfo />} />
           <Route path="/kyc-details" element={<KYCDetails />} />
+          <Route path="/pan-info" element={<PANInfo />} />
           <Route path="/verification-processing" element={<VerificationProcessing />} />
           <Route path="/kyc-verification" element={<KYCVerification />} />
           <Route path="/kyc-verified" element={<KYCVerified />} />

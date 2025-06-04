@@ -89,6 +89,7 @@
 
 .resendButton {
   @apply ml-4 text-sm;
+  background: transparent !important;
 }
 
 .resendButtonActive {
