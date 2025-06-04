@@ -35,6 +35,8 @@ const EmploymentInfo = () => {
     if (!formData.industry) newErrors.industry = 'Industry is required';
     if (!formData.companyName.trim()) newErrors.companyName = 'Company name is required';
     if (!formData.jobRole.trim()) newErrors.jobRole = 'Job role is required';
+    if (!formData.monthlyIncome.trim()) newErrors.monthlyIncome = 'Monthly income is required';
+    if (!formData.workExperience.trim()) newErrors.workExperience = 'Work experience is required';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -177,6 +179,36 @@ const EmploymentInfo = () => {
                   className="inputField"
                 />
                 {errors.jobRole && <p className="error-message">{errors.jobRole}</p>}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="monthlyIncome" className="block text-sm font-medium text-gray-700 mb-2">
+                  Monthly Income (Take-Home) <sup className="text-red-500">*</sup>
+                </label>
+                <input
+                  id="monthlyIncome"
+                  type="number"
+                  value={formData.monthlyIncome}
+                  onChange={(e) => handleInputChange('monthlyIncome', e.target.value)}
+                  placeholder="Enter the monthly income"
+                  className="inputField"
+                />
+                {errors.monthlyIncome && <p className="error-message">{errors.monthlyIncome}</p>}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="workExperience" className="block text-sm font-medium text-gray-700 mb-2">
+                  Work Experience (Yrs) <sup className="text-red-500">*</sup>
+                </label>
+                <input
+                  id="workExperience"
+                  type="number"
+                  value={formData.workExperience}
+                  onChange={(e) => handleInputChange('workExperience', e.target.value)}
+                  placeholder="Enter the work experience"
+                  className="inputField"
+                />
+                {errors.workExperience && <p className="error-message">{errors.workExperience}</p>}
               </div>
             </div>
 
