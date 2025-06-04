@@ -23,7 +23,7 @@ const EmploymentInfo = () => {
     const authToken = localStorage.getItem('authToken');
     const bankInfoCompleted = localStorage.getItem('bankInfoCompleted');
 
-    if (!authToken || !bankInfoCompleted) {
+    if (!authToken) {
       navigate('/');
     }
   }, [navigate]);
