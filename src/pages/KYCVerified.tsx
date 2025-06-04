@@ -38,7 +38,7 @@ const KYCDetails = () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       localStorage.setItem('kycVerified', 'true');
-      navigate('/bank-info');
+      navigate('/employment-info');
     } catch (err) {
       setErrors({ submit: 'Failed to save KYC details. Please try again.' });
     } finally {
