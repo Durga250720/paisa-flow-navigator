@@ -1,3 +1,4 @@
+
 .container {
     @apply min-h-screen bg-white bg-gray-50;
     height: calc(100vh - 0px);
@@ -8,7 +9,27 @@
 }
 
 .mainContainer {
-    @apply flex h-[calc(100%-9%)] flex justify-center items-center;
+    @apply flex h-[calc(100%-9%)] p-8;
+}
+
+.leftPanel {
+    @apply hidden lg:flex lg:w-1/2 items-center justify-center;
+}
+
+.imageContainer {
+    @apply relative;
+}
+
+.heroImage {
+    @apply max-w-[85%] h-auto;
+}
+
+.rightPanel {
+    @apply w-full lg:w-1/2 flex items-center justify-center;
+}
+
+.employmentFormContainer {
+    @apply w-full max-w-md flex lg:bg-white h-[85%] flex-col lg:p-7 justify-center;
 }
 
 .heading {
@@ -22,6 +43,7 @@
 .label {
     @apply block text-sm font-medium text-gray-700;
 }
-.innerContainer{
-    @apply sm:w-[100%] sm:h-[100%]
+
+.innerContainer {
+    @apply sm:w-[100%] sm:h-[100%];
 }
