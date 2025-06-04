@@ -82,7 +82,7 @@ const EmploymentInfo = () => {
 
       toast.success("Employment information saved successfully!");
       localStorage.setItem('employmentInfoCompleted', 'true');
-      navigate('/verification-processing');
+      navigate('/bank-info');
     } catch (err) {
       setErrors({ submit: 'Failed to save employment information. Please try again.' });
     } finally {
@@ -111,7 +111,7 @@ const EmploymentInfo = () => {
         {/* Right Panel - Employment Form */}
         <div className={styles.rightPanel}>
           <div className={styles.employmentFormContainer}>
-            <div className="text-center mb-6">
+            <div className="text-center mb-2">
               <div className={styles.heading}>Employment Info</div>
               <p className={styles.description}>To deposit your approved amount and enable auto-repayment</p>
             </div>
