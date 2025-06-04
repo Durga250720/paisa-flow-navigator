@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -69,91 +68,6 @@ const BankInfo = () => {
 
         setLoading(true);
         try {
-            // console.log('Starting file uploads...');
-            // console.log('Number of payslips to upload:', files.payslips.length);
-            // console.log('Bank statement to upload:', files.bankStatement ? 'Yes' : 'No');
-
-            // const s3Config = config.componentImageUploading;
-            // const cognitoPoolId = s3Config.CredentialsProvider.CognitoIdentity.Default.PoolId;
-            // const cognitoRegion = s3Config.CredentialsProvider.CognitoIdentity.Default.Region;
-            // const s3Bucket = s3Config.S3TransferUtility.Default.Bucket;
-            // const s3Region = s3Config.S3TransferUtility.Default.Region;
-
-            // // Initialize S3 client with Cognito credentials
-            // const credentials = fromCognitoIdentityPool({
-            //     client: new CognitoIdentityClient({ region: cognitoRegion }),
-            //     identityPoolId: cognitoPoolId,
-            // });
-
-            // const s3Client = new S3Client({
-            //     region: s3Region,
-            //     credentials,
-            // });
-
-            // const uploadFileToS3 = async (file: File, fileType: 'payslip' | 'bank_statement'): Promise<string> => {
-            //   const timestamp = Date.now();
-            //   const randomId = Math.random().toString(36).substring(2, 15);
-            //   // Sanitize filename by replacing spaces with underscores
-            //   const sanitizedFileName = file.name.replace(/\s+/g, '_');
-            //   const key = `${authToken}/${fileType}/${timestamp}-${randomId}-${sanitizedFileName}`;
-
-            //   console.log(`Uploading ${fileType}:`, sanitizedFileName, 'to key:', key);
-
-            //   const putObjectCommand = new PutObjectCommand({
-            //     Bucket: s3Bucket,
-            //     Key: key,
-            //     Body: file,
-            //     ContentType: file.type,
-            //   });
-
-            //   await s3Client.send(putObjectCommand);
-            //   const url = `https://${s3Bucket}.s3.${s3Region}.amazonaws.com/${key}`;
-            //   console.log(`Successfully uploaded ${fileType}:`, url);
-            //   return url;
-            // };
-
-            // // Upload all payslips
-            // const payslipUrls: string[] = [];
-            // console.log('Starting payslip uploads...');
-
-            // for (let i = 0; i < files.payslips.length; i++) {
-            //   const payslipFile = files.payslips[i];
-            //   console.log(`Uploading payslip ${i + 1}/${files.payslips.length}:`, payslipFile.name);
-            //   try {
-            //     const url = await uploadFileToS3(payslipFile, 'payslip');
-            //     payslipUrls.push(url);
-            //     console.log(`Payslip ${i + 1} uploaded successfully:`, url);
-            //   } catch (error) {
-            //     console.error(`Failed to upload payslip ${i + 1}:`, error);
-            //     throw new Error(`Failed to upload payslip: ${payslipFile.name}`);
-            //   }
-            // }
-
-            // console.log('All payslips uploaded. URLs:', payslipUrls);
-
-            // // Upload bank statement
-            // let bankStatementUrl: string | null = null;
-            // if (files.bankStatement) {
-            //   console.log('Uploading bank statement...');
-            //   try {
-            //     bankStatementUrl = await uploadFileToS3(files.bankStatement, 'bank_statement');
-            //     console.log('Bank statement uploaded successfully:', bankStatementUrl);
-            //   } catch (error) {
-            //     console.error('Failed to upload bank statement:', error);
-            //     throw new Error('Failed to upload bank statement');
-            //   }
-            // }
-
-            // Construct payload for bank-detail API
-            const payload = {
-                borrowerId: authToken,
-                accountNumber: formData.bankAccountNumber,
-                ifscNumber: formData.ifscCode.toUpperCase(),
-                accountHolderName: formData.accountHolderName,
-                payslips: [],
-                bankStatement: [],
-            };
-
             console.log('API payload:', payload);
 
             // API call to bank-detail
@@ -188,7 +102,7 @@ const BankInfo = () => {
 
             toast.success("Bank details saved successfully!");
             localStorage.setItem('bankInfoCompleted', 'true');
-            navigate('/employment-info');
+            navigate('/income-verification');
         } catch (err) {
             setLoading(false);
             const errorMessage = err instanceof Error ? err.message : 'Failed to save bank information. Please try again.';

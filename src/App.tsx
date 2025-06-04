@@ -12,6 +12,7 @@ import VerificationProcessing from "./pages/VerificationProcessing";
 import KYCVerified from "./pages/KYCVerified";
 import LoanAmount from "./pages/LoanAmount";
 import BankInfo from "./pages/BankInfo";
+import IncomeVerification from "./pages/IncomeVerification";
 import EmploymentInfo from "./pages/EmploymentInfo";
 import LoanApplicationStatus from "./pages/LoanApplicationStatus";
 import Congratulations from "./pages/Congratulations";
@@ -44,6 +45,7 @@ const App = () => (
           <Route path="/kyc-verified" element={<KYCVerified />} />
           <Route path="/loan-amount" element={<LoanAmount />} />
           <Route path="/bank-info" element={<BankInfo />} />
+          <Route path="/income-verification" element={<IncomeVerification />} />
           <Route path="/employment-info" element={<EmploymentInfo />} />
           <Route path="/loan-application-status" element={<LoanApplicationStatus />} />
           <Route path="/congratulations" element={<Congratulations />} />
