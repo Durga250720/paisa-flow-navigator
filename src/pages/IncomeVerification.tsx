@@ -152,7 +152,7 @@ const IncomeVerification = () => {
         payslipNumber: number;
         file: File | null;
     }) => (
-        <div className="space-y-3 w-[95%]">
+        <div className="space-y-1 w-[95%]">
             <label className="block text-sm font-medium text-gray-700">
                 Pay slip {payslipNumber} <sup className="text-red-500">*</sup>
             </label>
@@ -180,17 +180,17 @@ const IncomeVerification = () => {
                 <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border">
                     <div className="flex items-center space-x-3">
                         <div className="bg-green-100 p-1 rounded">
-                            <Check className="h-4 w-4 text-green-600" />
+                            <Check className="h-3 w-3 rounded text-green-600" />
                         </div>
-                        <FileText className="h-5 w-5 text-gray-500" />
-                        <span className="text-sm text-gray-700 truncate max-w-xs">
+                        <FileText className="h-3 w-3 text-gray-500" />
+                        <span className="text-xs text-gray-700 truncate max-w-xs">
                             Pay Slip {payslipNumber}
                         </span>
                     </div>
                     <div className="flex items-center space-x-2">
                         <button
                             type="button"
-                            className="text-blue-500 hover:text-blue-700 text-sm"
+                            className="text-blue-500 hover:text-blue-700 text-xs"
                         >
                             Change
                         </button>
@@ -199,7 +199,7 @@ const IncomeVerification = () => {
                             onClick={() => removePayslip(payslipKey)}
                             className="text-red-500 hover:text-red-700"
                         >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3 w-3" />
                         </button>
                     </div>
                 </div>
@@ -305,7 +305,7 @@ const IncomeVerification = () => {
                             </p>
                         </div>
 
-                        <div className={`space-y-6 ${styles.formContainer}`}>
+                        <div className={`space-y-3 ${styles.formContainer}`}>
                             {/* Individual Payslip Upload Areas */}
                             <PayslipUploadArea payslipKey="payslip1" payslipNumber={1} file={files.payslip1} />
                             <PayslipUploadArea payslipKey="payslip2" payslipNumber={2} file={files.payslip2} />
