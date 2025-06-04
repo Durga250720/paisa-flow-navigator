@@ -152,7 +152,7 @@ const IncomeVerification = () => {
         payslipNumber: number;
         file: File | null;
     }) => (
-        <div className="space-y-3">
+        <div className="space-y-3 w-[95%]">
             <label className="block text-sm font-medium text-gray-700">
                 Pay slip {payslipNumber} <sup className="text-red-500">*</sup>
             </label>
@@ -212,7 +212,7 @@ const IncomeVerification = () => {
     );
 
     const BankStatementUploadArea = () => (
-        <div className="space-y-3">
+        <div className="space-y-3 w-[95%]">
             <div className="flex items-center justify-between">
                 <label className="block text-sm font-medium text-gray-700">
                     Bank Statements (Up to 6 months) <sup className="text-red-500">*</sup>
@@ -305,7 +305,7 @@ const IncomeVerification = () => {
                             </p>
                         </div>
 
-                        <div className={`space-y-6 ${styles.formContainer1}`}>
+                        <div className={`space-y-6 ${styles.formContainer}`}>
                             {/* Individual Payslip Upload Areas */}
                             <PayslipUploadArea payslipKey="payslip1" payslipNumber={1} file={files.payslip1} />
                             <PayslipUploadArea payslipKey="payslip2" payslipNumber={2} file={files.payslip2} />
