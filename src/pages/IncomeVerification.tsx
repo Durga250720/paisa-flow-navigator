@@ -119,7 +119,7 @@ const IncomeVerification = () => {
             
             toast.success("Income verification documents uploaded successfully!");
             localStorage.setItem('incomeVerificationCompleted', 'true');
-            navigate('/employment-info');
+            navigate('/loan-amount');
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Failed to upload documents. Please try again.';
             setErrors({ submit: errorMessage });

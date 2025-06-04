@@ -77,7 +77,7 @@ const LoanAmount = () => {
       // const responseData = await response.json(); // If you need to use the response data
       // localStorage.setItem('loanAmount', loanAmount);
       // localStorage.setItem('loanPurpose', purpose);
-      navigate('/bank-info');
+      navigate('/admin/my-application');
     } catch (err) {
       setLoading(false);
       setErrors({ submit: err instanceof Error ? err.message : 'An unexpected error occurred.' });
