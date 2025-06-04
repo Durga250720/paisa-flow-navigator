@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -64,63 +65,21 @@ const BankInfo = () => {
     const handleContinue = async () => {
         if (!validateForm()) return;
 
-        const authToken = localStorage.getItem('authToken');
-navigate('/income-verification');
         setLoading(true);
-        // try {
-        //     navigate('/income-verification');
-        //     const payload = {
-        //         borrowerId: authToken,
-        //         accountNumber: formData.bankAccountNumber,
-        //         ifscNumber: formData.ifscCode.toUpperCase(),
-        //         accountHolderName: formData.accountHolderName,
-        //         payslips: [],
-        //         bankStatement: [],
-        //     };
-
-        //     console.log('API payload:', payload);
-
-        //     // API call to bank-detail
-        //     const apiUrl = `${config.baseURL}bank-detail`;
-        //     console.log('Making API call to:', apiUrl);
-
-        //     const response = await fetch(apiUrl, {
-        //         method: 'PUT',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //         },
-        //         body: JSON.stringify(payload),
-        //     });
-
-        //     console.log('API response status:', response.status);
-        //     if (!response.ok) {
-        //         const errorText = await response.text();
-        //         console.error('API error response:', errorText);
-
-        //         let errorData;
-        //         try {
-        //             errorData = JSON.parse(errorText);
-        //         } catch {
-        //             errorData = { message: 'Failed to save bank information. Please try again.' };
-        //         }
-
-        //         throw new Error(errorData.message || 'Failed to save bank information.');
-        //     }
-
-        //     const responseData = await response.json();
-        //     console.log('API success response:', responseData);
-
-        //     toast.success("Bank details saved successfully!");
-        //     localStorage.setItem('bankInfoCompleted', 'true');
-        //     navigate('/employment-info');
-        // } catch (err) {
-        //     setLoading(false);
-        //     const errorMessage = err instanceof Error ? err.message : 'Failed to save bank information. Please try again.';
-        //     setErrors({ submit: errorMessage });
-        //     toast.error(errorMessage);
-        // } finally {
-        //     setLoading(false);
-        // }
+        try {
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            toast.success("Bank details saved successfully!");
+            localStorage.setItem('bankInfoCompleted', 'true');
+            navigate('/income-verification');
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'Failed to save bank information. Please try again.';
+            setErrors({ submit: errorMessage });
+            toast.error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
