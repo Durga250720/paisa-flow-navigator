@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -159,7 +158,7 @@ const IncomeVerification = () => {
             </label>
             
             {!file ? (
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-5 text-center hover:border-primary transition-colors">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center hover:border-primary transition-colors">
                     <input
                         type="file"
                         accept=".pdf,.jpg,.jpeg,.png"
@@ -169,9 +168,9 @@ const IncomeVerification = () => {
                     />
                     <label
                         htmlFor={`${payslipKey}-upload`}
-                        className="cursor-pointer"
+                        className="cursor-pointer flex items-center justify-center space-x-2"
                     >
-                        <Upload className="mx-auto h-4 w-8 text-gray-400 mb-1" />
+                        <Upload className="h-4 w-4 text-gray-400" />
                         <p className="text-sm text-gray-600">
                             Please upload your payslip here.
                         </p>
