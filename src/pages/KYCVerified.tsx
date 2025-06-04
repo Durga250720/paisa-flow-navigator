@@ -28,41 +28,7 @@ const KYCDetails = () => {
     }
   }, [navigate, resendTimer]);
 
-  const validateAadhaar = (aadhaar: string) => {
-    return /^\d{12}$/.test(aadhaar);
-  };
 
-  const validatePAN = (pan: string) => {
-    return /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(pan.toUpperCase());
-  };
-
-  const handleSendOTP = async () => {
-    setErrors({});
-    setLoading(true);
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setResendTimer(30); // Start resend timer
-    } catch (err) {
-      setErrors({ aadhaar: 'Failed to send OTP. Please try again.' });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleOTPComplete = async (otp: string) => {
-    setErrors({});
-    setLoading(true);
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      // setShowOTP(false); // OTP section will hide due to conditional rendering
-    } catch (err) {
-      setErrors({ otp: 'Invalid OTP. Please try again.' });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleContinue = async () => {
     setErrors({});
@@ -72,7 +38,7 @@ const KYCDetails = () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       localStorage.setItem('kycVerified', 'true');
-      navigate('/loan-amount');
+      navigate('/bank-info');
     } catch (err) {
       setErrors({ submit: 'Failed to save KYC details. Please try again.' });
     } finally {
