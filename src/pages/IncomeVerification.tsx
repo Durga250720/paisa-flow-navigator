@@ -14,7 +14,7 @@ const IncomeVerification = () => {
         payslip4: null as File | null,
         payslip5: null as File | null,
         payslip6: null as File | null,
-        bankStatements: [] as File[],
+        bankStatement: null as File | null,
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(false);
@@ -37,8 +37,8 @@ const IncomeVerification = () => {
             newErrors.payslips = 'At least one payslip is required';
         }
 
-        if (files.bankStatements.length === 0) {
-            newErrors.bankStatements = 'At least one bank statement is required';
+        if (!files.bankStatement) {
+            newErrors.bankStatement = 'Bank statement is required';
         }
 
         setErrors(newErrors);
@@ -80,47 +80,33 @@ const IncomeVerification = () => {
         }));
     };
 
-    const handleBankStatementUpload = (selectedFiles: FileList | null) => {
-        if (!selectedFiles) return;
+    const handleBankStatementUpload = (selectedFile: File | null) => {
+        if (!selectedFile) return;
 
-        const maxFiles = 6;
-        const currentFiles = files.bankStatements;
-        const newFiles = Array.from(selectedFiles);
-
-        if (currentFiles.length + newFiles.length > maxFiles) {
-            setErrors(prev => ({
-                ...prev,
-                bankStatements: `Maximum ${maxFiles} files allowed`
-            }));
-            return;
-        }
-
-        // Validate file types
+        // Validate file type
         const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
-        const invalidFiles = newFiles.filter(file => !allowedTypes.includes(file.type));
-
-        if (invalidFiles.length > 0) {
+        if (!allowedTypes.includes(selectedFile.type)) {
             setErrors(prev => ({
                 ...prev,
-                bankStatements: 'Only PDF, JPG, and PNG files are allowed'
+                bankStatement: 'Only PDF, JPG, and PNG files are allowed'
             }));
             return;
         }
 
         setFiles(prev => ({
             ...prev,
-            bankStatements: [...prev.bankStatements, ...newFiles]
+            bankStatement: selectedFile
         }));
 
-        if (errors.bankStatements) {
-            setErrors(prev => ({ ...prev, bankStatements: '' }));
+        if (errors.bankStatement) {
+            setErrors(prev => ({ ...prev, bankStatement: '' }));
         }
     };
 
-    const removeBankStatement = (index: number) => {
+    const removeBankStatement = () => {
         setFiles(prev => ({
             ...prev,
-            bankStatements: prev.bankStatements.filter((_, i) => i !== index)
+            bankStatement: null
         }));
     };
 
@@ -213,66 +199,63 @@ const IncomeVerification = () => {
 
     const BankStatementUploadArea = () => (
         <div className="space-y-3 w-[95%]">
-            <div className="flex items-center justify-between">
-                <label className="block text-sm font-medium text-gray-700">
-                    Bank Statements (Up to 6 months) <sup className="text-red-500">*</sup>
-                </label>
-                <span className="text-xs text-gray-500">
-                    {files.bankStatements.length}/6 files
-                </span>
-            </div>
+            <label className="block text-sm font-medium text-gray-700">
+                Bank Statement (Latest 6 months) <sup className="text-red-500">*</sup>
+            </label>
             
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
-                <input
-                    type="file"
-                    multiple
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => handleBankStatementUpload(e.target.files)}
-                    className="hidden"
-                    id="bankStatements-upload"
-                    disabled={files.bankStatements.length >= 6}
-                />
-                <label
-                    htmlFor="bankStatements-upload"
-                    className={`cursor-pointer ${files.bankStatements.length >= 6 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                    <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                    <p className="text-sm text-gray-600">
-                        {files.bankStatements.length >= 6 
-                            ? 'Maximum 6 files uploaded'
-                            : 'Click to upload or drag and drop'
-                        }
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                        PDF, JPG, PNG (Max 6 files)
-                    </p>
-                </label>
-            </div>
-
-            {files.bankStatements.length > 0 && (
-                <div className="space-y-2">
-                    {files.bankStatements.map((file, index) => (
-                        <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
-                            <div className="flex items-center space-x-2">
-                                <Check className="h-4 w-4 text-green-500" />
-                                <span className="text-sm text-gray-700 truncate max-w-xs">
-                                    {file.name}
-                                </span>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => removeBankStatement(index)}
-                                className="text-red-500 hover:text-red-700"
-                            >
-                                <X className="h-4 w-4" />
-                            </button>
+            {!files.bankStatement ? (
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
+                    <input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handleBankStatementUpload(e.target.files?.[0] || null)}
+                        className="hidden"
+                        id="bankStatement-upload"
+                    />
+                    <label
+                        htmlFor="bankStatement-upload"
+                        className="cursor-pointer"
+                    >
+                        <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                        <p className="text-sm text-gray-600">
+                            Click to upload your latest 6 months bank statement
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                            PDF, JPG, PNG (Single file containing 6 months)
+                        </p>
+                    </label>
+                </div>
+            ) : (
+                <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border">
+                    <div className="flex items-center space-x-3">
+                        <div className="bg-green-100 p-1 rounded">
+                            <Check className="h-4 w-4 text-green-600" />
                         </div>
-                    ))}
+                        <FileText className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm text-gray-700 truncate max-w-xs">
+                            {files.bankStatement.name}
+                        </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <button
+                            type="button"
+                            className="text-blue-500 hover:text-blue-700 text-sm"
+                        >
+                            Change
+                        </button>
+                        <button
+                            type="button"
+                            onClick={removeBankStatement}
+                            className="text-red-500 hover:text-red-700"
+                        >
+                            <X className="h-4 w-4" />
+                        </button>
+                    </div>
                 </div>
             )}
 
-            {errors.bankStatements && (
-                <p className="error-message">{errors.bankStatements}</p>
+            {errors.bankStatement && (
+                <p className="error-message">{errors.bankStatement}</p>
             )}
         </div>
     );
@@ -318,7 +301,7 @@ const IncomeVerification = () => {
                                 <p className="error-message">{errors.payslips}</p>
                             )}
 
-                            {/* Bank Statements Upload Area */}
+                            {/* Bank Statement Upload Area */}
                             <BankStatementUploadArea />
                         </div>
 
