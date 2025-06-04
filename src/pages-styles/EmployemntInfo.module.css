@@ -32,6 +32,10 @@
     @apply w-full max-w-md flex lg:bg-white h-[90%] flex-col lg:p-7 justify-between;
 }
 
+.employmentFormContainer1 {
+    @apply w-full max-w-md flex lg:bg-white h-full flex-col lg:p-7 justify-between;
+}
+
 .heading {
     @apply text-lg font-normal mb-2 text-center text-[var(--text-2)];
 }
