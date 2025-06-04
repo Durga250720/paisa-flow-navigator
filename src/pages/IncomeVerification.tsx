@@ -130,8 +130,6 @@ const IncomeVerification = () => {
 
         setLoading(true);
         try {
-            // Here you would implement the file upload logic
-            // For now, we'll just simulate the process
             await new Promise(resolve => setTimeout(resolve, 2000));
             
             toast.success("Income verification documents uploaded successfully!");
@@ -161,7 +159,7 @@ const IncomeVerification = () => {
             </label>
             
             {!file ? (
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-5 text-center hover:border-primary transition-colors">
                     <input
                         type="file"
                         accept=".pdf,.jpg,.jpeg,.png"
@@ -173,7 +171,7 @@ const IncomeVerification = () => {
                         htmlFor={`${payslipKey}-upload`}
                         className="cursor-pointer"
                     >
-                        <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                        <Upload className="mx-auto h-4 w-8 text-gray-400 mb-1" />
                         <p className="text-sm text-gray-600">
                             Please upload your payslip here.
                         </p>
