@@ -133,6 +133,10 @@ button.bg-primary:disabled {
   @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none outline-none h-[45px]  text-[14px]
 }
 
+.inputField1 {
+  @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none outline-none h-[45px]  text-[14px] w-[95%]
+}
+
 .inputOtp{
   @apply w-[50px] h-[50px] text-[14px]
 }

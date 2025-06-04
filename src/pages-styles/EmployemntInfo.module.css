@@ -29,7 +29,7 @@
 }
 
 .employmentFormContainer {
-    @apply w-full max-w-md flex lg:bg-white h-[85%] flex-col lg:p-7 justify-center;
+    @apply w-full max-w-md flex lg:bg-white h-[90%] flex-col lg:p-7 justify-between;
 }
 
 .heading {
@@ -46,4 +46,27 @@
 
 .innerContainer {
     @apply sm:w-[100%] sm:h-[100%];
+}
+
+.formContainer{
+    overflow-y: scroll;
+}
+.formContainer {
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: #F0F0F0;
+        border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: var(--primary-color);
+        border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-color);
+    }
 }

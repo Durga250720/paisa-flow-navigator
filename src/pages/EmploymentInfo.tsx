@@ -111,12 +111,12 @@ const EmploymentInfo = () => {
         {/* Right Panel - Employment Form */}
         <div className={styles.rightPanel}>
           <div className={styles.employmentFormContainer}>
-            <div className="text-center mb-8">
+            <div className="text-center mb-6">
               <div className={styles.heading}>Employment Info</div>
               <p className={styles.description}>To deposit your approved amount and enable auto-repayment</p>
             </div>
 
-            <div className="space-y-6">
+            <div className={`space-y-6 ${styles.formContainer}`}>
               <div className="form-group">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Employment Type
@@ -124,7 +124,7 @@ const EmploymentInfo = () => {
                 <select
                   value={formData.employmentType}
                   onChange={(e) => handleInputChange('employmentType', e.target.value)}
-                  className="inputField"
+                  className="inputField1"
                 >
                   <option value="">Select Employment Type</option>
                   <option value="SALARIED">Salaried</option>
@@ -140,7 +140,7 @@ const EmploymentInfo = () => {
                 <select
                   value={formData.industry}
                   onChange={(e) => handleInputChange('industry', e.target.value)}
-                  className="inputField"
+                  className="inputField1"
                 >
                   <option value="">Select Industry Type</option>
                   <option value="it">Information Technology</option>
@@ -162,7 +162,7 @@ const EmploymentInfo = () => {
                   value={formData.companyName}
                   onChange={(e) => handleInputChange('companyName', e.target.value)}
                   placeholder="Enter the Company Name"
-                  className="inputField"
+                  className="inputField1"
                 />
                 {errors.companyName && <p className="error-message">{errors.companyName}</p>}
               </div>
@@ -176,7 +176,7 @@ const EmploymentInfo = () => {
                   value={formData.jobRole}
                   onChange={(e) => handleInputChange('jobRole', e.target.value)}
                   placeholder="Enter the Job Role"
-                  className="inputField"
+                  className="inputField1"
                 />
                 {errors.jobRole && <p className="error-message">{errors.jobRole}</p>}
               </div>
@@ -191,7 +191,7 @@ const EmploymentInfo = () => {
                   value={formData.monthlyIncome}
                   onChange={(e) => handleInputChange('monthlyIncome', e.target.value)}
                   placeholder="Enter the monthly income"
-                  className="inputField"
+                  className="inputField1"
                 />
                 {errors.monthlyIncome && <p className="error-message">{errors.monthlyIncome}</p>}
               </div>
@@ -206,7 +206,7 @@ const EmploymentInfo = () => {
                   value={formData.workExperience}
                   onChange={(e) => handleInputChange('workExperience', e.target.value)}
                   placeholder="Enter the work experience"
-                  className="inputField"
+                  className="inputField1"
                 />
                 {errors.workExperience && <p className="error-message">{errors.workExperience}</p>}
               </div>
@@ -214,7 +214,7 @@ const EmploymentInfo = () => {
 
             {errors.submit && <p className="error-message text-center mt-4">{errors.submit}</p>}
 
-            <div className="text-center mt-8">
+            <div className={`${styles.bottomContainer} text-center mt-2`}>
               <button
                 onClick={handleContinue}
                 disabled={loading}
