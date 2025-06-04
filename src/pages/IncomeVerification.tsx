@@ -2,14 +2,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
-import { Upload, X, Check } from 'lucide-react';
+import { Upload, X, Check, FileText, Trash2 } from 'lucide-react';
 import { config } from '../config/environment';
 import styles from '../pages-styles/EmployemntInfo.module.css';
 import { toast } from "sonner";
 
 const IncomeVerification = () => {
     const [files, setFiles] = useState({
-        payslips: [] as File[],
+        payslip1: null as File | null,
+        payslip2: null as File | null,
+        payslip3: null as File | null,
+        payslip4: null as File | null,
+        payslip5: null as File | null,
+        payslip6: null as File | null,
         bankStatements: [] as File[],
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
@@ -18,7 +23,6 @@ const IncomeVerification = () => {
 
     useEffect(() => {
         const authToken = localStorage.getItem('authToken');
-        // const bankInfoCompleted = localStorage.getItem('bankInfoCompleted');
 
         if (!authToken) {
             navigate('/');
@@ -28,7 +32,9 @@ const IncomeVerification = () => {
     const validateFiles = () => {
         const newErrors: Record<string, string> = {};
 
-        if (files.payslips.length === 0) {
+        // Check if at least one payslip is uploaded
+        const hasPayslips = Object.values(files).slice(0, 6).some(file => file !== null);
+        if (!hasPayslips) {
             newErrors.payslips = 'At least one payslip is required';
         }
 
@@ -40,17 +46,52 @@ const IncomeVerification = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleFileUpload = (fileType: 'payslips' | 'bankStatements', selectedFiles: FileList | null) => {
+    const handlePayslipUpload = (payslipKey: string, selectedFile: File | null) => {
+        if (!selectedFile) return;
+
+        // Validate file type
+        const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+        if (!allowedTypes.includes(selectedFile.type)) {
+            setErrors(prev => ({
+                ...prev,
+                [payslipKey]: 'Only PDF, JPG, and PNG files are allowed'
+            }));
+            return;
+        }
+
+        setFiles(prev => ({
+            ...prev,
+            [payslipKey]: selectedFile
+        }));
+
+        if (errors[payslipKey]) {
+            setErrors(prev => ({ ...prev, [payslipKey]: '' }));
+        }
+        
+        // Clear general payslips error if exists
+        if (errors.payslips) {
+            setErrors(prev => ({ ...prev, payslips: '' }));
+        }
+    };
+
+    const removePayslip = (payslipKey: string) => {
+        setFiles(prev => ({
+            ...prev,
+            [payslipKey]: null
+        }));
+    };
+
+    const handleBankStatementUpload = (selectedFiles: FileList | null) => {
         if (!selectedFiles) return;
 
-        const maxFiles = fileType === 'payslips' ? 6 : 6;
-        const currentFiles = files[fileType];
+        const maxFiles = 6;
+        const currentFiles = files.bankStatements;
         const newFiles = Array.from(selectedFiles);
 
         if (currentFiles.length + newFiles.length > maxFiles) {
             setErrors(prev => ({
                 ...prev,
-                [fileType]: `Maximum ${maxFiles} files allowed`
+                bankStatements: `Maximum ${maxFiles} files allowed`
             }));
             return;
         }
@@ -62,25 +103,25 @@ const IncomeVerification = () => {
         if (invalidFiles.length > 0) {
             setErrors(prev => ({
                 ...prev,
-                [fileType]: 'Only PDF, JPG, and PNG files are allowed'
+                bankStatements: 'Only PDF, JPG, and PNG files are allowed'
             }));
             return;
         }
 
         setFiles(prev => ({
             ...prev,
-            [fileType]: [...prev[fileType], ...newFiles]
+            bankStatements: [...prev.bankStatements, ...newFiles]
         }));
 
-        if (errors[fileType]) {
-            setErrors(prev => ({ ...prev, [fileType]: '' }));
+        if (errors.bankStatements) {
+            setErrors(prev => ({ ...prev, bankStatements: '' }));
         }
     };
 
-    const removeFile = (fileType: 'payslips' | 'bankStatements', index: number) => {
+    const removeBankStatement = (index: number) => {
         setFiles(prev => ({
             ...prev,
-            [fileType]: prev[fileType].filter((_, i) => i !== index)
+            bankStatements: prev.bankStatements.filter((_, i) => i !== index)
         }));
     };
 
@@ -105,24 +146,82 @@ const IncomeVerification = () => {
         }
     };
 
-    const FileUploadArea = ({ 
-        fileType, 
-        title, 
-        maxFiles, 
-        currentFiles 
+    const PayslipUploadArea = ({ 
+        payslipKey, 
+        payslipNumber,
+        file
     }: { 
-        fileType: 'payslips' | 'bankStatements';
-        title: string;
-        maxFiles: number;
-        currentFiles: File[];
+        payslipKey: string;
+        payslipNumber: number;
+        file: File | null;
     }) => (
+        <div className="space-y-3">
+            <label className="block text-sm font-medium text-gray-700">
+                Pay slip {payslipNumber} <sup className="text-red-500">*</sup>
+            </label>
+            
+            {!file ? (
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
+                    <input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handlePayslipUpload(payslipKey, e.target.files?.[0] || null)}
+                        className="hidden"
+                        id={`${payslipKey}-upload`}
+                    />
+                    <label
+                        htmlFor={`${payslipKey}-upload`}
+                        className="cursor-pointer"
+                    >
+                        <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                        <p className="text-sm text-gray-600">
+                            Please upload your payslip here.
+                        </p>
+                    </label>
+                </div>
+            ) : (
+                <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border">
+                    <div className="flex items-center space-x-3">
+                        <div className="bg-green-100 p-1 rounded">
+                            <Check className="h-4 w-4 text-green-600" />
+                        </div>
+                        <FileText className="h-5 w-5 text-gray-500" />
+                        <span className="text-sm text-gray-700 truncate max-w-xs">
+                            Pay Slip {payslipNumber}
+                        </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <button
+                            type="button"
+                            className="text-blue-500 hover:text-blue-700 text-sm"
+                        >
+                            Change
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => removePayslip(payslipKey)}
+                            className="text-red-500 hover:text-red-700"
+                        >
+                            <Trash2 className="h-4 w-4" />
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {errors[payslipKey] && (
+                <p className="error-message">{errors[payslipKey]}</p>
+            )}
+        </div>
+    );
+
+    const BankStatementUploadArea = () => (
         <div className="space-y-3">
             <div className="flex items-center justify-between">
                 <label className="block text-sm font-medium text-gray-700">
-                    {title} <sup className="text-red-500">*</sup>
+                    Bank Statements (Up to 6 months) <sup className="text-red-500">*</sup>
                 </label>
                 <span className="text-xs text-gray-500">
-                    {currentFiles.length}/{maxFiles} files
+                    {files.bankStatements.length}/6 files
                 </span>
             </div>
             
@@ -131,31 +230,31 @@ const IncomeVerification = () => {
                     type="file"
                     multiple
                     accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => handleFileUpload(fileType, e.target.files)}
+                    onChange={(e) => handleBankStatementUpload(e.target.files)}
                     className="hidden"
-                    id={`${fileType}-upload`}
-                    disabled={currentFiles.length >= maxFiles}
+                    id="bankStatements-upload"
+                    disabled={files.bankStatements.length >= 6}
                 />
                 <label
-                    htmlFor={`${fileType}-upload`}
-                    className={`cursor-pointer ${currentFiles.length >= maxFiles ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    htmlFor="bankStatements-upload"
+                    className={`cursor-pointer ${files.bankStatements.length >= 6 ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
                     <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
                     <p className="text-sm text-gray-600">
-                        {currentFiles.length >= maxFiles 
-                            ? `Maximum ${maxFiles} files uploaded`
-                            : `Click to upload or drag and drop`
+                        {files.bankStatements.length >= 6 
+                            ? 'Maximum 6 files uploaded'
+                            : 'Click to upload or drag and drop'
                         }
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
-                        PDF, JPG, PNG (Max {maxFiles} files)
+                        PDF, JPG, PNG (Max 6 files)
                     </p>
                 </label>
             </div>
 
-            {currentFiles.length > 0 && (
+            {files.bankStatements.length > 0 && (
                 <div className="space-y-2">
-                    {currentFiles.map((file, index) => (
+                    {files.bankStatements.map((file, index) => (
                         <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded">
                             <div className="flex items-center space-x-2">
                                 <Check className="h-4 w-4 text-green-500" />
@@ -165,7 +264,7 @@ const IncomeVerification = () => {
                             </div>
                             <button
                                 type="button"
-                                onClick={() => removeFile(fileType, index)}
+                                onClick={() => removeBankStatement(index)}
                                 className="text-red-500 hover:text-red-700"
                             >
                                 <X className="h-4 w-4" />
@@ -175,8 +274,8 @@ const IncomeVerification = () => {
                 </div>
             )}
 
-            {errors[fileType] && (
-                <p className="error-message">{errors[fileType]}</p>
+            {errors.bankStatements && (
+                <p className="error-message">{errors.bankStatements}</p>
             )}
         </div>
     );
@@ -210,19 +309,20 @@ const IncomeVerification = () => {
                         </div>
 
                         <div className={`space-y-6 ${styles.formContainer1}`}>
-                            <FileUploadArea
-                                fileType="payslips"
-                                title="Payslips"
-                                maxFiles={6}
-                                currentFiles={files.payslips}
-                            />
+                            {/* Individual Payslip Upload Areas */}
+                            <PayslipUploadArea payslipKey="payslip1" payslipNumber={1} file={files.payslip1} />
+                            <PayslipUploadArea payslipKey="payslip2" payslipNumber={2} file={files.payslip2} />
+                            <PayslipUploadArea payslipKey="payslip3" payslipNumber={3} file={files.payslip3} />
+                            <PayslipUploadArea payslipKey="payslip4" payslipNumber={4} file={files.payslip4} />
+                            <PayslipUploadArea payslipKey="payslip5" payslipNumber={5} file={files.payslip5} />
+                            <PayslipUploadArea payslipKey="payslip6" payslipNumber={6} file={files.payslip6} />
 
-                            <FileUploadArea
-                                fileType="bankStatements"
-                                title="Bank Statements (Up to 6 months)"
-                                maxFiles={6}
-                                currentFiles={files.bankStatements}
-                            />
+                            {errors.payslips && (
+                                <p className="error-message">{errors.payslips}</p>
+                            )}
+
+                            {/* Bank Statements Upload Area */}
+                            <BankStatementUploadArea />
                         </div>
 
                         {errors.submit && (
@@ -232,7 +332,7 @@ const IncomeVerification = () => {
                         <div className={`${styles.bottomContainer} text-center mt-6`}>
                             <button
                                 onClick={handleContinue}
-                                disabled={loading || (files.payslips.length === 0 && files.bankStatements.length === 0)}
+                                disabled={loading}
                                 className="primary-button px-20"
                             >
                                 {loading ? 'Uploading...' : 'Check Eligibility'}
