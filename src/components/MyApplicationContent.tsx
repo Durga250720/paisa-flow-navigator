@@ -93,13 +93,13 @@ const MyApplicationContent = () => {
           <span className="text-blue-600 bg-blue-50 px-3 py-1 rounded-full text-sm font-medium">
             Pending Approval
           </span>
-          <button className="text-blue-600 text-sm font-medium hover:text-blue-700">
+          {/* <button className="text-blue-600 text-sm font-medium hover:text-blue-700">
             Need Help?
-          </button>
+          </button> */}
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
+      <div className="flex-1 flex items-start justify-center p-6">
         <div className="w-full max-w-5xl">
           {loading ? (
             <div className="text-center py-10">
@@ -121,13 +121,13 @@ const MyApplicationContent = () => {
                         : 'bg-white border-gray-300 text-gray-400'
                     }`}>
                       {step.completed ? (
-                        <CheckCircle className="w-8 h-8" />
+                        <CheckCircle className="w-6 h-6" />
                       ) : (
-                        <span className="text-lg font-medium">{step.id}</span>
+                        <span className="text-sm font-medium">{step.id}</span>
                       )}
                     </div>
-                    <span className={`mt-3 text-sm text-center max-w-[120px] leading-tight ${
-                      step.completed ? 'text-gray-900 font-medium' : 'text-gray-500'
+                    <span className={`mt-3 text-xs text-center max-w-[160px] leading-tight ${
+                      step.completed ? 'text-gray-900 font-normal' : 'text-gray-500'
                     }`}>
                       {step.label}
                     </span>
@@ -136,7 +136,7 @@ const MyApplicationContent = () => {
                         className={`absolute top-8 left-16 h-0.5 transition-all duration-300 ${
                           steps[index + 1].completed ? 'bg-primary' : 'bg-gray-300'
                         }`}
-                        style={{ width: 'calc(100vw / 5 - 80px)', maxWidth: '180px' }}
+                        style={{ width: 'calc(100vw / 5 - 80px)', maxWidth: '200px'}}
                       />
                     )}
                   </div>
