@@ -13,6 +13,7 @@ const OTP = () => {
   const [resendTimer, setResendTimer] = useState(30);
   const [phoneNumber, setPhoneNumber] = useState('');
   const [name, setName] = useState('');
+  const [email, setMailId] = useState('');
   const [otp, setOtp] = useState('');
   const [isOtpComplete, setIsOtpComplete] = useState(false);
   const navigate = useNavigate();
@@ -29,9 +30,10 @@ const OTP = () => {
     // Check if user has phoneNumber from login flow
     const storedPhone = localStorage.getItem('phoneNumber');
     const storedName = localStorage.getItem('name');
+    const storedEmail = localStorage.getItem('email');
+
 
     if (!storedPhone || !storedName) {
-      // If no phone number or name in storage, redirect to login
       navigate('/');
       return;
     }
@@ -42,6 +44,10 @@ const OTP = () => {
 
     if (storedName) {
       setName(storedName);
+    }
+
+    if(storedEmail){
+      setMailId(storedEmail);
     }
 
     // Start resend timer
@@ -73,6 +79,8 @@ const OTP = () => {
         body: JSON.stringify({
           mobile: phoneNumber,
           name: name,
+          email:email,
+          source: "WEBSITE",
           otp: otp
         }),
       });
@@ -92,10 +100,8 @@ const OTP = () => {
 
       const res = await response.json();
 
-      localStorage.setItem('authToken', res.data.id);
-      // setAuthToken(res.data.id);
+      localStorage.setItem('authToken', res.data.id); // Assuming res.data.id is the borrowerId/authToken
       localStorage.setItem('otpVerified', 'true');
-      // navigate('/kyc-details');
       handleFetchDetails(res.data.id)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
@@ -128,13 +134,29 @@ const OTP = () => {
       }
 
       const res = await response.json();
+      localStorage.setItem('up',JSON.stringify(res.data));
       // navigate('/kyc-details');
-      // if(res.data.aadhaarVerified && res.data.panVerified){
-      //   navigate('/admin/kyc-documents') 
-      // }
-      // else{
+
+      // --- Navigation Logic based on Profile Completion ---
+      const profileData = res.data;
+
+      if (!profileData.aadhaarVerified) {
+        setLoading(false); 
         navigate('/kyc-details');
-      // }
+      } else if (!profileData.panVerified) {
+        setLoading(false);
+        navigate('/pan-info');
+      } else if (!profileData.employmentDetails) {
+        setLoading(false);
+        navigate('/employment-info');
+      } else if (!profileData.bankDetailsAvailable) {
+         setLoading(false);
+         navigate('/bank-info');
+      } else {
+        setLoading(false);
+        navigate('/admin/my-application');
+      }
+      // --- End Navigation Logic ---
     } catch (err) {
       setLoading(false);
       setError(err instanceof Error ? err.message : 'An unexpected error occurred.');

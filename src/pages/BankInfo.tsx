@@ -66,14 +66,67 @@ const BankInfo = () => {
         if (!validateForm()) return;
 
         setLoading(true);
-        try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
+        // try {
+        //     // Simulate API call
+        //     await new Promise(resolve => setTimeout(resolve, 1000));
             
+            // toast.success("Bank details saved successfully!");
+            // localStorage.setItem('bankInfoCompleted', 'true');
+            // navigate('/income-verification');
+        // } catch (err) {
+        //     const errorMessage = err instanceof Error ? err.message : 'Failed to save bank information. Please try again.';
+        //     setErrors({ submit: errorMessage });
+        //     toast.error(errorMessage);
+        // } finally {
+        //     setLoading(false);
+        // }
+        const authToken = localStorage.getItem('authToken');
+
+        setLoading(true);
+        try {
+            const payload = {
+                borrowerId: authToken,
+                accountNumber: formData.bankAccountNumber,
+                ifscNumber: formData.ifscCode.toUpperCase(),
+                accountHolderName: formData.accountHolderName
+            };
+
+            console.log('API payload:', payload);
+
+            // API call to bank-detail
+            const apiUrl = `${config.baseURL}bank-detail`;
+            console.log('Making API call to:', apiUrl);
+
+            const response = await fetch(apiUrl, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            console.log('API response status:', response.status);
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('API error response:', errorText);
+
+                let errorData;
+                try {
+                    errorData = JSON.parse(errorText);
+                } catch {
+                    errorData = { message: 'Failed to save bank information. Please try again.' };
+                }
+
+                throw new Error(errorData.message || 'Failed to save bank information.');
+            }
+
+            const responseData = await response.json();
+            console.log('API success response:', responseData);
             toast.success("Bank details saved successfully!");
             localStorage.setItem('bankInfoCompleted', 'true');
             navigate('/income-verification');
         } catch (err) {
+            setLoading(false);
             const errorMessage = err instanceof Error ? err.message : 'Failed to save bank information. Please try again.';
             setErrors({ submit: errorMessage });
             toast.error(errorMessage);

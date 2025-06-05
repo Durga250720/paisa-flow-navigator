@@ -10,6 +10,7 @@ const LoanAmount = () => {
   const [purpose, setPurpose] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [applicationId, setApplicatinId] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,7 +26,37 @@ const LoanAmount = () => {
       navigate('/kyc-details');
       return;
     }
+
+    fetchBorrowerDetails();
   }, [navigate]);
+  const fetchBorrowerDetails = async () => {
+
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+
+      const response = await fetch(config.baseURL + `loan-application/${localStorage.getItem('authToken')}/detail`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Failed to submit loan application. Please try again.' }));
+        throw new Error(errorData.message || 'Failed to submit loan application.');
+      }
+
+      const res = await response.json();
+      setApplicatinId(res.data.id)
+    } catch (err) {
+      setLoading(false);
+      setErrors({ submit: err instanceof Error ? err.message : 'An unexpected error occurred.' });
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const handleContinue = async () => {
     const newErrors: Record<string, string> = {};
@@ -45,24 +76,20 @@ const LoanAmount = () => {
 
     setErrors({});
     setLoading(true);
+    console.log(applicationId)
 
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       const payload = {
-        borrower: {
-          id: localStorage.getItem('authToken'),
-          name: localStorage.getItem('name'),
-        },
-        email: localStorage.getItem('email'),
-        phone: localStorage.getItem('phoneNumber'),
+        applicationId: applicationId,
         loanAmount: parseFloat(loanAmount) || 0,
         loanPurpose: purpose,
       };
 
-      const response = await fetch(config.baseURL + 'loan-application/apply', {
-        method: 'POST',
+      const response = await fetch(config.baseURL + 'loan-application/amount-purpose-update', {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },

@@ -70,7 +70,7 @@ const PANInfo = () => {
             // Simulate API call
             await new Promise(resolve => setTimeout(resolve, 1000));
             const response = await fetch(
-                `${config.baseURL}borrower/${authToken}/add-pan?panNumber=${panForApi}`,
+                `${config.baseURL}kyc-docs/${authToken}/add-pan?panNumber=${panForApi}`,
                 {
                     method: 'GET', // Assuming GET based on your previous code, but PUT/POST might be more appropriate for 'add'
                     headers: {

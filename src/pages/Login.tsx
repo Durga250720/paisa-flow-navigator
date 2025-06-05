@@ -36,6 +36,12 @@ const Login = () => {
     return phoneRegex.test(phone);
   };
 
+  const validateEmail = (email: string) => {
+    const emailRegex = /\S+@\S+\.\S+/;
+    return emailRegex.test(email);
+  };
+
+
   const handleGetOTP = async () => {
     const newErrors: Record<string, string> = {};
 
@@ -53,6 +59,10 @@ const Login = () => {
 
     if (phoneNumber && !validatePhoneNumber(phoneNumber)) {
       newErrors.phoneNumber = 'Please enter a valid 10-digit mobile number';
+    }
+
+    if(uMail && !validateEmail(uMail)){
+      newErrors.uMail = 'Please enter a valid E-mail ID';
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -74,6 +84,8 @@ const Login = () => {
         body: JSON.stringify({
           mobile: phoneNumber,
           name: uName,
+          email:uMail,
+          source: "WEBSITE"
         }),
       });
 

@@ -116,9 +116,9 @@ const EmploymentInfo = () => {
               <p className={styles.description}>To deposit your approved amount and enable auto-repayment</p>
             </div>
 
-            <div className={`space-y-6 ${styles.formContainer}`}>
+            <div className={`space-y-3 ${styles.formContainer}`}>
               <div className="form-group">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Employment Type
                 </label>
                 <select
@@ -134,7 +134,7 @@ const EmploymentInfo = () => {
               </div>
 
               <div className="form-group">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Industry
                 </label>
                 <select
@@ -154,7 +154,7 @@ const EmploymentInfo = () => {
               </div>
 
               <div className="form-group">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Company Name <sup className="text-red-500">*</sup>
                 </label>
                 <input
@@ -168,7 +168,7 @@ const EmploymentInfo = () => {
               </div>
 
               <div className="form-group">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Job Role / Designation
                 </label>
                 <input
@@ -182,7 +182,7 @@ const EmploymentInfo = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="monthlyIncome" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="monthlyIncome" className="block text-sm font-medium text-gray-700 mb-1">
                   Monthly Income (Take-Home) <sup className="text-red-500">*</sup>
                 </label>
                 <input
@@ -197,7 +197,7 @@ const EmploymentInfo = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="workExperience" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="workExperience" className="block text-sm font-medium text-gray-700 mb-1">
                   Work Experience (Yrs) <sup className="text-red-500">*</sup>
                 </label>
                 <input

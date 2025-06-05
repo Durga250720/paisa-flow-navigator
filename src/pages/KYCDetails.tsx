@@ -12,9 +12,9 @@ const KYCDetails = () => {
     aadhaarNumber: '',
     panNumber: ''
   });
-  const [enteredOTP, setEnteredOTP] = useState(''); // New state to hold entered OTP
-  const [showAadhaarOTP, setShowAadhaarOTP] = useState(false); // Renamed state
-  const [isAadhaarVerified, setIsAadhaarVerified] = useState(false); // New state
+  const [enteredOTP, setEnteredOTP] = useState(''); 
+  const [showAadhaarOTP, setShowAadhaarOTP] = useState(false); 
+  const [isAadhaarVerified, setIsAadhaarVerified] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [resendTimer, setResendTimer] = useState(0);
@@ -55,7 +55,7 @@ const KYCDetails = () => {
     setLoading(true);
     try {
       // Simulate API call
-      const response = await fetch(`${config.baseURL}borrower/aadhaar-otp?aadhaar=${aadhaarForApi}`, {
+      const response = await fetch(`${config.baseURL}kyc-docs/aadhaar-otp?aadhaar=${aadhaarForApi}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -79,8 +79,7 @@ const KYCDetails = () => {
 
   // Renamed from handleOTPComplete: This function now only updates the OTP state.
   const handleOtpInputChange = (otp: string) => {
-    setEnteredOTP(otp); // Store the entered OTP
-    // Clear OTP error if user is typing a new OTP
+    setEnteredOTP(otp); 
     if (errors.otp) {
       setErrors(prev => ({ ...prev, otp: '' }));
     }
@@ -108,7 +107,7 @@ const KYCDetails = () => {
     try {
       // await new Promise(resolve => setTimeout(resolve, 1000)); // Remove simulation
       const response = await fetch(
-        `${config.baseURL}borrower/${authToken}/add-aadhaar?aadhaarNumber=${aadhaarForApi}&otp=${enteredOTP}`,
+        `${config.baseURL}kyc-docs/${authToken}/add-aadhaar?aadhaarNumber=${aadhaarForApi}&otp=${enteredOTP}`,
         {
           method: 'GET', // Assuming GET based on your previous code, but PUT/POST might be more appropriate for 'add'
           headers: {
@@ -147,14 +146,29 @@ const KYCDetails = () => {
   const handleResend = async () => {
     if (resendTimer > 0) return;
     setErrors(prev => ({ ...prev, otp: '' })); // Clear previous OTP error
+    const aadhaarForApi = formData.aadhaarNumber.replace(/\s/g, ''); // Ensure no spaces
 
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      console.log('API call to:', config.baseURL + '/resend-aadhaar-otp', { aadhaarNumber: formData.aadhaarNumber });
-      setResendTimer(30);
+      const response = await fetch(`${config.baseURL}kyc-docs/aadhaar-otp?aadhaar=${aadhaarForApi}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        let errorMessage = 'Failed to send OTP. Please try again.';
+        throw new Error(errorMessage);
+      }
+      toast.success("Aadhaar OTP sent to your registered mobile number.");
+      setShowAadhaarOTP(true); // Show OTP input
+      setResendTimer(30); // Start resend timer
     } catch (err) {
-      setErrors({ otp: 'Failed to resend OTP. Please try again.' });
+      setLoading(false);
+      setErrors({ aadhaar: 'Failed to send OTP. Please try again.' });
+    } finally {
+      setLoading(false);
     }
   };
 
