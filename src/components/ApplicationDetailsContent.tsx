@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Check } from 'lucide-react';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { config } from '../config/environment';
 import { toast } from 'sonner';
@@ -66,7 +67,7 @@ function QontoStepIcon(props: StepIconProps) {
   return (
     <QontoStepIconRoot ownerState={{ active, completed }} className={className}>
       {completed ? (
-        <CheckCircle size={24} color="white" />
+        <Check size={20} color="white" />
       ) : (
         <div style={{
           width: '20px',
