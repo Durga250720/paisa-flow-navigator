@@ -7,7 +7,7 @@
 }
 
 .itemTitle {
-    @apply text-[14px] font-normal text-[var(--text-4)];
+    @apply text-[0.8rem] font-normal text-[var(--text-4)];
 }
 
 .activeItemTitle {

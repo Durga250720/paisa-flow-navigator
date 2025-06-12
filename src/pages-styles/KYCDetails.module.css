@@ -78,7 +78,10 @@
   @apply w-[25%]
 }
 .continueButton{
-  @apply bg-primary text-white font-medium py-3 px-20 rounded-lg transition-colors disabled:opacity-5;
+  @apply bg-primary text-white font-normal py-3 px-16 rounded-lg transition-colors disabled:opacity-5 w-max text-sm;
+}
+.dashboard{
+  @apply bg-transparent text-sm text-primary;
 }
 .resendOtp{
   background: transparent !important;

@@ -1,10 +1,10 @@
 
 import { Toaster } from "@/components/ui/toaster";
+import 'react-toastify/dist/ReactToastify.css';
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Login from "./pages/Login";
 import OTP from "./pages/OTP";
 import BasicInfo from "./pages/BasicInfo";
 import KYCDetails from "./pages/KYCDetails";
@@ -25,6 +25,10 @@ import Admin from "./pages/Admin";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsConditions from "./pages/TermsConditions";
 import PANInfo from "./pages/PANInfo";
+import SignUp from "./pages/SignUp";
+import Login from "./pages/Login";
+import { ToastContainer } from 'react-toastify';
+import PreApprovedLoadAmount from "./pages/PreApprovedLoanAmount";
 
 const queryClient = new QueryClient();
 
@@ -32,10 +36,12 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
+      <ToastContainer position="bottom-right" autoClose={5000} toastClassName="text-sm text-gray-600"/>
       <Sonner />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Login />} />
+          <Route path="/sign-up" element={<SignUp />} />
           <Route path="/otp" element={<OTP />} />
           <Route path="/basic-info" element={<BasicInfo />} />
           <Route path="/kyc-details" element={<KYCDetails />} />
@@ -44,6 +50,7 @@ const App = () => (
           <Route path="/kyc-verification" element={<KYCVerification />} />
           <Route path="/kyc-verified" element={<KYCVerified />} />
           <Route path="/loan-amount" element={<LoanAmount />} />
+          <Route path="/approved-loan-amount" element={<PreApprovedLoadAmount />}/>
           <Route path="/bank-info" element={<BankInfo />} />
           <Route path="/income-verification" element={<IncomeVerification />} />
           <Route path="/employment-info" element={<EmploymentInfo />} />

@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import DashboardSidebar from '@/components/AdminSidebar';
@@ -10,6 +10,7 @@ import { LogOut } from 'lucide-react';
 
 const Admin = () => {
   const navigate = useNavigate();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   useEffect(() => {
     const authToken = localStorage.getItem('authToken');
@@ -23,12 +24,18 @@ const Admin = () => {
   };
 
   const handleLogout = () => {
+    // Show the confirmation popup
+    setShowLogoutConfirm(true);
+  };
+
+  const executeLogout = () => {
     toast.info("Logout functionality to be implemented!");
     localStorage.clear();
     navigate('/');
     toast.success("You have been logged out successfully!");
+    setShowLogoutConfirm(false); // Close the popup
   };
-
+  
   return (
     <div className={`${styles.container}`}>
       <div className={`${styles.leftPanel}`}>
@@ -59,6 +66,29 @@ const Admin = () => {
           <AdminOutlet />
         </div>
       </div>
+      {/* Logout Confirmation Popup */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Confirm Logout</h3>
+            <p className="text-sm text-gray-700 mb-6">Are you sure you want to logout?</p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={executeLogout}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-md focus:outline-none focus:ring-2 focus:ring-red-400"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -4,13 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import styles from '../pages-styles/LoanAmount.module.css';
 import { config } from '../config/environment';
+import { toast } from 'react-toastify';
 
 const LoanAmount = () => {
   const [loanAmount, setLoanAmount] = useState('');
   const [purpose, setPurpose] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
-  const [applicationId, setApplicatinId] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,47 +22,39 @@ const LoanAmount = () => {
       return;
     }
 
-    if (!kycVerified) {
-      navigate('/kyc-details');
+    // if (!kycVerified) {
+    //   navigate('/kyc-details');
+    //   return;
+    // }
+
+  }, [navigate]);
+  
+
+  const handleLoanAmountChange = (value: string) => {
+    // Clear existing error for loanAmount if user starts typing
+    if (errors.loanAmount) {
+      setErrors(prev => ({ ...prev, loanAmount: '' }));
+    }
+
+    const numericValue = parseFloat(value);
+    if (!isNaN(numericValue) && numericValue > 25000) {
+      toast.warn("We will provide loan up to ₹25,000 only.");
+      setLoanAmount('');
       return;
     }
-
-    fetchBorrowerDetails();
-  }, [navigate]);
-  const fetchBorrowerDetails = async () => {
-
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-
-      const response = await fetch(config.baseURL + `loan-application/${localStorage.getItem('authToken')}/detail`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Failed to submit loan application. Please try again.' }));
-        throw new Error(errorData.message || 'Failed to submit loan application.');
-      }
-
-      const res = await response.json();
-      setApplicatinId(res.data.id)
-    } catch (err) {
-      setLoading(false);
-      setErrors({ submit: err instanceof Error ? err.message : 'An unexpected error occurred.' });
-    } finally {
-      setLoading(false);
-    }
-  }
+    setLoanAmount(value);
+  };
 
   const handleContinue = async () => {
     const newErrors: Record<string, string> = {};
+    const numericLoanAmount = parseFloat(loanAmount);
 
-    if (!loanAmount) {
+    if (!loanAmount || isNaN(numericLoanAmount)) {
       newErrors.loanAmount = 'Please enter the amount to be borrowed';
+    } else if (numericLoanAmount <= 0) {
+      newErrors.loanAmount = 'Loan amount must be a positive number.';
+    } else if (numericLoanAmount > 25000) {
+      newErrors.loanAmount = 'Loan amount cannot exceed ₹25,000.';
     }
 
     if (!purpose) {
@@ -76,20 +68,19 @@ const LoanAmount = () => {
 
     setErrors({});
     setLoading(true);
-    console.log(applicationId)
 
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       const payload = {
-        applicationId: applicationId,
+        borrowerId: localStorage.getItem('authToken'),
         loanAmount: parseFloat(loanAmount) || 0,
         loanPurpose: purpose,
       };
 
-      const response = await fetch(config.baseURL + 'loan-application/amount-purpose-update', {
-        method: 'PUT',
+      const response = await fetch(config.baseURL + 'loan-application/apply', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -101,12 +92,12 @@ const LoanAmount = () => {
         throw new Error(errorData.message || 'Failed to submit loan application.');
       }
 
-      // const responseData = await response.json(); // If you need to use the response data
-      // localStorage.setItem('loanAmount', loanAmount);
-      // localStorage.setItem('loanPurpose', purpose);
-      navigate('/admin/my-application');
-    } catch (err) {
+      const res : any = await response.json();
+      localStorage.setItem('appId',res.data.id)
+      navigate('/approved-loan-amount');
+    } catch (err: any) {
       setLoading(false);
+      toast.error(err ? err.message : 'An unexpected error occurred.');
       setErrors({ submit: err instanceof Error ? err.message : 'An unexpected error occurred.' });
     } finally {
       setLoading(false);
@@ -135,7 +126,7 @@ const LoanAmount = () => {
             <div className={styles.heading}>
               How Much Would You Like to Borrow?
             </div>
-            
+
             <div className={styles.subHeading}>
               To deposit your approved amount and enable auto-repayment
             </div>
@@ -149,7 +140,7 @@ const LoanAmount = () => {
                   id="loanAmount"
                   type="number"
                   value={loanAmount}
-                  onChange={(e) => setLoanAmount(e.target.value)}
+                  onChange={(e) => handleLoanAmountChange(e.target.value)}
                   placeholder="Enter the amount to be borrowed"
                   className="inputField"
                 />
@@ -178,7 +169,7 @@ const LoanAmount = () => {
                 disabled={loading}
                 className={styles.continueButton}
               >
-                {loading ? 'Processing...' : 'Continue'}
+                {loading ? 'Processing...' : 'Check Eligibility'}
               </button>
             </div>
           </div>

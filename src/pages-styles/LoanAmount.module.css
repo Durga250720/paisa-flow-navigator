@@ -48,6 +48,10 @@
   @apply text-xl font-semibold mb-4 text-center text-gray-900;
 }
 
+.heading1{
+  @apply text-[1.03rem] font-semibold mb-4 text-center text-gray-900;
+}
+
 .subHeading {
   @apply text-sm text-gray-600 mb-8 text-center leading-relaxed;
 }

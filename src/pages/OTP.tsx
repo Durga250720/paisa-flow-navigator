@@ -5,7 +5,7 @@ import OTPInput from '../components/OTPInput';
 import { config } from '../config/environment';
 import styles from '../pages-styles/OTP.module.css';
 import { Pencil } from 'lucide-react';
-import { set } from 'date-fns';
+import {toast } from 'react-toastify';
 
 const OTP = () => {
   const [error, setError] = useState('');
@@ -23,7 +23,7 @@ const OTP = () => {
     const authToken = localStorage.getItem('authToken');
     if (authToken) {
       // Redirect to admin dashboard if already logged in
-      navigate('/admin');
+      navigate('/admin/my-application');
       return;
     }
 
@@ -33,7 +33,7 @@ const OTP = () => {
     const storedEmail = localStorage.getItem('email');
 
 
-    if (!storedPhone || !storedName) {
+    if (!storedPhone) {
       navigate('/');
       return;
     }
@@ -71,19 +71,30 @@ const OTP = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(config.baseURL + 'api/auth/verify-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          mobile: phoneNumber,
-          name: name,
-          email:email,
-          source: "WEBSITE",
-          otp: otp
-        }),
-      });
+      let response = null
+      if(localStorage.getItem('from') === 'signup'){
+        response = await fetch(config.baseURL + 'api/auth/verify-signup-otp', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            mobile: phoneNumber,
+            name: name,
+            email: email,
+            source: "WEBSITE",
+            otp: otp
+          }),
+        });
+      }
+      else{
+        response = await fetch(config.baseURL + `api/auth/verify-login-otp?mobile=${phoneNumber}&otp=${otp}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+      }
 
       if (!response.ok) {
         let errorMessage = 'Invalid OTP. Please try again.';
@@ -102,8 +113,15 @@ const OTP = () => {
 
       localStorage.setItem('authToken', res.data.id); // Assuming res.data.id is the borrowerId/authToken
       localStorage.setItem('otpVerified', 'true');
-      handleFetchDetails(res.data.id)
+      if(localStorage.getItem('from') === 'signup'){
+        // localStorage.setItem('basicInfoCompleted', 'true');
+        handleFetchDetails(res.data.id)
+      }
+      else{
+        navigate('/admin/my-application');
+      }
     } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Invalid OTP. Please try again.');
       setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
       setLoading(false);
     } finally {
@@ -135,9 +153,8 @@ const OTP = () => {
 
       const res = await response.json();
       localStorage.setItem('up',JSON.stringify(res.data));
-      // navigate('/kyc-details');
 
-      // --- Navigation Logic based on Profile Completion ---
+
       const profileData = res.data;
 
       if (!profileData.aadhaarVerified) {
@@ -193,10 +210,8 @@ const OTP = () => {
         }
         throw new Error(errorMessage);
       }
-      navigate('/otp'); // Navigate only on successful OTP send
     } catch (err) {
       setLoading(false);
-      // setErrors({ submit: err instanceof Error ? err.message : 'An unexpected error occurred.' });
     } finally {
       setLoading(false);
     }
@@ -210,7 +225,12 @@ const OTP = () => {
   };
 
   const handleEditPhoneNumber = () => {
-    navigate('/'); // Navigate to the Login page
+    if(localStorage.getItem('from') === 'signup'){
+      navigate('/sign-up'); 
+    }
+    else{
+        navigate('/'); 
+    }
   };
 
   const handleTermsClick = () => {

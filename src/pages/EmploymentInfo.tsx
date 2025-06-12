@@ -62,10 +62,10 @@ const EmploymentInfo = () => {
         companyName: formData.companyName,
         designation: formData.jobRole,
         takeHomeSalary: parseInt(formData.monthlyIncome, 10) || 0,
-        totalExperienceInMonths: parseInt(formData.workExperience, 10) || 0
+        totalExperienceInMonths: parseInt(formData.workExperience, 10)*12 || 0
       };
 
-      const response = await fetch(config.baseURL + `borrower/${authToken}/update-employment`,
+      const response = await fetch(config.baseURL + `kyc-docs/${authToken}/update-employment`,
         {
           method: 'PUT',
           headers: {
@@ -82,7 +82,7 @@ const EmploymentInfo = () => {
 
       toast.success("Employment information saved successfully!");
       localStorage.setItem('employmentInfoCompleted', 'true');
-      navigate('/bank-info');
+      navigate('/income-verification');
     } catch (err) {
       setErrors({ submit: 'Failed to save employment information. Please try again.' });
     } finally {

@@ -157,3 +157,10 @@ input[type=number]::-webkit-outer-spin-button {
 button:disabled{
   background-color: gray;
 }
+
+.css-12eb3rq-MuiStepLabel-label.MuiStepLabel-alternativeLabel{
+  margin-top: 30px !important;
+  /* white-space: nowrap; */
+  font-family: 'Lexend' !important;
+  @apply text-[12px]
+}

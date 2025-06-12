@@ -1,5 +1,5 @@
 .container {
-  @apply min-h-screen bg-white flex bg-gray-50;
+  @apply min-h-screen bg-white bg-gray-50;
   height: calc(100vh - 0px);
 }
 
@@ -31,6 +31,9 @@
   @apply w-full max-w-md flex lg:bg-white h-[85%] flex-col lg:p-7 flex-col justify-center;
 }
 
+.loginFormWrapper{
+  @apply w-full max-w-md flex lg:bg-white h-auto flex-col lg:p-7 flex-col justify-center;
+}
 .heading {
   @apply text-2xl font-normal mb-8 text-center;
 }
@@ -70,4 +73,8 @@
 
 .secureInfoDot {
   @apply w-2 h-2 bg-green-500 rounded-full mr-2;
+}
+
+.dontHaveAccount{
+  @apply text-sm mt-3 text-center text-gray-600
 }

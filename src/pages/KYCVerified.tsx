@@ -46,36 +46,11 @@ const KYCDetails = () => {
     }
   };
 
-  const handleResend = async () => {
-    if (resendTimer > 0) return;
-    setErrors(prev => ({ ...prev, otp: '' }));
+  const handleGoToDashboard = () => {
+    navigate('/admin/my-application');
+  }
 
-    try {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setResendTimer(30);
-    } catch (err) {
-      setErrors({ otp: 'Failed to resend OTP. Please try again.' });
-    }
-  };
-
-  const formatAadhaar = (value: string) => {
-    // Remove non-digits and then format
-    const digitsOnly = value.replace(/\D/g, '');
-    return digitsOnly.replace(/(\d{4})(\d{4})(\d{4})/, '$1 $2 $3').trim();
-  };
-
-  const handleInputChange = (field: string, value: string) => {
-    let processedValue = value;
-    if (field === 'aadhaarNumber') {
-      processedValue = value.replace(/\D/g, ''); // Allow only digits for Aadhaar
-    } else if (field === 'panNumber') {
-      processedValue = value.toUpperCase(); // Convert PAN to uppercase
-    }
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
-  };
-
+  
   return (
     <div className={`${styles.container} block`}>
       <div className={styles.navbarWrapper}>
@@ -112,14 +87,20 @@ const KYCDetails = () => {
                 Congrats! Your KYC Got Verified, You can Apply for loan
               </div>
             </div>
-            <div className={`${styles.buttonContainer} text-center mt-6`}>
-            <button
-              onClick={handleContinue}
-              className={styles.continueButton}
-            >
-              {loading ? 'Verifying...' : 'Continue'}
-            </button>
-          </div>
+            <div className={`${styles.buttonContainer} flex flex-col text-center mt-6 items-center`}>
+              <button
+                onClick={handleContinue}
+                className={`${styles.continueButton}`}
+              >
+                {loading ? 'Verifying...' : 'Apply Loan'}
+              </button>
+              <button
+                onClick={handleGoToDashboard}
+                className={`${styles.dashboard} mt-4`}
+              >
+                Go To Dashboard
+              </button>
+            </div>
           </div>
         </div>
       </div>

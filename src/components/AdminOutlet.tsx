@@ -7,12 +7,14 @@ import RepaymentsContent from './RepaymentsContent';
 import KYCDocumentsContent from './KYCDocumentsContent';
 import PrivacyPolicyContent from './PrivacyPolicyContent';
 import CreateMyBorrowing from './CreateMyBorrowing';
+import ApplicationDetailsContent from './ApplicationDetailsContent';
 
 const AdminOutlet  = () => {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/admin/kyc-documents" replace />} />
       <Route path="/my-application" element={<MyApplicationContent />} />
+      <Route path='view-application/:id' element={<ApplicationDetailsContent />}/>
       <Route path="/my-borrowings" element={<MyBorrowingsContent />} />
       <Route path="/my-repayments" element={<RepaymentsContent />} />
       <Route path="/kyc-documents" element={<KYCDocumentsContent />} />

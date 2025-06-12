@@ -7,17 +7,15 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { CognitoIdentityClient } from "@aws-sdk/client-cognito-identity";
 import { fromCognitoIdentityPool } from "@aws-sdk/credential-provider-cognito-identity";
 import styles from '../pages-styles/EmployemntInfo.module.css';
-import { toast } from "sonner";
+import {toast } from 'react-toastify';
 
 const IncomeVerification = () => {
-    const [files, setFiles] = useState({
-        payslip1: null as File | null,
-        payslip2: null as File | null,
-        payslip3: null as File | null,
-        payslip4: null as File | null,
-        payslip5: null as File | null,
-        payslip6: null as File | null,
-        bankStatement: null as File | null,
+    const [files, setFiles] = useState<{
+        payslips: File[];
+        bankStatement: File | null,
+    }>({
+        payslips: [],
+        bankStatement: null,
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(false);
@@ -95,9 +93,11 @@ const IncomeVerification = () => {
     const validateFiles = () => {
         const newErrors: Record<string, string> = {};
 
-        const hasPayslips = Object.values(files).slice(0, 6).some(file => file !== null);
-        if (!hasPayslips) {
-            newErrors.payslips = 'At least one payslip is required';
+        if (files.payslips.length === 0) {
+            newErrors.payslips = 'At least one payslip is required. Upload up to 6 files.';
+        } else if (files.payslips.length > 6) {
+            // This should ideally be prevented by the upload handler
+            newErrors.payslips = 'You can upload a maximum of 6 payslips.';
         }
 
         if (!files.bankStatement) {
@@ -108,39 +108,41 @@ const IncomeVerification = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handlePayslipUpload = (payslipKey: string, selectedFile: File | null) => {
-        if (!selectedFile) return;
+    const handlePayslipUpload = (selectedFilesList: FileList | null) => {
+        if (!selectedFilesList) return;
 
-        // Validate file type
-        const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
-        if (!allowedTypes.includes(selectedFile.type)) {
-            setErrors(prev => ({
-                ...prev,
-                [payslipKey]: 'Only PDF, JPG, and PNG files are allowed'
-            }));
+        const newFilesArray = Array.from(selectedFilesList);
+        let currentPayslips = files.payslips;
+        const localValidationErrors: string[] = [];
+
+        if (currentPayslips.length + newFilesArray.length > 6) {
+            toast.error("You can upload a maximum of 6 payslips.");
+            setErrors(prev => ({ ...prev, payslips: "Maximum 6 payslips allowed." }));
             return;
         }
 
-        setFiles(prev => ({
-            ...prev,
-            [payslipKey]: selectedFile
-        }));
+        const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+        const validNewUploads: File[] = [];
 
-        if (errors[payslipKey]) {
-            setErrors(prev => ({ ...prev, [payslipKey]: '' }));
+        for (const file of newFilesArray) {
+            if (!allowedTypes.includes(file.type)) {
+                localValidationErrors.push(`File "${file.name}" has an invalid type. Only PDF, JPG, PNG allowed.`);
+            } else {
+                validNewUploads.push(file);
+            }
         }
-        
-        // Clear general payslips error if exists
-        if (errors.payslips) {
+
+        if (localValidationErrors.length > 0) {
+            setErrors(prev => ({ ...prev, payslips: localValidationErrors.join(' ') }));
+        } else {
             setErrors(prev => ({ ...prev, payslips: '' }));
         }
+
+        setFiles(prev => ({ ...prev, payslips: [...prev.payslips, ...validNewUploads].slice(0, 6) }));
     };
 
-    const removePayslip = (payslipKey: string) => {
-        setFiles(prev => ({
-            ...prev,
-            [payslipKey]: null
-        }));
+    const removePayslip = (indexToRemove: number) => {
+        setFiles(prev => ({ ...prev, payslips: prev.payslips.filter((_, index) => index !== indexToRemove) }));
     };
 
     const handleBankStatementUpload = (selectedFile: File | null) => {
@@ -208,13 +210,9 @@ const IncomeVerification = () => {
         try {
             const filesToUploadPromises: Promise<{fileName: string, url: string, type: string}>[] = [];
 
-            // Collect payslips for upload
-            for (let i = 1; i <= 6; i++) {
-                const payslipKey = `payslip${i}` as keyof typeof files;
-                const file = files[payslipKey] as File | null;
-                if (file) {
-                    filesToUploadPromises.push(uploadFileToS3(file, 'payslips', sanitizedUserName));
-                }
+            // Collect payslips for upload from the payslips array
+            for (const file of files.payslips) {
+                filesToUploadPromises.push(uploadFileToS3(file, 'payslips', sanitizedUserName));
             }
 
             // Collect bank statement for upload
@@ -223,7 +221,6 @@ const IncomeVerification = () => {
             }
 
             if (filesToUploadPromises.length === 0) {
-                // Should be caught by validateFiles, but as a safeguard
                 toast.info("No files selected for upload.");
                 setLoading(false);
                 return;
@@ -296,12 +293,9 @@ const IncomeVerification = () => {
             console.log('Uploaded Payslip Details (name and URL):', payslipUploads);
             console.log('Uploaded Bank Statement URLs:', bankStatementUploads.map(f => f.url));
             console.log('Uploaded Bank Statement Details (name and URL):', bankStatementUploads);
-
             toast.success("Income verification documents uploaded successfully!");
             localStorage.setItem('incomeVerificationCompleted', 'true');
-            // Optionally, store URLs if needed by other parts of the app
-            // localStorage.setItem('uploadedDocumentUrls', JSON.stringify(uploadedFileDetails.map(f => f.url)));
-            navigate('/loan-amount');
+            navigate('/bank-info');
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Failed to upload documents. Please try again.';
             setErrors(prev => ({ ...prev, submit: errorMessage }));
@@ -311,71 +305,60 @@ const IncomeVerification = () => {
         }
     };
 
-    const PayslipUploadArea = ({ 
-        payslipKey, 
-        payslipNumber,
-        file
-    }: { 
-        payslipKey: string;
-        payslipNumber: number;
-        file: File | null;
-    }) => (
-        <div className="space-y-1 w-[95%]">
+    const PayslipUploadArea = () => (
+        <div className="space-y-3 w-[95%]">
             <label className="block text-sm font-medium text-gray-700">
-                Pay slip {payslipNumber} <sup className="text-red-500">*</sup>
+                Pay Slips (Latest 6 months, up to 6 files) <sup className="text-red-500">*</sup>
             </label>
-            
-            {!file ? (
+
+            {/* Input for uploading files */}
+            {files.payslips.length < 6 && (
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center hover:border-primary transition-colors">
                     <input
                         type="file"
                         accept=".pdf,.jpg,.jpeg,.png"
-                        onChange={(e) => handlePayslipUpload(payslipKey, e.target.files?.[0] || null)}
+                        multiple // Allow multiple file selection
+                        onChange={(e) => handlePayslipUpload(e.target.files)}
                         className="hidden"
-                        id={`${payslipKey}-upload`}
+                        id="payslips-upload"
                     />
                     <label
-                        htmlFor={`${payslipKey}-upload`}
+                        htmlFor="payslips-upload"
                         className="cursor-pointer flex items-center justify-center space-x-2"
                     >
                         <Upload className="h-4 w-4 text-gray-400" />
                         <p className="text-xs text-gray-600">
-                            Please upload your payslip here.
+                            Click to upload payslips (PDF, JPG, PNG)
                         </p>
                     </label>
                 </div>
-            ) : (
-                <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border">
-                    <div className="flex items-center space-x-3">
-                        <div className="bg-green-100 p-1 rounded">
-                            <Check className="h-3 w-3 rounded text-green-600" />
-                        </div>
-                        <FileText className="h-3 w-3 text-gray-500" />
-                        <span className="text-xs text-gray-700 truncate max-w-xs">
-                            Pay Slip {payslipNumber}
-                        </span>
-                    </div>
-                    <div className="flex items-center space-x-1 sm:space-x-2">
-                        <button
-                            type="button"
-                            className="text-blue-500 hover:text-blue-700 text-xs"
-                            onClick={() => document.getElementById(`${payslipKey}-upload`)?.click()}
-                        >
-                            Change
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => removePayslip(payslipKey)}
-                            className="text-red-500 hover:text-red-700"
-                        >
-                            <Trash2 className="h-3 w-3" />
-                        </button>
-                    </div>
-                </div>
             )}
 
-            {errors[payslipKey] && (
-                <p className="error-message">{errors[payslipKey]}</p>
+            {/* Display uploaded payslips */}
+            {files.payslips.length > 0 && (
+                <div className="mt-2 space-y-2">
+                    <p className="text-xs text-gray-500">Uploaded Payslips ({files.payslips.length}/6):</p>
+                    {files.payslips.map((file, index) => (
+                        <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded-lg border">
+                            <div className="flex items-center space-x-2">
+                                <FileText className="h-4 w-4 text-gray-500" />
+                                <span className="text-xs text-gray-700 truncate max-w-xs" title={file.name}>
+                                    {file.name}
+                                </span>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => removePayslip(index)}
+                                className="text-red-500 hover:text-red-700"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
+            {errors.payslips && (
+                <p className="error-message">{errors.payslips}</p>
             )}
         </div>
     );
@@ -412,7 +395,7 @@ const IncomeVerification = () => {
                             <Check className="h-4 w-4 text-green-600" />
                         </div>
                         <FileText className="h-4 w-4 text-gray-500" />
-                        <span className="text-sm text-gray-700 truncate max-w-xs">
+                        <span className="text-sm text-gray-700 truncate max-w-xs" title={files.bankStatement.name}>
                             {files.bankStatement.name}
                         </span>
                     </div>
@@ -470,17 +453,8 @@ const IncomeVerification = () => {
                         </div>
 
                         <div className={`space-y-3 ${styles.formContainer}`}>
-                            {/* Individual Payslip Upload Areas */}
-                            <PayslipUploadArea payslipKey="payslip1" payslipNumber={1} file={files.payslip1} />
-                            <PayslipUploadArea payslipKey="payslip2" payslipNumber={2} file={files.payslip2} />
-                            <PayslipUploadArea payslipKey="payslip3" payslipNumber={3} file={files.payslip3} />
-                            <PayslipUploadArea payslipKey="payslip4" payslipNumber={4} file={files.payslip4} />
-                            <PayslipUploadArea payslipKey="payslip5" payslipNumber={5} file={files.payslip5} />
-                            <PayslipUploadArea payslipKey="payslip6" payslipNumber={6} file={files.payslip6} />
-
-                            {errors.payslips && (
-                                <p className="error-message">{errors.payslips}</p>
-                            )}
+                            {/* Unified Payslip Upload Area */}
+                            <PayslipUploadArea />
 
                             {/* Bank Statement Upload Area */}
                             <BankStatementUploadArea />
@@ -496,7 +470,7 @@ const IncomeVerification = () => {
                                 disabled={loading}
                                 className="primary-button px-20"
                             >
-                                {loading ? 'Uploading...' : 'Check Eligibility'}
+                                {loading ? 'Uploading...' : 'Continue'}
                             </button>
                         </div>
                     </div>

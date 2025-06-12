@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { config } from '../config/environment';
 import styles from '../pages-styles/EmployemntInfo.module.css';
-import { toast } from "sonner";
+import {toast } from 'react-toastify';
 
 const BankInfo = () => {
     const [formData, setFormData] = useState({
@@ -91,11 +91,9 @@ const BankInfo = () => {
                 accountHolderName: formData.accountHolderName
             };
 
-            console.log('API payload:', payload);
 
             // API call to bank-detail
             const apiUrl = `${config.baseURL}bank-detail`;
-            console.log('Making API call to:', apiUrl);
 
             const response = await fetch(apiUrl, {
                 method: 'PUT',
@@ -105,10 +103,8 @@ const BankInfo = () => {
                 body: JSON.stringify(payload),
             });
 
-            console.log('API response status:', response.status);
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error('API error response:', errorText);
 
                 let errorData;
                 try {
@@ -124,7 +120,7 @@ const BankInfo = () => {
             console.log('API success response:', responseData);
             toast.success("Bank details saved successfully!");
             localStorage.setItem('bankInfoCompleted', 'true');
-            navigate('/income-verification');
+            navigate('/loan-amount');
         } catch (err) {
             setLoading(false);
             const errorMessage = err instanceof Error ? err.message : 'Failed to save bank information. Please try again.';
