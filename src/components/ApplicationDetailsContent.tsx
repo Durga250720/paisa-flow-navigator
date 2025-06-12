@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
@@ -14,6 +13,79 @@ import { styled } from '@mui/material/styles';
 import StepConnector, { stepConnectorClasses } from '@mui/material/StepConnector';
 import { StepIconProps } from '@mui/material/StepIcon';
 
+const QontoConnector = styled(StepConnector)(({ theme }) => ({
+  [`&.${stepConnectorClasses.alternativeLabel}`]: {
+    top: 22, // Adjusted: half of the icon height (45px / 2 = 22.5px, using 22px)
+    left: 'calc(-50% + 16px)',
+    right: 'calc(50% + 16px)',
+  },
+  [`&.${stepConnectorClasses.active}`]: {
+    [`& .${stepConnectorClasses.line}`]: {
+      borderColor: '#784af4',
+    },
+  },
+  [`&.${stepConnectorClasses.completed}`]: {
+    [`& .${stepConnectorClasses.line}`]: {
+      borderColor: '#784af4',
+    },
+  },
+  [`& .${stepConnectorClasses.line}`]: {
+    borderColor: '#eaeaf0',
+    borderTopWidth: 3,
+    borderRadius: 1,
+    ...theme.applyStyles('dark', {
+      borderColor: theme.palette.grey[800],
+    }),
+  },
+}));
+
+const QontoStepIconRoot = styled('div')<{ ownerState: { active?: boolean; completed?: boolean } }>(
+  ({ theme, ownerState }) => ({
+    color: theme.palette.mode === 'dark' ? theme.palette.grey[700] : '#eaeaf0',
+    display: 'flex',
+    height: 45,
+    width: 45,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '50%',
+    position: 'relative',
+    ...(ownerState.active && {
+      color: '#784af4',
+    }),
+    ...(ownerState.completed && {
+      backgroundColor: '#784af4',
+      color: '#ffffff',
+    }),
+    '& .QontoStepIcon-completedIcon': {
+      color: '#ffffff',
+      zIndex: 1,
+      fontSize: '1.5rem',
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+    },
+    '& .QontoStepIcon-circle': {
+      width: '100%', 
+      height: '100%',
+      borderRadius: '50%',
+      backgroundColor: 'currentColor',
+    },
+  }),
+);
+
+function QontoStepIcon(props: StepIconProps) {
+  const { active, completed, className } = props;
+  return (
+    <QontoStepIconRoot ownerState={{ active, completed }} className={className}>
+      {completed ? (
+        <CheckCircle className="QontoStepIcon-completedIcon" />
+      ) : (
+        <div className="QontoStepIcon-circle" />
+      )}
+    </QontoStepIconRoot>
+  );
+}
 
 const ApplicationDetailsContent = () => {
   const [applicationData, setApplicationData] = useState<any | null>(null);
@@ -111,7 +183,6 @@ const ApplicationDetailsContent = () => {
     };
   }, [steps, loading, applicationData, circleDiameterRem]);
 
-
   const getStatusClasses = (status: any) => {
     switch (status?.toLowerCase()) {
       case 'pending':
@@ -128,7 +199,6 @@ const ApplicationDetailsContent = () => {
         return 'bg-gray-100 text-gray-800';
     }
   }
-  
 
   return (
     <div className="min-h-full bg-white flex flex-col">
@@ -159,45 +229,6 @@ const ApplicationDetailsContent = () => {
             </div>
           ) : (
             <>
-              {/* <div ref={stepsContainerRef} className="flex items-center justify-between mb-16 px-4">
-                {steps.map((step, index) => (
-                  <div key={step.id} className="flex flex-col items-center relative">
-                    <div className={`w-16 h-16 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${step.completed
-                      ? 'bg-primary border-primary text-white'
-                      : 'bg-white border-gray-300 text-gray-400'
-                      }`}>
-                      {step.completed ? (
-                        <CheckCircle className="w-6 h-6" />
-                      ) : (
-                        <span className="text-sm font-medium">{step.id}</span>
-                      )}
-                    </div>
-                    <span className={`mt-3 text-xs text-center max-w-[160px] leading-tight ${step.completed ? 'text-gray-900 font-normal' : 'text-gray-500'
-                      }`}>
-                      {step.label}
-                    </span>
-                    {index < steps.length - 1 && (
-                      <div
-                        className={`absolute top-8 left-16 h-0.5 transition-all duration-300 ${steps[index + 1].completed ? 'bg-primary' : 'bg-gray-300'
-                          }`}
-                        style={{
-                          left: `calc(50% + ${circleDiameterRem / 2}rem)`,
-                          width: `${lineWidthPx}px`
-                        }}
-                      />
-                    )}
-                  </div>
-                ))}
-              </div> */}
-              {/* <Box sx={{ width: '100%' }}>
-                <Stepper activeStep={1} alternativeLabel>
-                  {steps.map((step) => (
-                    <Step key={step.id}>
-                      <StepLabel>{step.label}</StepLabel>
-                    </Step>
-                  ))}
-                </Stepper>
-              </Box> */}
               <Stack sx={{ width: '100%' }} spacing={4}>
                 <Stepper alternativeLabel connector={<QontoConnector />}>
                   {steps.map((step,index) => (
@@ -205,7 +236,6 @@ const ApplicationDetailsContent = () => {
                       <StepLabel StepIconComponent={QontoStepIcon} className='text-xs'>{step.label}</StepLabel>
                     </Step>
                   ))}
-
                 </Stepper>
               </Stack>
               <div className="text-center mt-10">
@@ -228,11 +258,6 @@ const ApplicationDetailsContent = () => {
                     : "We'll notify you as soon as your application is ready for disbursement."
                   }
                 </p>
-                {/* <div className='mt-3'>
-                  <button className='text-white bg-primary text-sm px-2 py-3'>
-                    Disburse
-                  </button>
-                </div> */}
               </div>
             </>
           )}
@@ -241,71 +266,5 @@ const ApplicationDetailsContent = () => {
     </div>
   );
 };
-
-const QontoConnector = styled(StepConnector)(({ theme }) => ({
-  [`&.${stepConnectorClasses.alternativeLabel}`]: {
-    top: 22, // Adjusted: half of the icon height (45px / 2 = 22.5px, using 22px)
-    left: 'calc(-50% + 16px)',
-    right: 'calc(50% + 16px)',
-  },
-  [`&.${stepConnectorClasses.active}`]: {
-    [`& .${stepConnectorClasses.line}`]: {
-      borderColor: '#784af4',
-    },
-  },
-  [`&.${stepConnectorClasses.completed}`]: {
-    [`& .${stepConnectorClasses.line}`]: {
-      borderColor: '#784af4',
-    },
-  },
-  [`& .${stepConnectorClasses.line}`]: {
-    borderColor: '#eaeaf0',
-    borderTopWidth: 3,
-    borderRadius: 1,
-    ...theme.applyStyles('dark', {
-      borderColor: theme.palette.grey[800],
-    }),
-  },
-}));
-
-const QontoStepIconRoot = styled('div')<{ ownerState: { active?: boolean; completed?: boolean } }>(
-  ({ theme, ownerState }) => ({
-    color: theme.palette.mode === 'dark' ? theme.palette.grey[700] : '#eaeaf0',
-    display: 'flex',
-    height: 45,
-    width: 45,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...(ownerState.active && {
-      color: '#784af4',
-    }),
-    '& .QontoStepIcon-completedIcon': {
-      color: '#784af4',
-      zIndex: 1,
-      fontSize: '1.75rem', // Approx 28px, ensures the icon has a defined size
-    },
-    '& .QontoStepIcon-circle': {
-      width: '100%', 
-      height: '100%',
-      borderRadius: '50%',
-      backgroundColor: 'currentColor',
-    },
-  }),
-);
-
-function QontoStepIcon(props: StepIconProps) {
-  const { active, completed, className } = props;
-  return (
-    <QontoStepIconRoot ownerState={{ active, completed }} className={className}>
-      {completed ? (
-        <CheckCircle className="QontoStepIcon-completedIcon" />
-      ) : (
-        <div className="QontoStepIcon-circle" />
-      )}
-    </QontoStepIconRoot>
-  );
-}
-
- 
 
 export default ApplicationDetailsContent;
