@@ -15,7 +15,7 @@ import { StepIconProps } from '@mui/material/StepIcon';
 
 const QontoConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
-    top: 22, // Adjusted: half of the icon height (45px / 2 = 22.5px, using 22px)
+    top: 22,
     left: 'calc(-50% + 16px)',
     right: 'calc(50% + 16px)',
   },
@@ -49,28 +49,15 @@ const QontoStepIconRoot = styled('div')<{ ownerState: { active?: boolean; comple
     justifyContent: 'center',
     borderRadius: '50%',
     position: 'relative',
+    backgroundColor: 'currentColor',
     ...(ownerState.active && {
       color: '#784af4',
+      backgroundColor: '#784af4',
     }),
     ...(ownerState.completed && {
       backgroundColor: '#784af4',
       color: '#ffffff',
     }),
-    '& .QontoStepIcon-completedIcon': {
-      color: '#ffffff',
-      zIndex: 1,
-      fontSize: '1.5rem',
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-    },
-    '& .QontoStepIcon-circle': {
-      width: '100%', 
-      height: '100%',
-      borderRadius: '50%',
-      backgroundColor: 'currentColor',
-    },
   }),
 );
 
@@ -79,9 +66,14 @@ function QontoStepIcon(props: StepIconProps) {
   return (
     <QontoStepIconRoot ownerState={{ active, completed }} className={className}>
       {completed ? (
-        <CheckCircle className="QontoStepIcon-completedIcon" />
+        <CheckCircle size={24} color="white" />
       ) : (
-        <div className="QontoStepIcon-circle" />
+        <div style={{
+          width: '20px',
+          height: '20px',
+          borderRadius: '50%',
+          backgroundColor: active ? 'white' : 'transparent',
+        }} />
       )}
     </QontoStepIconRoot>
   );
