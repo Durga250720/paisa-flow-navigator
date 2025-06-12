@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, XCircle } from 'lucide-react'; // Added XCircle
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { config } from '../config/environment';
 import { toast } from 'sonner';
@@ -39,7 +39,7 @@ const QontoConnector = styled(StepConnector)(({ theme }) => ({
   },
 }));
 
-const QontoStepIconRoot = styled('div')<{ ownerState: { active?: boolean; completed?: boolean } }>(
+const QontoStepIconRoot = styled('div')<{ ownerState: { active?: boolean; completed?: boolean; error?: boolean } }>(
   ({ theme, ownerState }) => ({
     color: theme.palette.mode === 'dark' ? theme.palette.grey[700] : '#eaeaf0',
     display: 'flex',
@@ -50,29 +50,37 @@ const QontoStepIconRoot = styled('div')<{ ownerState: { active?: boolean; comple
     borderRadius: '50%',
     position: 'relative',
     backgroundColor: 'currentColor',
-    ...(ownerState.active && {
+
+    ...(ownerState.active && !ownerState.completed && !ownerState.error && {
       color: '#784af4',
       backgroundColor: '#784af4',
     }),
-    ...(ownerState.completed && {
+    ...(ownerState.completed && !ownerState.error && {
       backgroundColor: '#784af4',
       color: '#ffffff',
+    }),
+    ...(ownerState.error && { // Styles for error state
+      backgroundColor: '#d32f2f', // Red background
+      color: '#ffffff', // White icon
     }),
   }),
 );
 
 function QontoStepIcon(props: StepIconProps) {
-  const { active, completed, className } = props;
+  const { active, completed, error, className } = props;
   return (
-    <QontoStepIconRoot ownerState={{ active, completed }} className={className}>
-      {completed ? (
+    <QontoStepIconRoot ownerState={{ active, completed, error }} className={className}>
+      {error ? (
+        <XCircle size={24} color="white" />
+      ) : completed ? (
         <CheckCircle size={24} color="white" />
       ) : (
+        // Inner circle for active (but not completed/error) or default non-active state
         <div style={{
           width: '20px',
           height: '20px',
           borderRadius: '50%',
-          backgroundColor: active ? 'white' : 'transparent',
+          backgroundColor: active && !completed && !error ? 'white' : 'transparent',
         }} />
       )}
     </QontoStepIconRoot>
@@ -130,7 +138,9 @@ const ApplicationDetailsContent = () => {
     const step1Completed = true;
     const step2Completed = applicationData?.loanProgress.AADHAAR_VERIFIED;
     const step3Completed = applicationData?.loanProgress.PAN_VERIFIED;
-    const step4Completed = applicationData?.loanDocuments?.length ? applicationData.loanDocuments.every(doc => doc.verified === true) : false;
+    const step4Completed = applicationData?.applicationStatus === 'REJECTED' // If rejected, step 4 is not considered complete for visual flow
+      ? false
+      : (applicationData?.loanDocuments ? applicationData.loanDocuments.every(doc => doc.verified === true) : false);
     const step5Completed = applicationData?.loanProgress.KYC_DONE;
     const step6Completed = applicationData?.loanProgress.ELIGIBILITY_PASSED
     const step7Completed = applicationData?.applicationStatus === 'APPROVED';
@@ -147,8 +157,15 @@ const ApplicationDetailsContent = () => {
   }, [applicationData]);
 
   useEffect(() => {
-    const lastCompletedStep = steps.slice().reverse().find(step => step.completed);
-    setCurrentStep(lastCompletedStep ? lastCompletedStep.id : 0);
+    // Determine the active step: it's the 0-based index of the first step that is not completed.
+    // If all steps are completed, activeStep should be steps.length.
+    const firstUncompletedStepIndex = steps.findIndex(step => !step.completed);
+
+    if (firstUncompletedStepIndex === -1 && steps.length > 0) {
+      setCurrentStep(steps.length); // All steps are completed
+    } else {
+      setCurrentStep(firstUncompletedStepIndex !== -1 ? firstUncompletedStepIndex : 0); // Set to first uncompleted or 0 if no steps/error
+    }
   }, [steps, navigate]);
 
   useEffect(() => {
@@ -222,9 +239,14 @@ const ApplicationDetailsContent = () => {
           ) : (
             <>
               <Stack sx={{ width: '100%' }} spacing={4}>
-                <Stepper alternativeLabel connector={<QontoConnector />}>
-                  {steps.map((step,index) => (
-                    <Step key={step.id} active={step.completed}>
+                <Stepper alternativeLabel activeStep={currentStep} connector={<QontoConnector />}>
+                  {steps.map((step, index) => (
+                    <Step
+                      key={step.id}
+                      completed={step.completed}
+                      // Ensure the error prop is always a boolean and check status case-insensitively
+                      error={!!(step.id === 7 && applicationData?.applicationStatus?.toUpperCase() === 'REJECTED')}
+                    >
                       <StepLabel StepIconComponent={QontoStepIcon} className='text-xs'>{step.label}</StepLabel>
                     </Step>
                   ))}
@@ -238,18 +260,25 @@ const ApplicationDetailsContent = () => {
                     </div>
                     : ''
                 }
-                <h2 className="text-xl font-mediyum mb-4 text-gray-900">
-                  {applicationData?.applicationStatus === 'APPROVED'
-                    ? `Congratulations! ₹ ${applicationData?.approvedAmount} loan is approved.`
-                    : "We've received your loan request and are reviewing your eligibility."
-                  }
+                <h2 className="text-xl font-medium mb-4 text-gray-900">
+                  {applicationData?.applicationStatus === 'APPROVED' ? (
+                    `Congratulations! ₹ ${applicationData?.approvedAmount} loan is approved.`
+                  ) : applicationData?.applicationStatus === 'REJECTED' ? (
+                    "Sorry! Your application is rejected."
+                  ) : (
+                    "We've received your loan request and are reviewing your eligibility."
+                  )}
                 </h2>
                 <p className="text-gray-600 text-sm">
-                  {applicationData?.applicationStatus === 'APPROVED'
-                    ? 'You can proceed to the next step.'
-                    : "We'll notify you as soon as your application is ready for disbursement."
-                  }
+                  {applicationData?.applicationStatus === 'APPROVED' ? (
+                    'You can proceed to the next step.'
+                  ) : applicationData?.applicationStatus === 'REJECTED' ? (
+                    applicationData?.remarks || 'Your application was rejected.'
+                  ) : (
+                    "We'll notify you as soon as your application is ready for disbursement."
+                  )}
                 </p>
+
               </div>
             </>
           )}

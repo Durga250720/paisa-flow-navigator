@@ -76,7 +76,7 @@ const LoanAmount = () => {
       const payload = {
         borrowerId: localStorage.getItem('authToken'),
         loanAmount: parseFloat(loanAmount) || 0,
-        loanPurpose: purpose,
+        purpose: purpose,
       };
 
       const response = await fetch(config.baseURL + 'loan-application/apply', {

@@ -12,6 +12,7 @@ const BankInfo = () => {
         reEnterBankAccountNumber: '',
         ifscCode: '',
         accountHolderName: '',
+        bankName: '',
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(false);
@@ -25,6 +26,37 @@ const BankInfo = () => {
             navigate('/');
         }
     }, [navigate]);
+
+    const indianBanks = [
+        { value: "", label: "Select Bank Name" },
+        { value: "State Bank Of India", label: "State Bank of India" },
+        { value: "HDFC", label: "HDFC Bank" },
+        { value: "ICICI", label: "ICICI Bank" },
+        { value: "Panjab National Bank", label: "Punjab National Bank" },
+        { value: "Kotak Mahindra Bank", label: "Kotak Mahindra Bank" },
+        { value: "Axis", label: "Axis Bank" },
+        { value: "Bank Of Baroda", label: "Bank of Baroda" },
+        { value: "Bank Of India", label: "Bank of India" },
+        { value: "Canara", label: "Canara Bank" },
+        { value: "Union Bank Of India", label: "Union Bank of India" },
+        { value: "IDBI", label: "IDBI Bank" },
+        { value: "Indian Bank", label: "Indian Bank" },
+        { value: "Central Bank Of India", label: "Central Bank of India" },
+        { value: "Indian Overseas Bank", label: "Indian Overseas Bank" },
+        { value: "UCO Bank", label: "UCO Bank" },
+        { value: "Bank Of Maharashtra", label: "Bank of Maharashtra"},
+        { value: "Yes Bank", label: "Yes Bank" },
+        { value: "IndusInd Bank", label: "IndusInd Bank" },
+        { value: "Fedaral Bank", label: "Federal Bank" },
+        { value: "Karnataka Bank", label: "Karnataka Bank" },
+        { value: "IDFC First Bank", label: "IDFC First Bank" },
+        { value: "IDFC First Bank", label: "IDFC First Bank" },
+        { value: "CSB Bank", label: "CSB Bank" },
+        { value: "DCB Bank", label: "DCB Bank" },
+        { value: "Dhanlaxmi Bank", label: "Dhanlaxmi Bank" },
+        { value: "Karur Vysya Bank", label: "Karur Vysya Bank" },
+        { value: "RBL Bank", label: "RBL Bank" }
+    ];
 
     const validateForm = () => {
         const newErrors: Record<string, string> = {};
@@ -49,6 +81,10 @@ const BankInfo = () => {
 
         if (!formData.accountHolderName.trim()) {
             newErrors.accountHolderName = 'Account holder name is required';
+        }
+
+        if (!formData.bankName) {
+            newErrors.bankName = 'Please select your bank name';
         }
 
         setErrors(newErrors);
@@ -88,7 +124,8 @@ const BankInfo = () => {
                 borrowerId: authToken,
                 accountNumber: formData.bankAccountNumber,
                 ifscNumber: formData.ifscCode.toUpperCase(),
-                accountHolderName: formData.accountHolderName
+                accountHolderName: formData.accountHolderName,
+                bankName: formData.bankName, // Add bankName to payload
             };
 
 
@@ -158,6 +195,23 @@ const BankInfo = () => {
                         </div>
 
                         <div className={`space-y-4 ${styles.formContainer1}`}>
+                            <div className="form-group">
+                                <label htmlFor="bankName" className="block text-sm font-medium text-gray-700 mb-1">
+                                    Bank Name <sup className="text-red-500">*</sup>
+                                </label>
+                                <select
+                                    id="bankName"
+                                    value={formData.bankName}
+                                    onChange={(e) => handleInputChange('bankName', e.target.value)}
+                                    className="inputField1"
+                                >
+                                    {indianBanks.map(bank => (
+                                        <option key={bank.value} value={bank.value}>{bank.label}</option>
+                                    ))}
+                                </select>
+                                {errors.bankName && <p className="error-message">{errors.bankName}</p>}
+                            </div>
+
                             <div className="form-group">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Bank Account Number <sup className="text-red-500">*</sup>

@@ -39,7 +39,6 @@ const PreApprovedLoadAmount = () => {
             const res = await response.json();
             setLoanAmount(res.data.loanAmount)
             setApplicationData(res.data)
-            console.log(res.data)
 
         } catch (error) {
             toast.error(error instanceof Error ? error.message : 'An unexpected error occurred.');
@@ -128,7 +127,9 @@ const PreApprovedLoadAmount = () => {
     const loanProtectionFee = applicationData?.loanConfig?.loanProtectionFee;
     const loanProcessingFee = applicationData?.loanConfig?.processingFee;
     const gstOnProcessingFee = loanProcessingFee * 0.18
-    const totalAmount = loanAmount + flatFee + interest + loanProtectionFee + loanProcessingFee;
+    const totalAmount = loanAmount + interest;
+    const disbursingAmount = loanAmount -  loanProtectionFee - gstOnProcessingFee - loanProcessingFee - flatFee;
+
 
     return (
         <div className={`${styles.container} block`}>
@@ -154,7 +155,7 @@ const PreApprovedLoadAmount = () => {
                         </div>
 
                         {/* === Replaced section starts here === */}
-                        <div className={`${styles.borrowingSection} mt-4`}> {/* Added mt-6 for spacing */}
+                        <div className={`${styles.borrowingSection} mt-1`}> {/* Added mt-6 for spacing */}
                             {/* Loan Amount Display and Slider */}
                             <div className="mb-8">
                                 <div className="text-3xl font-medium text-primary mb-6 text-center">
@@ -223,9 +224,14 @@ const PreApprovedLoadAmount = () => {
                                     <span className="text-gray-900">₹ {totalAmount}</span>
                                 </div>
 
+                                <div className="flex justify-between text-sm font-medium pt-1">
+                                    <span className="text-gray-700">Total Disbursing Amount</span> {/* Placeholder for Due Date */}
+                                    <span className="text-gray-900">₹ {disbursingAmount}</span>
+                                </div>
+
                                 <div className="flex justify-between text-sm">
                                     <span className="text-gray-600">Transfer to</span>
-                                    <span className="font-medium">**** 1234 (ICICI)</span> {/* Placeholder Bank Info */}
+                                    <span className="font-medium">****{applicationData?.bankDetail?.accountNumber.slice(-4)} ({applicationData?.bankDetail?.bankName})</span> {/* Placeholder Bank Info */}
                                 </div>
                             </div>
 
