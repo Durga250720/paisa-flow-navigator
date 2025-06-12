@@ -113,7 +113,7 @@ const KYCDocumentsContent = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
               <div>
                 <div className="text-sm text-gray-600">CIBIL Score</div>
-                <div className="text-lg font-semibold">{profileData.score || '0'}</div>
+                <div className="text-lg font-semibold">{profileData?.borrowerCibilData?.score || '0'}</div>
               </div>
               <div>
                 <div className="text-sm text-gray-600">Employment</div>
