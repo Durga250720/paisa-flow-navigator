@@ -14,7 +14,7 @@ const AdminOutlet  = () => {
     <Routes>
       <Route path="/" element={<Navigate to="/admin/kyc-documents" replace />} />
       <Route path="/my-application" element={<MyApplicationContent />} />
-      <Route path='view-application/:id' element={<ApplicationDetailsContent />}/>
+      <Route path='/view-application/:id' element={<ApplicationDetailsContent />}/>
       <Route path="/my-borrowings" element={<MyBorrowingsContent />} />
       <Route path="/my-repayments" element={<RepaymentsContent />} />
       <Route path="/kyc-documents" element={<KYCDocumentsContent />} />
