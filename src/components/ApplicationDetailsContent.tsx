@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { CheckCircle, XCircle, Check, ArrowLeft } from 'lucide-react'; // Added ArrowLeft
@@ -75,11 +74,13 @@ const QontoStepIconRoot = styled('div')<{ ownerState: { active?: boolean; comple
   }),
 );
 
-function QontoStepIcon(props: StepIconProps & { isIncomplete?: boolean }) {
-  const { active, completed, error, className, isIncomplete } = props;
+function QontoStepIcon(props: StepIconProps & { isIncomplete?: boolean; isRejected?: boolean }) {
+  const { active, completed, className, isIncomplete, isRejected } = props;
+  const isError = isRejected && !completed;
+  
   return (
-    <QontoStepIconRoot ownerState={{ active, completed, error, isIncomplete }} className={className}>
-      {error ? (
+    <QontoStepIconRoot ownerState={{ active, completed, error: isError, isIncomplete }} className={className}>
+      {isError ? (
         <XCircle size={24} color="white" />
       ) : completed ? (
         <CheckCircle size={24} color="white" />
@@ -89,7 +90,7 @@ function QontoStepIcon(props: StepIconProps & { isIncomplete?: boolean }) {
           width: '20px',
           height: '20px',
           borderRadius: '50%',
-          backgroundColor: (active && !completed && !error && !isIncomplete) ? 'white' : 'transparent',
+          backgroundColor: (active && !completed && !isError && !isIncomplete) ? 'white' : 'transparent',
         }} />
       )}
     </QontoStepIconRoot>
@@ -270,11 +271,14 @@ const ApplicationDetailsContent = () => {
                       <Step
                         key={step.id}
                         completed={step.completed}
-                        error={isRejectedFinalStep}
                       >
                         <StepLabel 
                           StepIconComponent={(props) => (
-                            <QontoStepIcon {...props} isIncomplete={isIncomplete && !isRejectedFinalStep} />
+                            <QontoStepIcon 
+                              {...props} 
+                              isIncomplete={isIncomplete && !isRejectedFinalStep} 
+                              isRejected={isRejectedFinalStep}
+                            />
                           )} 
                           className='text-xs'
                         >
