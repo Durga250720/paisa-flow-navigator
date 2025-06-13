@@ -57,14 +57,12 @@ const ApplicationDetailsContent = () => {
   }, [navigate]);
 
   useEffect(() => {
-    // Determine the active step: it's the 0-based index of the first step that is not completed.
-    // If all steps are completed, activeStep should be steps.length.
     const firstUncompletedStepIndex = steps.findIndex(step => !step.completed);
 
     if (firstUncompletedStepIndex === -1 && steps.length > 0) {
-      setCurrentStep(steps.length); // All steps are completed
+      setCurrentStep(steps.length);
     } else {
-      setCurrentStep(firstUncompletedStepIndex !== -1 ? firstUncompletedStepIndex : 0); // Set to first uncompleted or 0 if no steps/error
+      setCurrentStep(firstUncompletedStepIndex !== -1 ? firstUncompletedStepIndex : 0);
     }
   }, [steps, navigate]);
 
