@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { CheckCircle, XCircle, Check } from 'lucide-react'; // Added XCircle
+import { CheckCircle, XCircle, Check, ArrowLeft } from 'lucide-react'; // Added ArrowLeft
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { config } from '../config/environment';
 import { toast } from 'sonner';
@@ -212,8 +212,17 @@ const ApplicationDetailsContent = () => {
 
   return (
     <div className="min-h-full bg-white flex flex-col">
-      <div className="flex justify-between items-center px-6 py-4 border-b bg-white">
-        <h1 className="text-lg font-medium text-gray-900">Your Loan Application</h1>
+      <div className="flex justify-between items-center px-4 sm:px-6 py-4 border-b bg-white">
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => navigate('/admin/my-application')} 
+            className="text-gray-600 hover:text-gray-900 focus:outline-none"
+            aria-label="Back to applications"
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <h1 className="text-lg font-medium text-gray-900">Your Loan Application</h1>
+        </div>
         <div className="flex items-center gap-4">
           <span className={`px-3 py-1 rounded-full text-sm font-medium 
             ${`${getStatusClasses(applicationData?.applicationStatus)}`}`}>

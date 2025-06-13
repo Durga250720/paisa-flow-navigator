@@ -9,8 +9,8 @@
 }
 .firstContainer{
     /* @apply w-[50%] margin-auto; */
-    width: 50%;
-    margin: 0 auto;
+    /* width: 50%; */
+    /* margin: 0 auto; */
     margin-bottom: 15px !important;
 }
 .activeStatusValue{

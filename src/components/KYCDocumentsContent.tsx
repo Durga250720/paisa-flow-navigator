@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, CheckCircle, User, XCircle } from 'lucide-react';
+import { FileText, CheckCircle, User, XCircle, Eye } from 'lucide-react'; // Added Eye icon
 import styles from './KYCDocumentsContent.module.css';
 import { config } from '../config/environment'; // Assuming config is here
 
@@ -16,7 +16,7 @@ const KYCDocumentsContent = () => {
     {
       type: "PAN Card",
       status: "Unverified", // Initial status
-      icon: FileText
+      icon: FileText,
     },
     {
       type: "Salary Slips",
@@ -64,22 +64,24 @@ const KYCDocumentsContent = () => {
         // Update documents state based on API response
         setDocuments(prevDocuments => prevDocuments.map(doc => {
           if (doc.type === "PAN Card") {
-            return { ...doc, status: data.data.panVerified ? 'Verified' : 'Unverified' };
+            return { ...doc, status: data.data.panVerified ? 'Verified' : 'Unverified', docUrl: data.data.kycDocuments.find(kyc => kyc.documentType === 'PAN')?.documentUrls || ''};
           } else if (doc.type === "Salary Slips") {
-            return { ...doc, status: data.data.salarySlip ? 'Verified' : 'Unverified' };
+            return { ...doc, status: data.data.salarySlip ? 'Verified' : 'Unverified', docUrl:data.data.payslips.documentUrls};
           } else if (doc.type === "KYC Verified") {
-            return { ...doc, status: data.data.kycverified ? 'Verified' : 'Unverified' };
+            return { ...doc, status: data.data.kycverified ? 'Verified' : 'Unverified',docUrl:''};
           } else if (doc.type === "AADHAR Verified") {
-            return { ...doc, status: data.data.aadhaarVerified ? 'Verified' : 'Unverified' };
+            return { ...doc, status: data.data.aadhaarVerified ? 'Verified' : 'Unverified', docUrl: data.data.kycDocuments.find(kyc => kyc.documentType === 'AADHAAR')?.documentUrls || ''};
           }
           return doc;
         }));
 
         setProfileData(data.data);
+
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
       } finally {
         setLoading(false);
+        // console.log(documents)
       }
     };
 
@@ -142,15 +144,21 @@ const KYCDocumentsContent = () => {
                 <doc.icon className="w-5 h-5 text-gray-600" />
                 <span className="text-xs font-normal text-gray-900">{doc.type}</span>
               </div>
-              <div className="flex items-center gap-2">
-                {doc.status === 'Verified' ? (
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                ) : (
-                  <XCircle className="w-4 h-4 text-red-500" /> // Or another appropriate color like text-gray-400
-                )}
+              <div className="flex items-center gap-3"> {/* Increased gap for View icon */}
+                <div className="flex items-center gap-1"> {/* Group status icon and text */}
+                  {doc.status === 'Verified' ? (
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                  ) : (
+                    <XCircle className="w-4 h-4 text-red-500" />
+                  )}
+                </div>
                 <span className={`${doc.status === 'Verified' ? styles.activeStatusValue : styles.inActiveStatusValue} text-xs px-2 py-1 rounded text-center`}>
                   {doc.status}
                 </span>
+                {/* View Icon */}
+                {/* <button title="View Document" className="text-gray-500 hover:text-primary">
+                  <Eye size={16} />
+                </button> */}
               </div>
             </div>
           ))}
