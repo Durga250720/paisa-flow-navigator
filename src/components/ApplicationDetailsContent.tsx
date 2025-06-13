@@ -14,7 +14,7 @@ import { styled } from '@mui/material/styles';
 import StepConnector, { stepConnectorClasses } from '@mui/material/StepConnector';
 import { StepIconProps } from '@mui/material/StepIcon';
 
-const QontoConnector = styled(StepConnector)(({ theme }) => ({
+const QontoConnector = styled(StepConnector)<{ completed?: boolean }>(({ theme, completed }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
     top: 22,
     left: 'calc(-50% + 16px)',
@@ -22,7 +22,7 @@ const QontoConnector = styled(StepConnector)(({ theme }) => ({
   },
   [`&.${stepConnectorClasses.active}`]: {
     [`& .${stepConnectorClasses.line}`]: {
-      borderColor: '#784af4',
+      borderColor: completed ? '#784af4' : '#9CA3AF', // Gray if not completed
     },
   },
   [`&.${stepConnectorClasses.completed}`]: {
@@ -31,7 +31,7 @@ const QontoConnector = styled(StepConnector)(({ theme }) => ({
     },
   },
   [`& .${stepConnectorClasses.line}`]: {
-    borderColor: '#eaeaf0',
+    borderColor: completed ? '#eaeaf0' : '#9CA3AF', // Gray if not completed
     borderTopWidth: 3,
     borderRadius: 1,
     ...theme.applyStyles('dark', {
@@ -40,7 +40,7 @@ const QontoConnector = styled(StepConnector)(({ theme }) => ({
   },
 }));
 
-const QontoStepIconRoot = styled('div')<{ ownerState: { active?: boolean; completed?: boolean; error?: boolean } }>(
+const QontoStepIconRoot = styled('div')<{ ownerState: { active?: boolean; completed?: boolean; error?: boolean; isIncomplete?: boolean } }>(
   ({ theme, ownerState }) => ({
     color: theme.palette.mode === 'dark' ? theme.palette.grey[700] : '#eaeaf0',
     display: 'flex',
@@ -52,25 +52,33 @@ const QontoStepIconRoot = styled('div')<{ ownerState: { active?: boolean; comple
     position: 'relative',
     backgroundColor: 'currentColor',
 
-    ...(ownerState.active && !ownerState.completed && !ownerState.error && {
+    // Incomplete steps (gray background)
+    ...(ownerState.isIncomplete && {
+      backgroundColor: '#9CA3AF', // Gray background
+      color: '#9CA3AF',
+    }),
+    // Active step (not completed, not error, not incomplete)
+    ...(ownerState.active && !ownerState.completed && !ownerState.error && !ownerState.isIncomplete && {
       color: '#784af4',
       backgroundColor: '#784af4',
     }),
+    // Completed steps
     ...(ownerState.completed && !ownerState.error && {
       backgroundColor: '#784af4',
       color: '#ffffff',
     }),
-    ...(ownerState.error && { // Styles for error state
+    // Error state (rejected)
+    ...(ownerState.error && {
       backgroundColor: '#d32f2f', // Red background
       color: '#ffffff', // White icon
     }),
   }),
 );
 
-function QontoStepIcon(props: StepIconProps) {
-  const { active, completed, error, className } = props;
+function QontoStepIcon(props: StepIconProps & { isIncomplete?: boolean }) {
+  const { active, completed, error, className, isIncomplete } = props;
   return (
-    <QontoStepIconRoot ownerState={{ active, completed, error }} className={className}>
+    <QontoStepIconRoot ownerState={{ active, completed, error, isIncomplete }} className={className}>
       {error ? (
         <XCircle size={24} color="white" />
       ) : completed ? (
@@ -81,7 +89,7 @@ function QontoStepIcon(props: StepIconProps) {
           width: '20px',
           height: '20px',
           borderRadius: '50%',
-          backgroundColor: active && !completed && !error ? 'white' : 'transparent',
+          backgroundColor: (active && !completed && !error && !isIncomplete) ? 'white' : 'transparent',
         }} />
       )}
     </QontoStepIconRoot>
@@ -249,17 +257,32 @@ const ApplicationDetailsContent = () => {
           ) : (
             <>
               <Stack sx={{ width: '100%' }} spacing={4}>
-                <Stepper alternativeLabel activeStep={currentStep} connector={<QontoConnector />}>
-                  {steps.map((step, index) => (
-                    <Step
-                      key={step.id}
-                      completed={step.completed}
-                      // Ensure the error prop is always a boolean and check status case-insensitively
-                      error={!!(step.id === 7 && applicationData?.applicationStatus?.toUpperCase() === 'REJECTED')}
-                    >
-                      <StepLabel StepIconComponent={QontoStepIcon} className='text-xs'>{step.label}</StepLabel>
-                    </Step>
-                  ))}
+                <Stepper 
+                  alternativeLabel 
+                  activeStep={currentStep} 
+                  connector={<QontoConnector />}
+                >
+                  {steps.map((step, index) => {
+                    const isIncomplete = !step.completed;
+                    const isRejectedFinalStep = step.id === 7 && applicationData?.applicationStatus?.toUpperCase() === 'REJECTED';
+                    
+                    return (
+                      <Step
+                        key={step.id}
+                        completed={step.completed}
+                        error={isRejectedFinalStep}
+                      >
+                        <StepLabel 
+                          StepIconComponent={(props) => (
+                            <QontoStepIcon {...props} isIncomplete={isIncomplete && !isRejectedFinalStep} />
+                          )} 
+                          className='text-xs'
+                        >
+                          {step.label}
+                        </StepLabel>
+                      </Step>
+                    );
+                  })}
                 </Stepper>
               </Stack>
               <div className="text-center mt-10">
