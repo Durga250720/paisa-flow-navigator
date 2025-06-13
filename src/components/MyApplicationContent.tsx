@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import styles from './styles/MyApplication.module.css';
 import { useNavigate } from 'react-router-dom';
 import { config } from '../config/environment';
-import { Eye, X } from 'lucide-react';
-import { toast } from 'sonner';
+import { Eye, X, RefreshCw } from 'lucide-react'; // Added RefreshCw
+import {toast } from 'react-toastify';
 
 // Import form components (to be created)
 import EmploymentInfoForm from './forms/EmploymentInfoForm';
@@ -180,9 +180,16 @@ const MyApplicationContent = () => {
   return (
     <div className="p-4 h-full w-full">
       <div className='flex justify-between items-center'>
-        <div className="text-xl font-medium text-primary mb-2">Applied Applications</div>
-        <div className={`${styles.applyBtn}`}>
-          <button onClick={handleOpenApplyModal}>Apply</button>
+        <div className="text-xl font-medium text-primary">Applied Applications</div>
+        <div className="flex items-center gap-2">
+          <div className="reload ">
+            <button onClick={fetchApplications} className="p-2 rounded-md hover:bg-color-none focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 bg-gray-200" title="Reload Applications">
+              <RefreshCw size={18} className="text-primary" />
+            </button>
+          </div>
+          <div className={`${styles.applyBtn}`}>
+            <button onClick={handleOpenApplyModal}>Apply</button>
+          </div>
         </div>
       </div>
 

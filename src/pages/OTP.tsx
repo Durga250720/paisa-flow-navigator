@@ -118,6 +118,7 @@ const OTP = () => {
         handleFetchDetails(res.data.id)
       }
       else{
+        localStorage.setItem('name',res.data.name)
         navigate('/admin/my-application');
       }
     } catch (err) {
