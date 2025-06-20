@@ -37,7 +37,7 @@ const LoanAmount = () => {
     }
 
     const numericValue = parseFloat(value);
-    if (!isNaN(numericValue) && numericValue > 25000) {
+    if (!isNaN(numericValue) && numericValue > 55000) {
       toast.warn("We will provide loan up to ₹25,000 only.");
       setLoanAmount('');
       return;
@@ -53,7 +53,7 @@ const LoanAmount = () => {
       newErrors.loanAmount = 'Please enter the amount to be borrowed';
     } else if (numericLoanAmount <= 0) {
       newErrors.loanAmount = 'Loan amount must be a positive number.';
-    } else if (numericLoanAmount > 25000) {
+    } else if (numericLoanAmount > 55000) {
       newErrors.loanAmount = 'Loan amount cannot exceed ₹25,000.';
     }
 

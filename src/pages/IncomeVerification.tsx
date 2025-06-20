@@ -281,7 +281,6 @@ const IncomeVerification = () => {
                         const errorData = await response.json().catch(() => ({ message: 'Failed to submit bank statement to backend.' }));
                         throw new Error(errorData.message || 'Failed to submit bank statement.');
                     }
-                    console.log('Bank statement submitted successfully:', await response.json());
                 } catch (apiError) {
                     const errorMessage = apiError instanceof Error ? apiError.message : 'Unknown error submitting bank statement.';
                     throw new Error(`API Error (Bank Statement): ${errorMessage}`);
@@ -289,10 +288,10 @@ const IncomeVerification = () => {
             }
             // --- End API Calls ---
 
-            console.log('Uploaded Payslip URLs:', payslipUploads.map(f => f.url));
-            console.log('Uploaded Payslip Details (name and URL):', payslipUploads);
-            console.log('Uploaded Bank Statement URLs:', bankStatementUploads.map(f => f.url));
-            console.log('Uploaded Bank Statement Details (name and URL):', bankStatementUploads);
+            // console.log('Uploaded Payslip URLs:', payslipUploads.map(f => f.url));
+            // console.log('Uploaded Payslip Details (name and URL):', payslipUploads);
+            // console.log('Uploaded Bank Statement URLs:', bankStatementUploads.map(f => f.url));
+            // console.log('Uploaded Bank Statement Details (name and URL):', bankStatementUploads);
             toast.success("Income verification documents uploaded successfully!");
             localStorage.setItem('incomeVerificationCompleted', 'true');
             navigate('/bank-info');
@@ -390,10 +389,10 @@ const IncomeVerification = () => {
                 </div>
             ) : (
                 <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border">
-                    <div className="flex items-center space-x-3">
-                        <div className="bg-green-100 p-1 rounded">
+                    <div className="flex items-center space-x-2">
+                        {/* <div className="bg-green-100 p-1 rounded">
                             <Check className="h-4 w-4 text-green-600" />
-                        </div>
+                        </div> */}
                         <FileText className="h-4 w-4 text-gray-500" />
                         <span className="text-sm text-gray-700 truncate max-w-xs" title={files.bankStatement.name}>
                             {files.bankStatement.name}

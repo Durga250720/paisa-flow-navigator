@@ -5,7 +5,7 @@ import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import DashboardSidebar from '@/components/AdminSidebar';
 import AdminOutlet from '@/components/AdminOutlet';
 import styles from '../pages-styles/Admin.module.css';
-import { toast } from "sonner";
+import {toast } from 'react-toastify';
 import { LogOut } from 'lucide-react';
 
 const Admin = () => {
@@ -29,10 +29,9 @@ const Admin = () => {
   };
 
   const executeLogout = () => {
-    toast.info("Logout functionality to be implemented!");
     localStorage.clear();
     navigate('/');
-    toast.success("You have been logged out successfully!");
+    toast.info("You have been logged out successfully!");
     setShowLogoutConfirm(false); // Close the popup
   };
   

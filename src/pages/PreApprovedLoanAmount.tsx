@@ -6,13 +6,40 @@ import styles from '../pages-styles/LoanAmount.module.css';
 import { config } from '../config/environment';
 import { toast } from 'react-toastify'; // Assuming this is sonner or react-toastify
 import { ChevronRight, Check } from 'lucide-react';
+import { formatIndianNumber } from '../lib/utils';
 
 const PreApprovedLoadAmount = () => {
     const [loanAmount, setLoanAmount] = useState<number>(6000); // Min loan amount as initial
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(false);
-    const [applicationData, setApplicationData] = useState<any>();
+    const [configData, setLoanConfig] = useState<any>();
+    const [purpose, setPurpose] = useState('');
     const navigate = useNavigate();
+
+    // Define the list of purpose options
+    const purposeOptions = [
+        { value: '', label: 'Select Purpose of Borrowing' }, // Default/placeholder option
+        { value: 'Home Renovation', label: 'Home Renovation' },
+        { value: 'Medical Emergency', label: 'Medical Emergency' },
+        { value: 'Education Expenses', label: 'Education Expenses' },
+        { value: 'Wedding/Marriage', label: 'Wedding/Marriage' },
+        { value: 'Business Expansion', label: 'Business Expansion' },
+        { value: 'Debt Consolidation', label: 'Debt Consolidation' },
+        { value: 'Vehicle Purchase', label: 'Vehicle Purchase' },
+        { value: 'Travel or Vacation', label: 'Travel or Vacation' },
+        { value: 'House Purchase', label: 'House Purchase' },
+        { value: 'Rent Deposit', label: 'Rent Deposit' },
+        { value: 'Personal Use', label: 'Personal Use' },
+        { value: 'Gadget Purchase', label: 'Gadget Purchase' },
+        { value: 'Home Appliance Purchase', label: 'Home Appliance Purchase' },
+        { value: 'Investment', label: 'Investment' },
+        { value: 'Agricultural Needs', label: 'Agricultural Needs' },
+        { value: 'Construction of Property', label: 'Construction of Property' },
+        { value: 'Loan Repayment', label: 'Loan Repayment' },
+        { value: 'Credit Card Bill Payment', label: 'Credit Card Bill Payment' },
+        { value: 'Utility Bill Payment', label: 'Utility Bill Payment' },
+        { value: 'Others', label: 'Others' }
+    ];
 
     useEffect(() => {
         const authToken = localStorage.getItem('authToken');
@@ -23,22 +50,21 @@ const PreApprovedLoadAmount = () => {
             return;
         }
 
-        fetchUserProfile();
+        fetchConfigData();
 
     }, [navigate]);
 
-    const fetchUserProfile = async () => {
-        const applicationId = localStorage.getItem('appId');
+    const fetchConfigData = async () => {
         try {
-            const response = await fetch(config.baseURL + `loan-application/${applicationId}/details`, {
+            const response = await fetch(config.baseURL + `loan-application/loan-config`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                 }
             });
             const res = await response.json();
-            setLoanAmount(res.data.loanAmount)
-            setApplicationData(res.data)
+            setLoanAmount(55000)
+            setLoanConfig(res.data)
 
         } catch (error) {
             toast.error(error instanceof Error ? error.message : 'An unexpected error occurred.');
@@ -60,13 +86,13 @@ const PreApprovedLoadAmount = () => {
             return;
         }
 
-        if (value > 25000) {
+        if (value > 55000) {
             toast.warn("We will provide loan up to ₹25,000 only.");
-            setLoanAmount(25000);
+            setLoanAmount(55000);
             return;
         }
-        if (value < 1000) { // Assuming 1000 is min from slider
-            setLoanAmount(1000); // Cap at min
+        if (value < 1000) {
+            setLoanAmount(1000);
             return;
         }
         setLoanAmount(value);
@@ -76,8 +102,12 @@ const PreApprovedLoadAmount = () => {
         const newErrors: Record<string, string> = {};
         if (loanAmount < 1000) { // Min loan amount check
             newErrors.loanAmount = 'Loan amount must be at least ₹1,000.';
-        } else if (loanAmount > 25000) { // Max loan amount check (should be caught by handleLoanAmountChange too)
+        } else if (loanAmount > 55000) { // Max loan amount check (should be caught by handleLoanAmountChange too)
             newErrors.loanAmount = 'Loan amount cannot exceed ₹25,000.';
+        }
+
+        if (!purpose) { // Validation for the new dropdown
+            newErrors.purpose = 'Please select the purpose of borrowing.';
         }
 
         if (Object.keys(newErrors).length > 0) {
@@ -92,25 +122,25 @@ const PreApprovedLoadAmount = () => {
             // Simulate API call
             await new Promise(resolve => setTimeout(resolve, 1000));
 
-            // const payload = {
-            //     borrowerId: localStorage.getItem('authToken'),
-            //     loanAmount: loanAmount,
-            //     // loanPurpose: purpose, // Purpose is removed
-            // };
+            const payload = {
+                borrowerId: localStorage.getItem('authToken'),
+                loanAmount: loanAmount || 0,
+                purpose: purpose,
+            }
 
-            const response = await fetch(config.baseURL + `loan-application/${localStorage.getItem('appId')}/update-amount?amount=${loanAmount}`, {
-                method: 'PUT',
+            const response = await fetch(config.baseURL + `loan-application/apply`, {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                // body: JSON.stringify(payload),
+                body: JSON.stringify(payload),
             });
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({ message: 'Failed to submit loan application. Please try again.' }));
                 throw new Error(errorData.message || 'Failed to submit loan application.');
             }
-              navigate('/admin/my-application');
+            navigate('/admin/my-application');
         } catch (err: any) {
             setLoading(false);
             toast.error(err ? err.message : 'An unexpected error occurred.');
@@ -121,14 +151,14 @@ const PreApprovedLoadAmount = () => {
     };
 
     // Fees and total calculation from CreateMyBorrowing.tsx
-    const flatFee = applicationData?.loanConfig?.platformFee;
-    const loanInterestPercentage = (applicationData?.loanAmount / applicationData?.loanConfig?.loanInterest)/100;
-    const interest =loanAmount*loanInterestPercentage; // This might need to be dynamic based on loanAmount
-    const loanProtectionFee = applicationData?.loanConfig?.loanProtectionFee;
-    const loanProcessingFee = applicationData?.loanConfig?.processingFee;
-    const gstOnProcessingFee = loanProcessingFee * 0.18
+    const flatFee = configData?.platformFee;
+    // const loanInterestPercentage = configData?.interestPercentage * 100;
+    const interest = loanAmount * configData?.interestPercentage;
+    const loanProtectionFee = configData?.protectionFee;
+    const loanProcessingFee = loanAmount * (configData?.processingFeePercentage);
+    const gstOnProcessingFee = loanProcessingFee * configData?.gstPercentOnProcessingFee
     const totalAmount = loanAmount + interest;
-    const disbursingAmount = loanAmount -  loanProtectionFee - gstOnProcessingFee - loanProcessingFee - flatFee;
+    const disbursingAmount = loanAmount - loanProtectionFee - gstOnProcessingFee - loanProcessingFee - flatFee;
 
 
     return (
@@ -151,7 +181,7 @@ const PreApprovedLoadAmount = () => {
                 <div className={styles.rightPanel}>
                     <div className={styles.formWrapper}>
                         <div className={styles.heading1}>
-                            Congratulations! You’re Approved Limit ₹{applicationData?.approvedAmount}
+                            You’re Approved Limit ₹{formatIndianNumber(55000)}
                         </div>
 
                         {/* === Replaced section starts here === */}
@@ -167,18 +197,18 @@ const PreApprovedLoadAmount = () => {
                                     <input
                                         type="range"
                                         min="1000"
-                                        max={applicationData?.approvedAmount}
+                                        max="55000"
                                         step="500"
                                         value={loanAmount} // Use loanAmount (number) for slider value
                                         onChange={(e) => handleLoanAmountChange(e.target.value)}
                                         className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                                         style={{
-                                            background: `linear-gradient(to right, #5D15C1 0%, #5D15C1 ${((loanAmount - 1000) / (25000 - 1000)) * 100}%, #e5e7eb ${((loanAmount - 1000) / (25000 - 1000)) * 100}%, #e5e7eb 100%)`
+                                            background: `linear-gradient(to right, #5D15C1 0%, #5D15C1 ${((loanAmount - 1000) / (55000 - 1000)) * 100}%, #e5e7eb ${((loanAmount - 1000) / (55000 - 1000)) * 100}%, #e5e7eb 100%)`
                                         }}
                                     />
                                     <div className="flex justify-between text-xs text-gray-500 mt-1">
                                         <span>₹1,000</span>
-                                        <span>₹25,000</span>
+                                        <span>₹55,000</span>
                                     </div>
                                 </div>
                                 {errors.loanAmount && <p className={`${styles.errorMessage} text-center`}>{errors.loanAmount}</p>}
@@ -229,18 +259,34 @@ const PreApprovedLoadAmount = () => {
                                     <span className="text-gray-900">₹ {disbursingAmount}</span>
                                 </div>
 
-                                <div className="flex justify-between text-sm">
+                                {/* <div className="flex justify-between text-sm">
                                     <span className="text-gray-600">Transfer to</span>
-                                    <span className="font-medium">****{applicationData?.bankDetail?.accountNumber.slice(-4)} ({applicationData?.bankDetail?.bankName})</span> {/* Placeholder Bank Info */}
-                                </div>
+                                    <span className="font-medium">****{applicationData?.bankDetail?.accountNumber.slice(-4)} ({applicationData?.bankDetail?.bankName})</span> 
+                                </div> */}
                             </div>
 
                             {/* KFS & Loan Documents */}
-                            <div className="mb-6 border-t pt-4">
+                            {/* <div className="mb-6 border-t pt-4">
                                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100">
                                     <span className="text-gray-700 font-medium text-sm">KFS & Loan Documents</span>
                                     <ChevronRight className="w-5 h-5 text-gray-400" />
                                 </div>
+                            </div> */}
+                            <div className={`${styles.fieldGroup} mb-4`}>
+                                <label htmlFor="purpose" className={styles.label}>
+                                    Purpose of Borrowing <sup>*</sup>
+                                </label>
+                                <select
+                                    id="purpose"
+                                    value={purpose}
+                                    onChange={(e) => setPurpose(e.target.value)}
+                                    className="inputField" // Ensure this class styles select elements appropriately
+                                >
+                                    {purposeOptions.map(option => (
+                                        <option key={option.value} value={option.value}>{option.label}</option>
+                                    ))}
+                                </select>
+                                {errors.purpose && <p className={styles.errorMessage}>{errors.purpose}</p>}
                             </div>
 
                             {errors.submit && <p className={`${styles.errorMessage} text-center mb-4`}>{errors.submit}</p>}

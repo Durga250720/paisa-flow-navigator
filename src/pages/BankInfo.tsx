@@ -154,10 +154,10 @@ const BankInfo = () => {
             }
 
             const responseData = await response.json();
-            console.log('API success response:', responseData);
+            // console.log('API success response:', responseData);
             toast.success("Bank details saved successfully!");
             localStorage.setItem('bankInfoCompleted', 'true');
-            navigate('/loan-amount');
+            navigate('/approved-loan-amount');
         } catch (err) {
             setLoading(false);
             const errorMessage = err instanceof Error ? err.message : 'Failed to save bank information. Please try again.';
@@ -191,7 +191,7 @@ const BankInfo = () => {
                     <div className={styles.employmentFormContainer1}>
                         <div className="text-center mb-2">
                             <div className={styles.heading}>Bank Info</div>
-                            <p className={styles.description}>To deposit your approved amount and enable auto-repayment</p>
+                            <p className={styles.description}>To get the loan amount into your account</p>
                         </div>
 
                         <div className={`space-y-4 ${styles.formContainer1}`}>

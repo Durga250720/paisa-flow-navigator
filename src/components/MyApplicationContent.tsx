@@ -237,7 +237,7 @@ const MyApplicationContent = () => {
                     ))
                   ) :
                     <tr>
-                      <td colSpan={7} className="p-4 text-center text-gray-500">No borrowing history found.</td>
+                      <td colSpan={7} className="p-4 text-center text-gray-500" style={{height:'75vh'}}>No application history found.</td>
                     </tr>
                   }
                 </tbody>

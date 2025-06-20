@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, CheckCircle, User, XCircle, Eye } from 'lucide-react'; // Added Eye icon
+import { FileText, IdCard, Banknote, UserCheck, BadgeCheck, CheckCircle, User, XCircle, Eye } from 'lucide-react'; // Added Eye icon
 import styles from './KYCDocumentsContent.module.css';
 import { config } from '../config/environment'; // Assuming config is here
+import { formatIndianNumber, getCibilColor, toTitleCase } from '../lib/utils';
 
 
 const KYCDocumentsContent = () => {
@@ -16,22 +17,26 @@ const KYCDocumentsContent = () => {
     {
       type: "PAN Card",
       status: "Unverified", // Initial status
-      icon: FileText,
+      icon: IdCard,
+      documentValue: ''
     },
     {
       type: "Salary Slips",
       status: "Unverified", // Initial status
-      icon: FileText
+      icon: Banknote,
+      documentValue: ''
     },
     {
       type: "KYC Verified",
       status: "Unverified", // Initial status
-      icon: FileText
+      icon: BadgeCheck,
+      documentValue: ''
     },
     {
       type: "AADHAR Verified",
       status: "Unverified", // Initial status
-      icon: FileText
+      icon: UserCheck,
+      documentValue: ''
     }
   ]);
 
@@ -58,19 +63,33 @@ const KYCDocumentsContent = () => {
           const errorData = await response.json().catch(() => ({ message: 'Failed to fetch profile data.' }));
           throw new Error(errorData.message || 'Failed to fetch profile data.');
         }
-
         const data = await response.json();
 
         // Update documents state based on API response
         setDocuments(prevDocuments => prevDocuments.map(doc => {
           if (doc.type === "PAN Card") {
-            return { ...doc, status: data.data.panVerified ? 'Verified' : 'Unverified', docUrl: data.data.kycDocuments.find(kyc => kyc.documentType === 'PAN')?.documentUrls || ''};
+            return {
+              ...doc, status: data.data.kycDocuments.find(verify => verify.documentType === 'PAN')?.verified ? 'Verified' : 'Unverified',
+              docUrl: data?.data?.kycDocuments?.find(kyc => kyc.documentType === 'PAN')?.documentUrls || '',
+              documentValue: data.data.kycDocuments.find(verify => verify.documentType === 'PAN')?.documentNumber
+            };
           } else if (doc.type === "Salary Slips") {
-            return { ...doc, status: data.data.salarySlip ? 'Verified' : 'Unverified', docUrl:data.data.payslips.documentUrls};
+            return {
+              ...doc, status: data.data.payslips.verified ? 'Verified' : 'Unverified',
+              docUrl: data?.data?.payslips?.documentUrls,
+              documentValue: ''
+            };
           } else if (doc.type === "KYC Verified") {
-            return { ...doc, status: data.data.kycverified ? 'Verified' : 'Unverified',docUrl:''};
+            return {
+              ...doc, status: data.data.kycverified ? 'Verified' : 'Unverified', docUrl: '',
+              documentValue: ''
+            };
           } else if (doc.type === "AADHAR Verified") {
-            return { ...doc, status: data.data.aadhaarVerified ? 'Verified' : 'Unverified', docUrl: data.data.kycDocuments.find(kyc => kyc.documentType === 'AADHAAR')?.documentUrls || ''};
+            return {
+              ...doc, status: data.data.kycDocuments.find(verify => verify.documentType === 'PAN')?.verified ? 'Verified' : 'Unverified',
+              docUrl: data?.data?.kycDocuments?.find(kyc => kyc.documentType === 'AADHAAR')?.documentUrls || '',
+              documentValue: data.data.kycDocuments.find(verify => verify.documentType === 'AADHAAR')?.documentNumber
+            };
           }
           return doc;
         }));
@@ -115,16 +134,16 @@ const KYCDocumentsContent = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
               <div>
                 <div className="text-sm text-gray-600">CIBIL Score</div>
-                <div className="text-lg font-semibold">{profileData?.borrowerCibilData?.score || '0'}</div>
+                <div className={`${getCibilColor(profileData?.borrowerCibilData?.score)}`}>{profileData?.borrowerCibilData?.score || '0'}</div>
               </div>
               <div>
                 <div className="text-sm text-gray-600">Employment</div>
-                <div className="text-sm font-medium">{profileData.employmentDetails ? profileData.employmentDetails.employmentType : 'N/A'}</div>
+                <div className="text-sm font-medium">{profileData.employmentDetails ? toTitleCase(profileData.employmentDetails.employmentType.split('_').join(' ')) : 'N/A'}</div>
               </div>
               <div>
                 <div className="text-sm text-gray-600">Monthly Income</div>
                 <div className="text-sm font-medium">
-                  {profileData.employmentDetails ? `₹ ${profileData.employmentDetails?.takeHomeSalary}` : '0'}
+                  {profileData.employmentDetails ? `₹ ${formatIndianNumber(profileData.employmentDetails?.takeHomeSalary)}` : '0'}
                 </div>
               </div>
             </div>
@@ -143,9 +162,21 @@ const KYCDocumentsContent = () => {
               <div className="flex items-center gap-3">
                 <doc.icon className="w-5 h-5 text-gray-600" />
                 <span className="text-xs font-normal text-gray-900">{doc.type}</span>
+                {
+                  doc.documentValue != '' ?
+                    <span className='text-xs font-normal text-gray-800'>(
+                      {
+                        doc.type.includes('AADHAR')
+                          ? doc.documentValue.replace(/(\d{4})(?=\d)/g, '$1 ')
+                          : doc.documentValue
+                      }
+                      )</span>
+                    :
+                    ''
+                }
               </div>
-              <div className="flex items-center gap-3"> {/* Increased gap for View icon */}
-                <div className="flex items-center gap-1"> {/* Group status icon and text */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1">
                   {doc.status === 'Verified' ? (
                     <CheckCircle className="w-4 h-4 text-green-600" />
                   ) : (
@@ -155,10 +186,6 @@ const KYCDocumentsContent = () => {
                 <span className={`${doc.status === 'Verified' ? styles.activeStatusValue : styles.inActiveStatusValue} text-xs px-2 py-1 rounded text-center`}>
                   {doc.status}
                 </span>
-                {/* View Icon */}
-                {/* <button title="View Document" className="text-gray-500 hover:text-primary">
-                  <Eye size={16} />
-                </button> */}
               </div>
             </div>
           ))}

@@ -8,10 +8,10 @@
     @apply text-white bg-[var(--primary-color)] text-[14px] px-8 py-2 rounded-md;
 }
 .loadingSection{
-    @apply h-[55vh] flex justify-center items-center;
+    @apply h-[73vh] flex justify-center items-center;
 }
 .tableContainer{
-    @apply h-[45vh]
+    @apply h-[83vh]
 }
 
 .tableContainer {

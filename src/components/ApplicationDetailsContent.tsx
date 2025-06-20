@@ -86,7 +86,7 @@ const ApplicationDetailsContent = () => {
         </div>
       </div>
 
-      <div className={`flex-1 flex items-start justify-center p-6 ${loading ? 'items-center' : ''}`}>
+      <div className={`flex-1 flex items-start justify-center p-6 ${loading ? 'items-center' : 'items-center'}`}>
         <div className="w-full max-w-5xl">
           {loading ? (
             <div className="text-center py-10">
