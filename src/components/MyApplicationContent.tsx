@@ -4,13 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { config } from '../config/environment';
 import { Eye, X, RefreshCw } from 'lucide-react'; // Added RefreshCw
 import {toast } from 'react-toastify';
-
-// Import form components (to be created)
 import EmploymentInfoForm from './forms/EmploymentInfoForm';
 import IncomeVerificationForm from './forms/IncomeVerificationForm';
 import BankInfoForm from './forms/BankInfoForm';
 import InitialLoanAmountForm from './forms/InitialLoanAmountForm';
-import FinalLoanAmountForm from './forms/FinalLoanAmountForm';
+import { toTitleCase } from '../lib/utils';
 
 const MyApplicationContent = () => {
   const [applicationData, setApplicationData] = useState<any | null>([]);
@@ -102,6 +100,8 @@ const MyApplicationContent = () => {
     switch (status?.toUpperCase()) {
       case 'PENDING':
         return 'bg-yellow-100 text-yellow-800';
+      case 'IN_REVIEW':
+        return 'bg-blue-100 text-blue-800';
       case 'REJECTED':
         return 'bg-red-100 text-red-800';
       case 'APPROVED':
@@ -224,8 +224,9 @@ const MyApplicationContent = () => {
                           <span className={`${getStatusClasses(application.applicationStatus)} rounded text-xs font-normal p-2`}>
                             {application.applicationStatus === 'APPROVED' ? '✓ ' : ''}
                             {application.applicationStatus === 'PENDING' ? '⏳ ' : ''}
+                            {application.applicationStatus === 'IN_REVIEW' ? '⏳ ' : ''}
                             {application.applicationStatus === 'REJECTED' ? '✕ ' : ''}
-                            {application.applicationStatus}
+                            {toTitleCase(application.applicationStatus.split('_').join(' '))}
                           </span>
                         </td>
                         <td className="text-xs font-normal p-3">
