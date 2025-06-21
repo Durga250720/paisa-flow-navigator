@@ -315,7 +315,7 @@ const IncomeVerification = () => {
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center hover:border-primary transition-colors">
                     <input
                         type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
+                        accept=".pdf"
                         multiple // Allow multiple file selection
                         onChange={(e) => handlePayslipUpload(e.target.files)}
                         className="hidden"
@@ -372,7 +372,7 @@ const IncomeVerification = () => {
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
                     <input
                         type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
+                        accept=".pdf"
                         onChange={(e) => handleBankStatementUpload(e.target.files?.[0] || null)}
                         className="hidden"
                         id="bankStatement-upload"

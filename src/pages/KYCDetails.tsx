@@ -4,7 +4,7 @@ import Navbar from '../components/Navbar';
 import { config } from '../config/environment';
 import OTPInput from '../components/OTPInput';
 import styles from '../pages-styles/KYCDetails.module.css';
-import { toast } from 'sonner';
+import {toast } from 'react-toastify';
 
 
 const KYCDetails = () => {
@@ -125,7 +125,15 @@ const KYCDetails = () => {
             errorMessage = errorData.message;
           }
         } catch (parseError) {
-          // Ignore if error response is not JSON
+        }
+
+        if (errorMessage === "Aadhaar number is already linked to another borrower") {
+          toast.error(errorMessage);
+          setShowAadhaarOTP(false);
+          setEnteredOTP('');
+          setResendTimer(0);
+          setLoading(false);
+          return; 
         }
         throw new Error(errorMessage);
       }
