@@ -151,7 +151,7 @@ const MyBorrowingsContent = () => {
                   borrowings.map((borrowing) => (
                     <tr key={borrowing.displayId} className="border-b">
                       <td className="text-xs font-normal p-3">{borrowing.displayId || 'N/A'}</td>
-                      <td className="text-xs font-normal p-3">₹ {borrowing.loanAmount?.toLocaleString('en-IN') || 0}</td>
+                      <td className="text-xs font-normal p-3">₹ {borrowing.approvedAmount?.toLocaleString('en-IN') || 0}</td>
                       <td className="text-xs font-normal p-3">
                         {borrowing.disbursedDate ? format(new Date(borrowing.disbursedDate), 'd MMM yy') : 'N/A'}
                       </td>

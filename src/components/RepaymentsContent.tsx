@@ -129,7 +129,7 @@ const RepaymentsContent = () => {
       if (daysDifference < 0) { // Past due
         return <span className="text-red-500 font-medium">Overdue by {Math.abs(daysDifference)} day{Math.abs(daysDifference) > 1 ? 's' : ''}</span>;
       }
-      return <span>Due in ${daysDifference} day${daysDifference > 1 ? 's' : ''}</span>;
+      return <span>Due in {daysDifference} day{daysDifference > 1 ? `'s` : ''}</span>;
     } catch (error) {
       console.error("Error parsing due date:", error);
       return format(new Date(dueDateString), 'd MMM yyyy'); // Fallback to original format
