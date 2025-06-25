@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import { config } from '../config/environment';
 import styles from '../pages-styles/EmployemntInfo.module.css';
 import { toast } from "sonner";
+import OTPInput from '../components/OTPInput';
 
 const EmploymentInfo = () => {
   const [formData, setFormData] = useState({
@@ -13,20 +14,34 @@ const EmploymentInfo = () => {
     companyName: '',
     jobRole: '',
     monthlyIncome: '',
-    workExperience: ''
+    workExperience: '',
+    officialEmail: ''
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [showOtpInput, setShowOtpInput] = useState(false);
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
     const authToken = localStorage.getItem('authToken');
-    const bankInfoCompleted = localStorage.getItem('bankInfoCompleted');
 
     if (!authToken) {
       navigate('/');
     }
   }, [navigate]);
+
+  useEffect(() => {
+    if (resendTimer > 0) {
+      const timer = setInterval(() => {
+        setResendTimer(prev => prev - 1);
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [resendTimer]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -37,6 +52,12 @@ const EmploymentInfo = () => {
     if (!formData.jobRole.trim()) newErrors.jobRole = 'Job role is required';
     if (!formData.monthlyIncome.trim()) newErrors.monthlyIncome = 'Monthly income is required';
     if (!formData.workExperience.trim()) newErrors.workExperience = 'Work experience is required';
+    if (!formData.officialEmail.trim()) {
+      newErrors.officialEmail = 'Official email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.officialEmail)) {
+      newErrors.officialEmail = 'Please enter a valid email address';
+    }
+    if (!isEmailVerified) newErrors.submit = 'Please verify your official email address to continue.';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -47,6 +68,76 @@ const EmploymentInfo = () => {
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
+    if (field === 'officialEmail') {
+      setIsEmailVerified(false);
+      setShowOtpInput(false);
+      setOtp('');
+      setResendTimer(0);
+    }
+  };
+
+  const handleSendEmailOTP = async () => {
+    const emailError = !formData.officialEmail.trim()
+      ? 'Official email is required'
+      : !/\S+@\S+\.\S+/.test(formData.officialEmail)
+        ? 'Please enter a valid email address'
+        : '';
+
+    if (emailError) {
+      setErrors(prev => ({ ...prev, officialEmail: emailError }));
+      return;
+    }
+
+    setEmailLoading(true);
+    setErrors(prev => ({ ...prev, officialEmail: '', otp: '' }));
+
+    try {
+      // TODO: Replace with actual API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      toast.success(`OTP sent to ${formData.officialEmail}`);
+      setShowOtpInput(true);
+      setResendTimer(30);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to send OTP.';
+      toast.error(message);
+      setErrors(prev => ({ ...prev, officialEmail: message }));
+    } finally {
+      setEmailLoading(false);
+    }
+  };
+
+  const handleOtpInputChange = (otpValue: string) => {
+    setOtp(otpValue);
+    if (errors.otp) {
+      setErrors(prev => ({ ...prev, otp: '' }));
+    }
+  };
+
+  const handleVerifyEmailOTP = async () => {
+    if (otp.length !== 6) {
+      setErrors(prev => ({ ...prev, otp: 'Please enter the 6-digit OTP.' }));
+      return;
+    }
+
+    setEmailLoading(true);
+    setErrors(prev => ({ ...prev, otp: '' }));
+
+    try {
+      // TODO: Replace with actual API call and verification logic
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      if (otp !== '123456') { // Mock verification
+        throw new Error("Invalid OTP. Please try again.");
+      }
+
+      toast.success("Email verified successfully!");
+      setIsEmailVerified(true);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'OTP verification failed.';
+      toast.error(message);
+      setErrors(prev => ({ ...prev, otp: message }));
+    } finally {
+      setEmailLoading(false);
+    }
   };
 
   const handleContinue = async () => {
@@ -55,14 +146,14 @@ const EmploymentInfo = () => {
     const authToken = localStorage.getItem('authToken');
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
       const payload = {
         employmentType: formData.employmentType,
         industry: formData.industry,
         companyName: formData.companyName,
         designation: formData.jobRole,
         takeHomeSalary: parseInt(formData.monthlyIncome, 10) || 0,
-        totalExperienceInMonths: parseInt(formData.workExperience, 10)*12 || 0
+        totalExperienceInMonths: parseInt(formData.workExperience, 10) * 12 || 0,
+        officialEmail: formData.officialEmail
       };
 
       const response = await fetch(config.baseURL + `kyc-docs/${authToken}/update-employment`,
@@ -77,6 +168,12 @@ const EmploymentInfo = () => {
 
       if (!response.ok) {
         let errorMessage = 'Failed to save employment information. Please try again.';
+        try {
+          const errorData = await response.json();
+          if (errorData && errorData.message) errorMessage = errorData.message;
+        } catch (e) {
+          // ignore
+        }
         throw new Error(errorMessage);
       }
 
@@ -84,7 +181,9 @@ const EmploymentInfo = () => {
       localStorage.setItem('employmentInfoCompleted', 'true');
       navigate('/income-verification');
     } catch (err) {
-      setErrors({ submit: 'Failed to save employment information. Please try again.' });
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred.';
+      setErrors({ submit: message });
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -210,6 +309,58 @@ const EmploymentInfo = () => {
                 />
                 {errors.workExperience && <p className="error-message">{errors.workExperience}</p>}
               </div>
+
+              <div className="form-group">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Official Mail ID <sup className="text-red-500">*</sup>
+                  {isEmailVerified && <span className="ml-2 text-green-600 text-xs">(Verified)</span>}
+                </label>
+                <div className="flex items-start space-x-2">
+                  <input
+                    type="email"
+                    value={formData.officialEmail}
+                    onChange={(e) => handleInputChange('officialEmail', e.target.value)}
+                    placeholder="Enter your official email"
+                    className="inputField1"
+                    disabled={isEmailVerified || showOtpInput}
+                  />
+                </div>
+                {errors.officialEmail && <p className="error-message">{errors.officialEmail}</p>}
+              </div>
+              {!isEmailVerified && (
+                <div className='flex justify-end px-5'>
+                  <button
+                    onClick={handleSendEmailOTP}
+                    disabled={emailLoading || resendTimer > 0 || !formData.officialEmail}
+                    className="text-sm px-3 whitespace-nowrap bg-white disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-white
+                    text-primary"
+                  >
+                    {emailLoading && !resendTimer ? 'Sending...' : (resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Send OTP')}
+                  </button>
+                </div>
+              )}
+
+              {showOtpInput && !isEmailVerified && (
+                <div className="form-group p-4 border rounded-lg bg-gray-50 space-y-3">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Enter OTP sent to {formData.officialEmail}
+                  </label>
+                  <OTPInput
+                    length={6}
+                    onComplete={handleOtpInputChange}
+                    error={errors.otp}
+                  />
+                  {errors.otp && <p className="error-message mt-1">{errors.otp}</p>}
+                  <button
+                    onClick={handleVerifyEmailOTP}
+                    disabled={emailLoading || otp.length !== 6}
+                    className="primary-button w-full"
+                  >
+                    {emailLoading ? 'Verifying...' : 'Verify Email'}
+                  </button>
+                </div>
+              )}
+
             </div>
 
             {errors.submit && <p className="error-message text-center mt-4">{errors.submit}</p>}
@@ -217,7 +368,7 @@ const EmploymentInfo = () => {
             <div className={`${styles.bottomContainer} text-center mt-2`}>
               <button
                 onClick={handleContinue}
-                disabled={loading}
+                disabled={loading || !isEmailVerified}
                 className="primary-button px-20"
               >
                 {loading ? 'Saving...' : 'Continue'}
