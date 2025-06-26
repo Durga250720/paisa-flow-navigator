@@ -5,6 +5,14 @@ import styles from './KYCDocumentsContent.module.css';
 import { config } from '../config/environment'; // Assuming config is here
 import { formatIndianNumber, getCibilColor, toTitleCase } from '../lib/utils';
 
+// A reusable loader component that matches the theme
+const Loader = ({ text = "Loading..." }: { text?: string }) => (
+    <div className="flex flex-col items-center justify-center p-10 bg-gray-50 min-h-full">
+      <div className="w-12 h-12 border-4 border-gray-300 border-t-gray-700 rounded-full animate-spin"></div>
+      <p className="mt-4 text-gray-600">{text}</p>
+    </div>
+);
+
 
 const KYCDocumentsContent = () => {
   const [profileData, setProfileData] = useState<any | null>(null);
@@ -29,13 +37,13 @@ const KYCDocumentsContent = () => {
       documentValue: ''
     },
     {
-      type: "KYC Verified",
+      type: "Overall KYC Status", // Changed from "KYC Verified"
       status: "Unverified", // Initial status
       icon: BadgeCheck,
       documentValue: ''
     },
     {
-      type: "AADHAR Verified",
+      type: "Aadhaar Verified",
       status: "Unverified", // Initial status
       icon: UserCheck,
       documentValue: ''
@@ -91,12 +99,12 @@ const KYCDocumentsContent = () => {
               docUrl: data?.data?.payslips?.documentUrls,
               documentValue: ''
             };
-          } else if (doc.type === "KYC Verified") {
+          } else if (doc.type === "Overall KYC Status") { // Changed from "KYC Verified"
             return {
               ...doc, status: data.data.kycverified ? 'Verified' : 'Unverified', docUrl: '',
               documentValue: ''
             };
-          } else if (doc.type === "AADHAR Verified") {
+          } else if (doc.type === "Aadhaar Verified") {
             return {
               ...doc, status: data.data.kycDocuments.find(verify => verify.documentType === 'AADHAAR')?.verified ? 'Verified' : 'Unverified',
               docUrl: data?.data?.kycDocuments?.find(kyc => kyc.documentType === 'AADHAAR')?.documentUrls || '',
@@ -119,7 +127,7 @@ const KYCDocumentsContent = () => {
   }, [navigate]);
 
   if (loading) {
-    return <div className="p-4 text-center">Fetching profile details...</div>;
+    return <Loader text="Fetching profile details..." />;
   }
 
   if (error) {
@@ -133,7 +141,7 @@ const KYCDocumentsContent = () => {
             <div className={`${styles.firstContainer} bg-white rounded-lg p-6 shadow-sm mb-6`}>
               <div className="flex items-center gap-3 mb-4">
                 <User className="w-5 h-5 text-gray-600" />
-                <h2 className={styles.borrowerTitle}>Borrower Profile</h2>
+                <h2 className={styles.borrowerTitle}>My Profile</h2>
               </div>
 
               <div className="flex items-center gap-4 mb-4">
@@ -193,7 +201,7 @@ const KYCDocumentsContent = () => {
         {/* KYC Verification Section */}
         <div className={`${styles.firstContainer} bg-white rounded-lg p-6 shadow-sm`}>
           <h3 className={styles.borrowerTitle}>KYC Verification</h3>
-          <p className={styles.id}>customer's documents</p>
+          <p className={styles.id}>Document Verification Status</p>
 
           <div className="space-y-4 mt-4">
             {documents.map((doc, index) => (
@@ -202,16 +210,15 @@ const KYCDocumentsContent = () => {
                     <doc.icon className="w-5 h-5 text-gray-600" />
                     <span className="text-xs font-normal text-gray-900">{doc.type}</span>
                     {
-                      doc.documentValue != '' ?
-                          <span className='text-xs font-normal text-gray-800'>(
-                            {
-                              doc.type.includes('AADHAR')
-                                  ? doc.documentValue.replace(/(\d{4})(?=\d)/g, '$1 ')
-                                  : doc.documentValue
-                            }
-                            )</span>
-                          :
-                          ''
+                        doc.documentValue && (
+                            <span className='text-xs font-normal text-gray-800'>(
+                              {
+                                doc.type === 'Aadhaar Verified'
+                                    ? doc.documentValue.replace(/(\d{4})(?=\d)/g, '$1 ')
+                                    : doc.documentValue
+                              }
+                              )</span>
+                        )
                     }
                   </div>
                   <div className="flex items-center gap-3">
