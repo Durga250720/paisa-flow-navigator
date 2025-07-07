@@ -29,6 +29,7 @@ import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import { ToastContainer } from 'react-toastify';
 import PreApprovedLoadAmount from "./pages/PreApprovedLoanAmount";
+import KycVerificationPage from "@/pages/KycVerificationPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -44,8 +45,9 @@ const App = () => (
           <Route path="/sign-up" element={<SignUp />} />
           <Route path="/otp" element={<OTP />} />
           <Route path="/basic-info" element={<BasicInfo />} />
-          <Route path="/kyc-details" element={<KYCDetails />} />
-          <Route path="/pan-info" element={<PANInfo />} />
+          {/*<Route path="/kyc-details" element={<KYCDetails />} />*/}
+          {/*<Route path="/pan-info" element={<PANInfo />} />*/}
+          <Route path="/digi-kyc" element={<KycVerificationPage />} />
           <Route path="/verification-processing" element={<VerificationProcessing />} />
           <Route path="/kyc-verification" element={<KYCVerification />} />
           <Route path="/kyc-verified" element={<KYCVerified />} />

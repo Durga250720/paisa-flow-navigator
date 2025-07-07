@@ -110,12 +110,15 @@ const OTP = () => {
       }
 
       const res = await response.json();
+      const userId = res.data.id;
 
       localStorage.setItem('authToken', res.data.id); // Assuming res.data.id is the borrowerId/authToken
       localStorage.setItem('otpVerified', 'true');
       if(localStorage.getItem('from') === 'signup'){
         // localStorage.setItem('basicInfoCompleted', 'true');
-        handleFetchDetails(res.data.id)
+        // handleFetchDetails(res.data.id)
+        console.log(`Signup successful. Navigating to KYC verification for user: ${userId}`);
+        navigate('/digi-kyc', { state: { userId: userId } });
       }
       else{
         localStorage.setItem('name',res.data.name)
