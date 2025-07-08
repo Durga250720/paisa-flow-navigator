@@ -5,7 +5,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { config } from '../config/environment';
 import { format, differenceInDays, isToday, startOfDay } from 'date-fns';
 
-// UI Components (assuming similar to RepaymentDetails.tsx)
+// UI Components
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -28,10 +28,16 @@ import {
   Wallet
 } from 'lucide-react';
 
-// --- Type Definitions (Updated to be more comprehensive) ---
+// --- MODIFICATION: Add Razorpay to the Window type for TypeScript ---
+declare global {
+  interface Window {
+    Razorpay;
+  }
+}
 
+// --- Type Definitions ---
 type RepaymentStatus = 'PENDING' | 'PARTIAL' | 'PAID' | 'OVERDUE';
-type PaymentMode = 'UPI' | 'CARD' | 'NETBANKING' | 'CASH' | 'CHEQUE';
+type PaymentMode = 'UPI' | 'CARD' | 'NETBANKING' | 'CASH' | 'CHEQUE' | 'ONLINE';
 type RepaymentType = 'ONLINE' | 'OFFLINE';
 
 interface PaymentHistoryItem {
@@ -48,7 +54,6 @@ interface PaymentHistoryItem {
   chequeNumber: string | null;
 }
 
-// This interface now matches the full API response structure
 interface RepaymentDetails {
   id: string;
   borrowerName: string;
@@ -70,6 +75,13 @@ interface RepaymentDetails {
   latePayment: boolean;
 }
 
+// --- NEW: Type for Razorpay's success response ---
+interface RazorpayResponse {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
+}
+
 // --- Helper Functions ---
 const toTitleCase = (str: string | null) => {
   if (!str) return '';
@@ -79,7 +91,43 @@ const toTitleCase = (str: string | null) => {
   );
 };
 
-// --- Attachment Modal Component (Kept for better UX) ---
+// --- Custom hook to load the Razorpay SDK script ---
+const useRazorpayScript = () => {
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const scriptId = 'razorpay-checkout-js';
+    if (document.getElementById(scriptId)) {
+      setIsLoaded(true);
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.id = scriptId;
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+
+    script.onload = () => setIsLoaded(true);
+    script.onerror = () => {
+      console.error("Razorpay SDK could not be loaded.");
+      setIsLoaded(false);
+    };
+
+    document.body.appendChild(script);
+
+    return () => {
+      const scriptElement = document.getElementById(scriptId);
+      if (scriptElement && scriptElement.parentElement) {
+        // It's often better to leave the SDK script loaded
+      }
+    };
+  }, []);
+
+  return isLoaded;
+};
+
+
+// --- Attachment Modal Component ---
 const AttachmentModal = ({ attachments, onClose }: { attachments: string[]; onClose: () => void }) => {
   if (attachments.length === 0) return null;
 
@@ -104,8 +152,8 @@ const AttachmentModal = ({ attachments, onClose }: { attachments: string[]; onCl
                     >
                       <LinkIcon className="w-4 h-4 mr-3 text-primary" />
                       <span className="text-sm font-medium text-blue-600 hover:underline">
-                                        View Attachment {index + 1}
-                                    </span>
+                        View Attachment {index + 1}
+                      </span>
                     </a>
                   </li>
               ))}
@@ -128,6 +176,9 @@ const RepaymentView = () => {
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalAttachments, setModalAttachments] = useState<string[]>([]);
+  const [isPaying, setIsPaying] = useState(false); // --- NEW: State for payment processing
+
+  const isRazorpayLoaded = useRazorpayScript();
 
   const fetchRepaymentDetails = useCallback(async () => {
     if (!repaymentId) {
@@ -152,7 +203,7 @@ const RepaymentView = () => {
       } else {
         throw new Error('Repayment details not found in the API response.');
       }
-    } catch (err: any) {
+    } catch (err) {
       setError(err.message);
       toast({
         variant: "destructive",
@@ -215,29 +266,16 @@ const RepaymentView = () => {
   };
 
   const getStatusBadge = (status: RepaymentStatus) => {
-    let classes = '';
-    let icon = <Clock className="w-4 h-4 mr-2" />;
-    switch (status) {
-      case 'PAID':
-        classes = 'bg-green-100 text-green-800 border-green-200';
-        icon = <CheckCircle className="w-4 h-4 mr-2" />;
-        break;
-      case 'OVERDUE':
-        classes = 'bg-red-100 text-red-800 border-red-200';
-        icon = <AlertTriangle className="w-4 h-4 mr-2" />;
-        break;
-      case 'PARTIAL':
-        classes = 'bg-yellow-100 text-yellow-800 border-yellow-200';
-        icon = <Clock className="w-4 h-4 mr-2" />;
-        break;
-      case 'PENDING':
-        classes = 'bg-blue-100 text-blue-800 border-blue-200';
-        icon = <Clock className="w-4 h-4 mr-2" />;
-        break;
-    }
+    const statusConfig = {
+      PAID: { classes: 'bg-green-100 text-green-800 border-green-200', icon: <CheckCircle className="w-4 h-4 mr-2" /> },
+      OVERDUE: { classes: 'bg-red-100 text-red-800 border-red-200', icon: <AlertTriangle className="w-4 h-4 mr-2" /> },
+      PARTIAL: { classes: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: <Clock className="w-4 h-4 mr-2" /> },
+      PENDING: { classes: 'bg-blue-100 text-blue-800 border-blue-200', icon: <Clock className="w-4 h-4 mr-2" /> },
+    };
+    const config = statusConfig[status] || statusConfig.PENDING;
     return (
-        <Badge className={`${classes} text-sm py-1 px-3 border`}>
-          {icon}
+        <Badge className={`${config.classes} text-sm py-1 px-3 border`}>
+          {config.icon}
           {toTitleCase(status)}
         </Badge>
     );
@@ -248,19 +286,120 @@ const RepaymentView = () => {
     setIsModalOpen(true);
   };
 
-  const handlePayNow = () => {
-    if (details?.pendingAmount && details.pendingAmount > 0) {
-      toast({
-        title: "Initiating Payment",
-        description: `Redirecting to payment gateway for ₹${details.pendingAmount.toLocaleString('en-IN')}.`,
+  const handlePayNow = async () => {
+    if (!details || details.pendingAmount <= 0) {
+      toast({ variant: "default", title: "No Pending Amount", description: "This repayment has no pending amount to be paid." });
+      return;
+    }
+    if (!isRazorpayLoaded) {
+      toast({ title: "Payment Gateway Loading", description: "Please wait a moment and try again." });
+      return;
+    }
+    if (isPaying) return;
+
+    setIsPaying(true);
+    try {
+      // Create a Razorpay Order from your backend
+      const orderResponse = await fetch(`${config.baseURL}payment/razorpay/create-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'accept': '*/*' },
+        // --- FIX: Send the correct payload to create the order ---
+        body: JSON.stringify({
+          amount: Math.round(details.pendingAmount * 100), // Amount in paisa
+          receipt: `repayment_${details.id}_${Date.now()}`,
+          currency: 'INR',
+        }),
       });
-      // TODO: Implement actual payment gateway redirection logic here
-    } else {
-      toast({
-        variant: "default",
-        title: "No Pending Amount",
-        description: "This repayment has no pending amount to be paid.",
+
+      if (!orderResponse.ok) {
+        const errorData = await orderResponse.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to create payment order.');
+      }
+
+      const result = await orderResponse.json();
+      const orderData = result.data;
+
+      // Configure Razorpay options
+      const options = {
+        key: "rzp_test_IoCHSYZRCKWYsq",
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "Paisa108",
+        description: `Repayment for Loan ${details.loanDisplayId}`,
+        image: "/your-logo.png",
+        order_id: orderData.id,
+        handler: async function (response: RazorpayResponse) {
+          // Verify the payment on your backend
+          try {
+            const verificationResponse = await fetch(`${config.baseURL}payment/verify`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            });
+
+            if (!verificationResponse.ok) {
+              throw new Error('Payment verification failed on the server.');
+            }
+
+            toast({
+              variant: "default",
+              className: "bg-green-100 text-green-800",
+              title: "Payment Successful!",
+              description: "Your payment has been verified and recorded.",
+            });
+            fetchRepaymentDetails(); // Refresh data
+          } catch (error) {
+            toast({
+              variant: "destructive",
+              title: "Verification Failed",
+              description: error.message || "Could not verify your payment. Please contact support.",
+            });
+          }
+        },
+        prefill: {
+          name: details.borrowerName,
+          email: details.borrowerEmail,
+          contact: details.borrowerMobile,
+        },
+        notes: {
+          repayment_id: details.id,
+          loan_id: details.loanDisplayId,
+        },
+        theme: {
+          color: "#3B82F6",
+        },
+        modal: {
+          ondismiss: function() {
+            // This function is called when the user closes the modal without paying
+            setIsPaying(false);
+          }
+        }
+      };
+
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.open();
+      // Razorpay handles closing the modal, so we reset our state on modal close
+      paymentObject.on('payment.failed', function (response) {
+        console.error('Payment Failed:', response.error);
+        toast({
+          variant: "destructive",
+          title: "Payment Failed",
+          description: response.error.description || "Your payment could not be processed.",
+        });
+        setIsPaying(false); // Reset state on failure
       });
+
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Payment Error",
+        description: error.message || "An unexpected error occurred.",
+      });
+      setIsPaying(false); // Reset state on error
     }
   };
 
@@ -308,9 +447,14 @@ const RepaymentView = () => {
             <div className="flex items-center space-x-3">
               {getStatusBadge(details.status)}
               {details.pendingAmount > 0 && details.status !== 'PAID' && (
-                  <Button onClick={handlePayNow} className="bg-green-600 hover:bg-green-700">
+                  // --- MODIFICATION: Update button text and disabled state based on payment status ---
+                  <Button
+                      onClick={handlePayNow}
+                      className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400"
+                      disabled={!isRazorpayLoaded || loading || isPaying}
+                  >
                     <Wallet className="w-4 h-4 mr-2" />
-                    Pay Now
+                    {isPaying ? 'Processing...' : (isRazorpayLoaded ? 'Pay Now' : 'Loading...')}
                   </Button>
               )}
             </div>
@@ -327,7 +471,6 @@ const RepaymentView = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-6 text-sm">
-                  {/* MODIFICATION: Changed labels and added Late Fee to the summary */}
                   <div>
                     <p className="text-gray-500">Principal Due</p>
                     <p className="font-semibold text-lg">{formatCurrency(details.dueLoanAmount)}</p>
@@ -405,7 +548,6 @@ const RepaymentView = () => {
                 </CardContent>
               </Card>
 
-              {/* MODIFICATION: Changed condition to be more robust */}
               {details.lateFeeCharged > 0 && (
                   <Card className="border-orange-200 bg-orange-50">
                     <CardHeader>
