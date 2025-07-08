@@ -324,7 +324,7 @@ const RepaymentView = () => {
         currency: orderData.currency,
         name: "Paisa108",
         description: `Repayment for Loan ${details.loanDisplayId}`,
-        image: "/your-logo.png",
+        image: "/lovable-uploads/53f43cc9-5dc2-4799-81fd-84c9577132eb.png",
         order_id: orderData.id,
         handler: async function (response: RazorpayResponse) {
           try {
