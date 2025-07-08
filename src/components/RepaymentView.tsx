@@ -303,11 +303,9 @@ const RepaymentView = () => {
       const orderResponse = await fetch(`${config.baseURL}payment/razorpay/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'accept': '*/*' },
-        // --- FIX: Send the correct payload to create the order ---
         body: JSON.stringify({
-          amount: Math.round(details.pendingAmount * 100), // Amount in paisa
-          receipt: `repayment_${details.id}_${Date.now()}`,
-          currency: 'INR',
+          amount: details.pendingAmount, // Amount in paisa
+          repaymentId: details.id,
         }),
       });
 
@@ -329,15 +327,14 @@ const RepaymentView = () => {
         image: "/your-logo.png",
         order_id: orderData.id,
         handler: async function (response: RazorpayResponse) {
-          // Verify the payment on your backend
           try {
-            const verificationResponse = await fetch(`${config.baseURL}payment/verify`, {
+            const verificationResponse = await fetch(`${config.baseURL}payment/razorpay/verify-payment`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
+                razorpayOrderId: response.razorpay_order_id,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
               }),
             });
 
