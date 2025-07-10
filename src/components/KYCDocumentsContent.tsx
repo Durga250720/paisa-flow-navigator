@@ -7,10 +7,10 @@ import { formatIndianNumber, getCibilColor, toTitleCase } from '../lib/utils';
 
 // A reusable loader component that matches the theme
 const Loader = ({ text = "Loading..." }: { text?: string }) => (
-    <div className="flex flex-col items-center justify-center p-10 bg-gray-50 min-h-full">
-      <div className="w-12 h-12 border-4 border-gray-300 border-t-gray-700 rounded-full animate-spin"></div>
-      <p className="mt-4 text-gray-600">{text}</p>
-    </div>
+  <div className="flex flex-col items-center justify-center p-10 bg-gray-50 min-h-full">
+    <div className="w-12 h-12 border-4 border-gray-300 border-t-gray-700 rounded-full animate-spin"></div>
+    <p className="mt-4 text-gray-600">{text}</p>
+  </div>
 );
 
 
@@ -135,67 +135,76 @@ const KYCDocumentsContent = () => {
   }
 
   return (
-      <div className="p-4 bg-gray-50 min-h-full">
+    <div className="p-4 bg-gray-50 min-h-full h-full">
+      <div className="h-full w-full" style={{overflowY:"scroll"}}>
         {/* Borrower Profile Section */}
         {profileData && (
-            <div className={`${styles.firstContainer} bg-white rounded-lg p-6 shadow-sm mb-6`}>
-              <div className="flex items-center gap-3 mb-4">
-                <User className="w-5 h-5 text-gray-600" />
-                <h2 className={styles.borrowerTitle}>My Profile</h2>
-              </div>
+          <div className={`${styles.firstContainer} bg-white rounded-lg p-6 shadow-sm mb-6`}>
+            <div className="flex items-center gap-3 mb-4">
+              <User className="w-5 h-5 text-gray-600" />
+              <h2 className={styles.borrowerTitle}>My Profile</h2>
+            </div>
 
-              <div className="flex items-center gap-4 mb-4">
-                {profileData.profileImage ? (
-                    <img
-                        src={profileData.profileImage}
-                        alt={profileData.name || 'Profile'}
-                        className="w-16 h-16 rounded-full object-cover border cursor-pointer hover:opacity-80 transition-opacity"
-                        onClick={() => handleImagePreview(profileData.profileImage)}
-                    />
-                ) : (
-                    <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
-                      <User className="w-8 h-8 text-gray-500" />
-                    </div>
-                )}
-                <div>
-                  <div className={styles.userName}>{profileData.name || 'N/A'}</div>
-                  <div className={styles.id}>ID: {profileData.displayId || 'N/A'}</div>
+            <div className="flex items-center gap-4 mb-4">
+              {profileData.profileImage ? (
+                <img
+                  src={profileData.profileImage}
+                  alt={profileData.name || 'Profile'}
+                  className="w-16 h-16 rounded-full object-cover border cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={() => handleImagePreview(profileData.profileImage)}
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
+                  <User className="w-8 h-8 text-gray-500" />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                <div>
-                  <div className="text-sm text-gray-600">CIBIL Score</div>
-                  <div className={`${getCibilColor(profileData?.borrowerCibilData?.score)}`}>{profileData?.borrowerCibilData?.score || '0'}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-600">Monthly Income</div>
-                  <div className="text-sm font-medium">
-                    {profileData.employmentDetails ? `₹ ${formatIndianNumber(profileData.employmentDetails?.takeHomeSalary)}` : '0'}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-600">Employment</div>
-                  <div className="text-sm font-medium">{profileData.employmentDetails ? toTitleCase(profileData.employmentDetails.employmentType.split('_').join(' ')) : 'N/A'}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-600">Date of Birth</div>
-                  <div className="text-sm font-medium">
-                    {profileData.dob ? new Date(profileData.dob).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-600">Gender</div>
-                  <div className="text-sm font-medium">
-                    {profileData.gender ? toTitleCase(profileData.gender) : 'N/A'}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm text-gray-600">Father's Name</div>
-                  <div className="text-sm font-medium">{profileData.fathersName || 'N/A'}</div>
-                </div>
+              )}
+              <div>
+                <div className={styles.userName}>{profileData.name || 'N/A'}</div>
+                <div className={styles.id}>ID: {profileData.displayId || 'N/A'}</div>
               </div>
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+              <div>
+                <div className="text-sm text-gray-600">CIBIL Score</div>
+                <div className={`${getCibilColor(profileData?.borrowerCibilData?.score)}`}>{profileData?.borrowerCibilData?.score || '0'}</div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-600">Monthly Income</div>
+                <div className="text-sm font-medium">
+                  {profileData.employmentDetails ? `₹ ${formatIndianNumber(profileData.employmentDetails?.takeHomeSalary)}` : '0'}
+                </div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-600">Employment</div>
+                <div className="text-sm font-medium">{profileData.employmentDetails ? toTitleCase(profileData.employmentDetails.employmentType.split('_').join(' ')) : 'N/A'}</div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-600">Date of Birth</div>
+                <div className="text-sm font-medium">
+                  {profileData.dob ? new Date(profileData.dob).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A'}
+                </div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-600">Gender</div>
+                <div className="text-sm font-medium">
+                  {profileData.gender ? toTitleCase(profileData.gender) : 'N/A'}
+                </div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-600">Father's Name</div>
+                <div className="text-sm font-medium">{profileData.fathersName || 'N/A'}</div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-600">Current Address</div>
+                <div className="text-sm font-medium break-words whitespace-normal">{profileData?.currentAddress?.address || 'N/A'}</div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-600">Perminent Address</div>
+                <div className="text-sm font-medium break-words whitespace-normal">{profileData?.permanentAddress?.address || 'N/A'}</div>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* KYC Verification Section */}
@@ -205,61 +214,62 @@ const KYCDocumentsContent = () => {
 
           <div className="space-y-4 mt-4">
             {documents.map((doc, index) => (
-                <div key={index} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <doc.icon className="w-5 h-5 text-gray-600" />
-                    <span className="text-xs font-normal text-gray-900">{doc.type}</span>
-                    {
-                        doc.documentValue && (
-                            <span className='text-xs font-normal text-gray-800'>(
-                              {
-                                doc.type === 'Aadhaar Verified'
-                                    ? doc.documentValue.replace(/(\d{4})(?=\d)/g, '$1 ')
-                                    : doc.documentValue
-                              }
-                              )</span>
-                        )
-                    }
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-1">
-                      {doc.status === 'Verified' ? (
-                          <CheckCircle className="w-4 h-4 text-green-600" />
-                      ) : (
-                          <XCircle className="w-4 h-4 text-red-500" />
-                      )}
-                    </div>
-                    <span className={`${doc.status === 'Verified' ? styles.activeStatusValue : styles.inActiveStatusValue} text-xs px-2 py-1 rounded text-center`}>
-                  {doc.status}
-                </span>
-                  </div>
+              <div key={index} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <doc.icon className="w-5 h-5 text-gray-600" />
+                  <span className="text-xs font-normal text-gray-900">{doc.type}</span>
+                  {
+                    doc.documentValue && (
+                      <span className='text-xs font-normal text-gray-800'>(
+                        {
+                          doc.type === 'Aadhaar Verified'
+                            ? doc.documentValue.replace(/(\d{4})(?=\d)/g, '$1 ')
+                            : doc.documentValue
+                        }
+                        )</span>
+                    )
+                  }
                 </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1">
+                    {doc.status === 'Verified' ? (
+                      <CheckCircle className="w-4 h-4 text-green-600" />
+                    ) : (
+                      <XCircle className="w-4 h-4 text-red-500" />
+                    )}
+                  </div>
+                  <span className={`${doc.status === 'Verified' ? styles.activeStatusValue : styles.inActiveStatusValue} text-xs px-2 py-1 rounded text-center`}>
+                    {doc.status}
+                  </span>
+                </div>
+              </div>
             ))}
           </div>
         </div>
 
         {/* Image Preview Modal */}
         {isPreviewOpen && previewImageUrl && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+            onClick={closeImagePreview}
+          >
             <div
-                className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
-                onClick={closeImagePreview}
+              className="relative"
+              onClick={(e) => e.stopPropagation()}
             >
-              <div
-                  className="relative"
-                  onClick={(e) => e.stopPropagation()}
+              <img src={previewImageUrl} alt="Profile Preview" className="max-w-[90vw] max-h-[90vh] rounded-lg" />
+              <button
+                onClick={closeImagePreview}
+                className="absolute top-[-15px] right-[-15px] text-white bg-gray-800 rounded-full p-1 hover:bg-gray-700 transition-colors"
+                aria-label="Close image preview"
               >
-                <img src={previewImageUrl} alt="Profile Preview" className="max-w-[90vw] max-h-[90vh] rounded-lg" />
-                <button
-                    onClick={closeImagePreview}
-                    className="absolute top-[-15px] right-[-15px] text-white bg-gray-800 rounded-full p-1 hover:bg-gray-700 transition-colors"
-                    aria-label="Close image preview"
-                >
-                  <XCircle className="w-8 h-8" />
-                </button>
-              </div>
+                <XCircle className="w-8 h-8" />
+              </button>
             </div>
+          </div>
         )}
       </div>
+    </div>
   );
 };
 

@@ -9,6 +9,17 @@ import { fromCognitoIdentityPool } from "@aws-sdk/credential-provider-cognito-id
 import styles from '../pages-styles/EmployemntInfo.module.css';
 import { toast } from 'react-toastify';
 
+const s3BucketConfig = config.componentImageUploading.S3TransferUtility.Default;
+const cognitoAuthConfig = config.componentImageUploading.CredentialsProvider.CognitoIdentity.Default;
+
+const s3Client = new S3Client({
+  region: s3BucketConfig.Region,
+  credentials: fromCognitoIdentityPool({
+    client: new CognitoIdentityClient({ region: cognitoAuthConfig.Region }),
+    identityPoolId: cognitoAuthConfig.PoolId,
+  }),
+});
+
 const IncomeVerification = () => {
   const [files, setFiles] = useState<{
     payslips: File[];
@@ -29,17 +40,6 @@ const IncomeVerification = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
-  const s3BucketConfig = config.componentImageUploading.S3TransferUtility.Default;
-  const cognitoAuthConfig = config.componentImageUploading.CredentialsProvider.CognitoIdentity.Default;
-
-  const s3Client = new S3Client({
-    region: s3BucketConfig.Region,
-    credentials: fromCognitoIdentityPool({
-      client: new CognitoIdentityClient({ region: cognitoAuthConfig.Region }),
-      identityPoolId: cognitoAuthConfig.PoolId,
-    }),
-  });
 
   const uploadFileToS3 = async (file: File, pathPrefix: string, userName: string): Promise<{ fileName: string, url: string, type: string }> => {
     const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -86,12 +86,12 @@ const IncomeVerification = () => {
       ...prev,
       payslips: [...prev.payslips, ...validFiles],
     }));
+    // Add corresponding empty access codes for the new files
     setAccessCodes(prev => ({
       ...prev,
-      payslips: [...prev.payslips, ...validFiles].map((_, i) => prev.payslips[i] || ''),
+      payslips: [...prev.payslips, ...Array(validFiles.length).fill('')],
     }));
   };
-
   const removePayslip = (index: number) => {
     setFiles(prev => ({
       ...prev,
@@ -143,34 +143,36 @@ const IncomeVerification = () => {
 
       // Payslip API
       if (payslipDocs.length) {
-        const documentsWithPassCode: Record<string, string> = {};
-        payslipDocs.forEach((doc, i) => {
-          documentsWithPassCode[doc.url] = accessCodes.payslips[i] || '';
-        });
+        const payslipPayload = {
+          borrowerId,
+          documentType: 'SALARY_SLIP',
+          documents: payslipDocs.map((doc, i) => ({
+            url: doc.url,
+            passCode: accessCodes.payslips[i] || '',
+          })),
+        };
 
         await fetch(`${config.baseURL}kyc-docs/add`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            borrowerId,
-            documents: payslipDocs.map(d => d.url),
-            documentType: 'SALARY_SLIP',
-            documentsWithPassCode
-          }),
+          body: JSON.stringify(payslipPayload),
         });
       }
 
       // Bank Statement API
       if (bankDoc) {
+        const bankStatementPayload = {
+          borrowerId,
+          documentType: 'BANK_STATEMENT',
+          documents: [{
+            url: bankDoc.url,
+            passCode: accessCodes.bankStatement || '',
+          }],
+        };
         await fetch(`${config.baseURL}kyc-docs/add`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            borrowerId,
-            documents: [bankDoc.url],
-            documentType: 'BANK_STATEMENT',
-            documentsWithPassCode: { [bankDoc.url]: accessCodes.bankStatement || '' },
-          }),
+          body: JSON.stringify(bankStatementPayload),
         });
       }
 
@@ -209,7 +211,7 @@ const IncomeVerification = () => {
       )}
 
       {files.payslips.map((file, i) => (
-        <div key={i} className="border p-2 rounded-lg border-primary space-y-2">
+        <div key={`${file.name}-${file.lastModified}-${i}`} className="border p-2 rounded-lg border-primary space-y-2">
           <div className="flex items-center justify-between bg-gray-50 p-2 rounded-lg border">
             <div className="flex items-center space-x-2">
               <FileText className="h-4 w-4 text-gray-500" />
@@ -225,9 +227,12 @@ const IncomeVerification = () => {
             style={{width:"100%"}}
             value={accessCodes.payslips[i] || ''}
             onChange={(e) => {
-              const updated = [...accessCodes.payslips];
-              updated[i] = e.target.value;
-              setAccessCodes(prev => ({ ...prev, payslips: updated }));
+              const newAccessCode = e.target.value;
+              setAccessCodes(prev => {
+                const updatedPayslips = [...prev.payslips];
+                updatedPayslips[i] = newAccessCode;
+                return { ...prev, payslips: updatedPayslips };
+              });
             }}
           />
         </div>

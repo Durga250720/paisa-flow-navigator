@@ -215,7 +215,7 @@ const PreApprovedLoadAmount = () => {
                             </div>
 
                             {/* Fee Breakdown */}
-                            <div className="space-y-2 mb-6 text-left">
+                            {/* <div className="space-y-2 mb-6 text-left">
                                 <div className="flex justify-between items-center text-xs">
                                     <div className="flex items-center">
                                         <span className="text-gray-600">Platform fee (inc. GST)</span>
@@ -234,7 +234,6 @@ const PreApprovedLoadAmount = () => {
                                 <div className="flex justify-between text-xs">
                                     <div className="flex items-center">
                                         <span className="text-gray-600">Loan Protection Fee</span>
-                                        {/* <span className="text-primary text-xs ml-2 cursor-pointer">Remove</span> */}
                                     </div>
                                     <span className="font-medium">₹ {loanProtectionFee}</span>
                                 </div>
@@ -250,20 +249,16 @@ const PreApprovedLoadAmount = () => {
                                 </div>
 
                                 <div className="flex justify-between text-sm font-medium pt-2 border-t mt-2">
-                                    <span className="text-gray-700">Pay total by [Due Date]</span> {/* Placeholder for Due Date */}
+                                    <span className="text-gray-700">Pay total by [Due Date]</span>
                                     <span className="text-gray-900">₹ {totalAmount}</span>
                                 </div>
 
                                 <div className="flex justify-between text-sm font-medium pt-1">
-                                    <span className="text-gray-700">Total Disbursing Amount</span> {/* Placeholder for Due Date */}
+                                    <span className="text-gray-700">Total Disbursing Amount</span>
                                     <span className="text-gray-900">₹ {disbursingAmount}</span>
                                 </div>
 
-                                {/* <div className="flex justify-between text-sm">
-                                    <span className="text-gray-600">Transfer to</span>
-                                    <span className="font-medium">****{applicationData?.bankDetail?.accountNumber.slice(-4)} ({applicationData?.bankDetail?.bankName})</span> 
-                                </div> */}
-                            </div>
+                            </div> */}
 
                             {/* KFS & Loan Documents */}
                             {/* <div className="mb-6 border-t pt-4">
