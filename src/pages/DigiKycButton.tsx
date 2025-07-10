@@ -14,6 +14,7 @@ const DIGIO_ENVIRONMENT = (import.meta.env.VITE_DIGIO_ENVIRONMENT || 'sandbox') 
 interface DigiKycButtonProps {
     userId: string;
     onSuccess: (digioDocId: string) => void;
+    disabled?: boolean;
 }
 
 interface DigioCallbackResponse {
@@ -33,7 +34,7 @@ interface ApiResponse {
     };
 }
 
-const DigiKycButton: React.FC<DigiKycButtonProps> = ({ userId, onSuccess }) => {
+const DigiKycButton: React.FC<DigiKycButtonProps> = ({ userId, onSuccess, disabled = false }) => {
     const sdkStatus = useDigioSDK();
     const [isKycLoading, setIsKycLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -102,7 +103,7 @@ const DigiKycButton: React.FC<DigiKycButtonProps> = ({ userId, onSuccess }) => {
         }
     };
 
-    const isButtonDisabled = sdkStatus !== 'ready' || isKycLoading;
+    const isButtonDisabled = sdkStatus !== 'ready' || isKycLoading || disabled;
 
     return (
         <div>
@@ -115,7 +116,7 @@ const DigiKycButton: React.FC<DigiKycButtonProps> = ({ userId, onSuccess }) => {
                 style={{
                     width: '100%',
                     padding: '12px 24px',
-                    fontSize: '16px',
+                    fontSize: '14px',
                     cursor: isButtonDisabled ? 'not-allowed' : 'pointer',
                     backgroundColor: isButtonDisabled ? '#ccc' : '#007bff',
                     color: 'white',

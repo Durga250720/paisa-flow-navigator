@@ -1,82 +1,52 @@
-/* src/pages-styles/KycVerificationPage.module.css */
-/* This file is adapted from your existing styles for visual consistency. */
 
 .container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    background-color: #ffffff;
+ @apply min-h-screen bg-white bg-gray-50;
+  height: calc(100vh - 0px);
 }
 
 .navbarWrapper {
-    /* Add styles for the navbar container if needed */
+    height: 9%;
 }
 
-.mainContainer {
-    display: flex;
-    flex: 1;
-    width: 100%;
+.mainContainer{
+     @apply flex h-[calc(100%-9%)] p-8;
 }
 
 .leftPanel {
-    flex: 1;
-    display: none; /* Hidden on mobile by default */
+  @apply hidden lg:flex lg:w-1/2 items-center justify-center;
 }
 
-/* Show the left panel on medium screens and up */
-@media (min-width: 768px) {
-    .leftPanel {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: #f0f5ff; /* A light, pleasant background */
-        padding: 2rem;
-    }
-}
 
 .imageContainer {
-    max-width: 450px;
-    width: 100%;
+  @apply relative;
 }
 
 .heroImage {
-    width: 100%;
-    height: auto;
-    object-fit: contain;
+  @apply max-w-[85%] h-auto;
 }
 
 .rightPanel {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 2rem 1rem;
+  @apply w-full lg:w-1/2 flex items-center justify-center;
 }
 
-.formContainer {
-    width: 100%;
-    max-width: 400px;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem; /* Creates space between elements */
-    text-align: center;
+.formWrapper {
+  @apply w-full max-w-md flex lg:bg-white h-[85%] flex-col lg:p-7 flex-col justify-center;
 }
 
 .heading {
-    font-size: 2rem; /* 32px */
-    font-weight: 700;
-    color: #1a202c; /* A dark gray */
+  @apply text-2xl font-medium mb-5 text-center;
 }
 
-.subtitle {
-    color: #4a5568; /* A medium gray */
-    font-size: 1rem; /* 16px */
-    line-height: 1.6;
-    margin-top: -1rem; /* Bring it closer to the heading */
+.subtitle{
+    @apply text-sm font-normal mb-5 text-center;
+}
+
+.checkBox{
+    @apply mb-5 text-sm;
 }
 
 .footerText {
-    font-size: 0.8rem; /* 12px */
-    color: #718096; /* A light gray */
+    font-size: 0.8rem;
+    color: #718096;
     margin-top: 0.5rem;
 }

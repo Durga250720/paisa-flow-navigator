@@ -1,5 +1,5 @@
-import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import DigiKycButton from './DigiKycButton.tsx';
 import styles from '../pages-styles/KycVerificationPage.module.css';
@@ -7,7 +7,8 @@ import styles from '../pages-styles/KycVerificationPage.module.css';
 const KycVerificationPage: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
-
+    const [isChecked, setIsChecked] = useState(false);
+    
     // Retrieve the userId passed from the OTP page
     const userId = location.state?.userId;
 
@@ -50,15 +51,28 @@ const KycVerificationPage: React.FC = () => {
 
                 {/* Right Panel: The interactive KYC content */}
                 <div className={styles.rightPanel}>
-                    <div className={styles.formContainer}>
+                    <div className={styles.formWrapper}>
                         <h1 className={styles.heading}>Identity Verification</h1>
                         <p className={styles.subtitle}>
                             To secure your account and unlock all features, we need to verify your
                             Aadhaar and PAN details through the secure DigiLocker process.
                         </p>
+                        <div className={`${styles.checkBox} flex items-center my-4`}>
+                            <input
+                                type="checkbox"
+                                id="kyc-consent"
+                                checked={isChecked}
+                                onChange={() => setIsChecked(!isChecked)}
+                                className="h-4 w-4 text-primary border-gray-300 rounded focus:ring-primary"
+                            />
+                            <label htmlFor="kyc-consent" className="ml-2 block text-xs text-gray-600">
+                                I agree to the <Link to="/terms-conditions" target="_blank" className="text-primary underline">Terms & Conditions</Link> and authorize Paisa108 to fetch my KYC details from DigiLocker.
+                            </label>
+                        </div>
 
-                        {/* The DigiKycButton component fits perfectly here as the main action */}
-                        <DigiKycButton userId={userId} onSuccess={handleKycSuccess} />
+                        <div className='flex justify-center items-center'>
+                            <DigiKycButton userId={userId} onSuccess={handleKycSuccess} disabled={!isChecked} />
+                        </div>
 
                         <p className={styles.footerText}>
                             You will be redirected to a secure portal powered by Digio.
