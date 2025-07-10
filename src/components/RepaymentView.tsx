@@ -24,6 +24,7 @@ import {
   History,
   Paperclip,
   X,
+  XCircle, // Added for failed status
   Link as LinkIcon,
   Wallet
 } from 'lucide-react';
@@ -40,6 +41,7 @@ type RepaymentStatus = 'PENDING' | 'PARTIAL' | 'PAID' | 'OVERDUE';
 type PaymentMode = 'UPI' | 'CARD' | 'NETBANKING' | 'CASH' | 'CHEQUE' | 'ONLINE';
 type RepaymentType = 'ONLINE' | 'OFFLINE';
 
+// MODIFICATION: Updated interface with new fields
 interface PaymentHistoryItem {
   amount: number;
   paidAt: string;
@@ -52,6 +54,10 @@ interface PaymentHistoryItem {
   cardHolderName: string | null;
   bankName: string | null;
   chequeNumber: string | null;
+  // NEW: Added fields for more detail
+  paid: boolean;
+  paymentReceiptId: string | null;
+  pgPaymentId: string | null;
 }
 
 interface RepaymentDetails {
@@ -164,6 +170,24 @@ const AttachmentModal = ({ attachments, onClose }: { attachments: string[]; onCl
   );
 };
 
+// --- NEW: Component for displaying payment status ---
+const PaymentStatusBadge = ({ paid }: { paid: boolean }) => {
+  if (paid) {
+    return (
+        <Badge className="bg-green-100 text-green-800 border-green-200 hover:bg-green-100 pointer-events-none">
+          <CheckCircle size={14} className="mr-1.5" />
+          Successful
+        </Badge>
+    );
+  }
+  return (
+      <Badge className="bg-red-100 text-red-800 border-red-200 hover:bg-red-100 pointer-events-none">
+        <XCircle size={14} className="mr-1.5" />
+        Failed
+      </Badge>
+  );
+};
+
 
 // --- Main Repayment View Component ---
 const RepaymentView = () => {
@@ -204,11 +228,12 @@ const RepaymentView = () => {
         throw new Error('Repayment details not found in the API response.');
       }
     } catch (err) {
-      setError(err.message);
+      const typedErr = err as Error;
+      setError(typedErr.message);
       toast({
         variant: "destructive",
         title: "API Error",
-        description: err.message || "Could not fetch repayment data.",
+        description: typedErr.message || "Could not fetch repayment data.",
       });
     } finally {
       setLoading(false);
@@ -230,6 +255,15 @@ const RepaymentView = () => {
       return new Date(dateString).toLocaleString('en-IN', {
         day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
       });
+    } catch {
+      return "Invalid Date";
+    }
+  };
+
+  const formatSimpleDate = (dateString: string | null) => {
+    if (!dateString) return 'N/A';
+    try {
+      return format(new Date(dateString), 'd MMM yyyy');
     } catch {
       return "Invalid Date";
     }
@@ -304,7 +338,7 @@ const RepaymentView = () => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'accept': '*/*' },
         body: JSON.stringify({
-          amount: details.pendingAmount, // Amount in paisa
+          amount: details.pendingAmount,
           repaymentId: details.id,
         }),
       });
@@ -319,7 +353,7 @@ const RepaymentView = () => {
 
       // Configure Razorpay options
       const options = {
-        key: "rzp_test_IoCHSYZRCKWYsq",
+        key: "rzp_test_IoCHSYZRCKWYsq", // Replace with your actual key
         amount: orderData.amount,
         currency: orderData.currency,
         name: "Paisa108",
@@ -350,10 +384,11 @@ const RepaymentView = () => {
             });
             fetchRepaymentDetails(); // Refresh data
           } catch (error) {
+            const typedErr = error as Error;
             toast({
               variant: "destructive",
               title: "Verification Failed",
-              description: error.message || "Could not verify your payment. Please contact support.",
+              description: typedErr.message || "Could not verify your payment. Please contact support.",
             });
           }
         },
@@ -371,7 +406,6 @@ const RepaymentView = () => {
         },
         modal: {
           ondismiss: function() {
-            // This function is called when the user closes the modal without paying
             setIsPaying(false);
           }
         }
@@ -379,7 +413,6 @@ const RepaymentView = () => {
 
       const paymentObject = new window.Razorpay(options);
       paymentObject.open();
-      // Razorpay handles closing the modal, so we reset our state on modal close
       paymentObject.on('payment.failed', function (response) {
         console.error('Payment Failed:', response.error);
         toast({
@@ -387,16 +420,17 @@ const RepaymentView = () => {
           title: "Payment Failed",
           description: response.error.description || "Your payment could not be processed.",
         });
-        setIsPaying(false); // Reset state on failure
+        setIsPaying(false);
       });
 
     } catch (error) {
+      const typedErr = error as Error;
       toast({
         variant: "destructive",
         title: "Payment Error",
-        description: error.message || "An unexpected error occurred.",
+        description: typedErr.message || "An unexpected error occurred.",
       });
-      setIsPaying(false); // Reset state on error
+      setIsPaying(false);
     }
   };
 
@@ -444,7 +478,6 @@ const RepaymentView = () => {
             <div className="flex items-center space-x-3">
               {getStatusBadge(details.status)}
               {details.pendingAmount > 0 && details.status !== 'PAID' && (
-                  // --- MODIFICATION: Update button text and disabled state based on payment status ---
                   <Button
                       onClick={handlePayNow}
                       className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400"
@@ -492,16 +525,30 @@ const RepaymentView = () => {
                     <p className="text-gray-500">Pending Amount</p>
                     <p className="font-semibold text-lg text-red-600">{formatCurrency(details.pendingAmount)}</p>
                   </div>
-                  <div>
-                    <p className="text-gray-500">Due Date</p>
-                    {getDueDateInfo(details.dueDate)}
-                  </div>
-                  {details.lastPaidAt && (
+
+                  {/* --- MODIFICATION START: Conditional Date Display --- */}
+                  {details.status === 'PAID' ? (
                       <div>
-                        <p className="text-gray-500">Last Paid On</p>
-                        <p className="font-medium">{formatDate(details.lastPaidAt)}</p>
+                        <p className="text-gray-500">Paid On</p>
+                        {/* Use lastPaidAt if available, otherwise fallback to a simple format of dueDate */}
+                        <p className="font-medium">{formatSimpleDate(details.lastPaidAt || details.dueDate)}</p>
                       </div>
+                  ) : (
+                      <>
+                        <div>
+                          <p className="text-gray-500">Due Date</p>
+                          {getDueDateInfo(details.dueDate)}
+                        </div>
+                        {details.lastPaidAt && (
+                            <div>
+                              <p className="text-gray-500">Last Paid On</p>
+                              <p className="font-medium">{formatDate(details.lastPaidAt)}</p>
+                            </div>
+                        )}
+                      </>
                   )}
+                  {/* --- MODIFICATION END --- */}
+
                 </CardContent>
               </Card>
 
@@ -517,14 +564,19 @@ const RepaymentView = () => {
                       <div className="space-y-4">
                         {details.paymentHistory.map((item, index) => (
                             <div key={index} className="p-4 border rounded-lg bg-gray-50/50">
-                              <div className="flex justify-between items-start">
+                              <div className="flex justify-between items-start gap-4">
                                 <div>
-                                  <p className="font-semibold text-green-600 text-lg">{formatCurrency(item.amount)}</p>
+                                  <p className={`font-semibold text-lg ${item.paid ? 'text-green-600' : 'text-red-600'}`}>{formatCurrency(item.amount)}</p>
                                   <p className="text-xs text-gray-500">{formatDate(item.paidAt)}</p>
                                 </div>
-                                <Badge variant="outline">{toTitleCase(item.mode)}</Badge>
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                  <PaymentStatusBadge paid={item.paid} />
+                                  <Badge variant="outline">{toTitleCase(item.mode)}</Badge>
+                                </div>
                               </div>
                               <div className="mt-3 pt-3 border-t grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                                {item.paymentReceiptId && <div className="flex"><strong className="w-28 text-gray-500 font-medium shrink-0">Receipt ID:</strong> <span className="text-gray-800 break-all">{item.paymentReceiptId}</span></div>}
+                                {item.pgPaymentId && <div className="flex"><strong className="w-28 text-gray-500 font-medium shrink-0">Gateway ID:</strong> <span className="text-gray-800 break-all">{item.pgPaymentId}</span></div>}
                                 <div className="flex"><strong className="w-28 text-gray-500 font-medium shrink-0">Reference ID:</strong> <span className="text-gray-800 break-all">{item.referenceId || 'N/A'}</span></div>
                                 {item.mode === 'CHEQUE' && item.chequeNumber && <div className="flex"><strong className="w-28 text-gray-500 font-medium shrink-0">Cheque No:</strong> <span className="text-gray-800">{item.chequeNumber}</span></div>}
                               </div>

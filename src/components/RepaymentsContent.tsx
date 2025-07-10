@@ -94,7 +94,7 @@ const RepaymentsContent = () => {
     setLoading(true);
     setError(null);
 
-    const requestBody: any = {
+    const requestBody = {
       pageNo: page,
       size: ITEMS_PER_PAGE,
       borrowerId: authToken,
@@ -188,7 +188,16 @@ const RepaymentsContent = () => {
     }
   };
 
-  const getDueDateMessage = (dueDateString: string | null | undefined): string | JSX.Element => {
+  const getDueDateMessage = (status: RepaymentListItem['status'], dueDateString: string | null | undefined): string | JSX.Element => {
+    if (status === 'PAID') {
+      if (!dueDateString) return 'Paid';
+      try {
+        return `Paid on ${format(new Date(dueDateString), 'd MMM yyyy')}`;
+      } catch (error) {
+        console.error("Error parsing date for paid item:", error);
+        return 'Paid';
+      }
+    }
     if (!dueDateString) return 'N/A';
     try {
       const today = startOfDay(new Date());
@@ -212,8 +221,8 @@ const RepaymentsContent = () => {
     } else {
       items.push(0);
       if (currentPage > 2) items.push('...');
-      let start = Math.max(1, currentPage - 1);
-      let end = Math.min(totalPages - 2, currentPage + 1);
+      const start = Math.max(1, currentPage - 1);
+      const end = Math.min(totalPages - 2, currentPage + 1);
       for (let i = start; i <= end; i++) items.push(i);
       if (currentPage < totalPages - 3) items.push('...');
       items.push(totalPages - 1);
@@ -320,7 +329,7 @@ const RepaymentsContent = () => {
                                 <tr className="border-b hover:bg-gray-50" key={repayment.id}>
                                   <td className="text-xs font-normal p-3">{repayment.loanDisplayId || 'N/A'}</td>
                                   <td className="text-xs font-normal p-3">₹ {repayment.dueLoanAmount?.toLocaleString('en-IN') || 'N/A'}</td>
-                                  <td className="text-xs font-normal p-3">{getDueDateMessage(repayment.dueDate)}</td>
+                                  <td className="text-xs font-normal p-3">{getDueDateMessage(repayment.status, repayment.dueDate)}</td>
                                   <td className="text-xs font-normal p-3">₹ {repayment.pendingAmount?.toLocaleString('en-IN') || 'N/A'}</td>
                                   <td className="text-xs font-normal p-3">₹ {repayment.amountPaid?.toLocaleString('en-IN') || 0}</td>
                                   <td className="text-xs font-normal p-3">₹ {repayment.lateFeeCharged?.toLocaleString('en-IN') || 'N/A'}</td>
