@@ -1,6 +1,6 @@
 
 // src/components/forms/IncomeVerificationForm.tsx
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { toast } from 'react-toastify';
 import { Upload, X, FileText, Trash2, Check } from 'lucide-react';
 import { config } from '../../config/environment'; // Adjust path as needed
@@ -85,13 +85,8 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
         bankStatement: null,
     });
     
-    const [accessCodes, setAccessCodes] = useState<{
-        payslips: { [key: string]: string };
-        bankStatement: string;
-    }>({
-        payslips: {},
-        bankStatement: '',
-    });
+    const [payslipAccessCodes, setPayslipAccessCodes] = useState<string[]>([]);
+    const [bankStatementAccessCode, setBankStatementAccessCode] = useState('');
     
     const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -107,11 +102,7 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
         return Object.keys(newErrors).length === 0;
     };
 
-    const generateFileKey = (file: File) => {
-        return `${file.name}-${file.lastModified}-${file.size}`;
-    };
-
-    const handlePayslipUpload = (selectedFilesList: FileList | null) => {
+    const handlePayslipUpload = useCallback((selectedFilesList: FileList | null) => {
         if (!selectedFilesList) return;
         const newFilesArray = Array.from(selectedFilesList);
         if (files.payslips.length + newFilesArray.length > 6) {
@@ -121,41 +112,41 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
         
         setFiles(prev => ({ ...prev, payslips: [...prev.payslips, ...newFilesArray].slice(0, 6) }));
         
-        // Initialize access codes for new files
-        const newAccessCodes = { ...accessCodes.payslips };
-        newFilesArray.forEach(file => {
-            const fileKey = generateFileKey(file);
-            if (!newAccessCodes[fileKey]) {
-                newAccessCodes[fileKey] = '';
+        // Add empty access codes for new files
+        setPayslipAccessCodes(prev => {
+            const newCodes = [...prev];
+            for (let i = 0; i < newFilesArray.length; i++) {
+                newCodes.push('');
             }
+            return newCodes.slice(0, 6);
         });
-        setAccessCodes(prev => ({ ...prev, payslips: newAccessCodes }));
         
         if (errors.payslips) setErrors(prev => ({ ...prev, payslips: '' }));
-    };
+    }, [files.payslips.length, errors.payslips]);
 
-    const removePayslip = (indexToRemove: number) => {
-        const fileToRemove = files.payslips[indexToRemove];
-        const fileKey = generateFileKey(fileToRemove);
-        
+    const removePayslip = useCallback((indexToRemove: number) => {
         setFiles(prev => ({ ...prev, payslips: prev.payslips.filter((_, index) => index !== indexToRemove) }));
-        
-        // Remove access code for the removed file
-        const updatedAccessCodes = { ...accessCodes.payslips };
-        delete updatedAccessCodes[fileKey];
-        setAccessCodes(prev => ({ ...prev, payslips: updatedAccessCodes }));
-    };
+        setPayslipAccessCodes(prev => prev.filter((_, index) => index !== indexToRemove));
+    }, []);
 
-    const handleBankStatementUpload = (selectedFile: File | null) => {
+    const handleBankStatementUpload = useCallback((selectedFile: File | null) => {
         if (!selectedFile) return;
         setFiles(prev => ({ ...prev, bankStatement: selectedFile }));
         if (errors.bankStatement) setErrors(prev => ({ ...prev, bankStatement: '' }));
-    };
+    }, [errors.bankStatement]);
 
-    const removeBankStatement = () => {
+    const removeBankStatement = useCallback(() => {
         setFiles(prev => ({ ...prev, bankStatement: null }));
-        setAccessCodes(prev => ({ ...prev, bankStatement: '' }));
-    };
+        setBankStatementAccessCode('');
+    }, []);
+
+    const updatePayslipAccessCode = useCallback((index: number, value: string) => {
+        setPayslipAccessCodes(prev => {
+            const newCodes = [...prev];
+            newCodes[index] = value;
+            return newCodes;
+        });
+    }, []);
 
     const handleSubmit = async () => {
         if (!validateFiles()) {
@@ -219,40 +210,29 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
                             </label>
                         </div>
                     )}
-                    {files.payslips.map((file, index) => {
-                        const fileKey = generateFileKey(file);
-                        return (
-                            <div key={fileKey} className="border p-2 rounded-lg border-primary space-y-2">
-                                <div className="flex items-center justify-between bg-gray-50 p-2 rounded-md border">
-                                    <FileText className="h-5 w-5 text-gray-500 mr-2" />
-                                    <span className="text-sm text-gray-700 truncate" title={file.name}>{file.name}</span>
-                                    <button onClick={() => removePayslip(index)} className="ml-2 text-red-500 hover:text-red-700">
-                                        <Trash2 size={18} />
-                                    </button>
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="block text-xs font-medium text-gray-600">
-                                        Access Code (optional)
-                                    </label>
-                                    <Input
-                                        type="text"
-                                        placeholder="Enter access code"
-                                        value={accessCodes.payslips[fileKey] || ''}
-                                        onChange={(e) => {
-                                            setAccessCodes(prev => ({
-                                                ...prev,
-                                                payslips: {
-                                                    ...prev.payslips,
-                                                    [fileKey]: e.target.value
-                                                }
-                                            }));
-                                        }}
-                                        className="text-sm"
-                                    />
-                                </div>
+                    {files.payslips.map((file, index) => (
+                        <div key={`payslip-${index}`} className="border p-2 rounded-lg border-primary space-y-2">
+                            <div className="flex items-center justify-between bg-gray-50 p-2 rounded-md border">
+                                <FileText className="h-5 w-5 text-gray-500 mr-2" />
+                                <span className="text-sm text-gray-700 truncate" title={file.name}>{file.name}</span>
+                                <button onClick={() => removePayslip(index)} className="ml-2 text-red-500 hover:text-red-700">
+                                    <Trash2 size={18} />
+                                </button>
                             </div>
-                        );
-                    })}
+                            <div className="space-y-1">
+                                <label className="block text-xs font-medium text-gray-600">
+                                    Access Code (optional)
+                                </label>
+                                <Input
+                                    type="text"
+                                    placeholder="Enter access code"
+                                    value={payslipAccessCodes[index] || ''}
+                                    onChange={(e) => updatePayslipAccessCode(index, e.target.value)}
+                                    className="text-sm"
+                                />
+                            </div>
+                        </div>
+                    ))}
                     {errors.payslips && <p className="text-red-500 text-xs mt-1">{errors.payslips}</p>}
                 </div>
 
@@ -291,10 +271,8 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
                                 <Input
                                     type="text"
                                     placeholder="Enter access code"
-                                    value={accessCodes.bankStatement}
-                                    onChange={(e) => {
-                                        setAccessCodes(prev => ({ ...prev, bankStatement: e.target.value }));
-                                    }}
+                                    value={bankStatementAccessCode}
+                                    onChange={(e) => setBankStatementAccessCode(e.target.value)}
                                     className="text-sm"
                                 />
                             </div>

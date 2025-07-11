@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { Upload, X, FileText, Trash2 } from 'lucide-react';
@@ -31,13 +31,8 @@ const IncomeVerification = () => {
     bankStatement: null,
   });
 
-  const [accessCodes, setAccessCodes] = useState<{
-    payslips: { [key: string]: string };
-    bankStatement: string;
-  }>({
-    payslips: {},
-    bankStatement: '',
-  });
+  const [payslipAccessCodes, setPayslipAccessCodes] = useState<string[]>([]);
+  const [bankStatementAccessCode, setBankStatementAccessCode] = useState('');
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -75,11 +70,7 @@ const IncomeVerification = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const generateFileKey = (file: File) => {
-    return `${file.name}-${file.lastModified}-${file.size}`;
-  };
-
-  const handlePayslipUpload = (selectedFilesList: FileList | null) => {
+  const handlePayslipUpload = useCallback((selectedFilesList: FileList | null) => {
     if (!selectedFilesList) return;
     const newFiles = Array.from(selectedFilesList);
     if (files.payslips.length + newFiles.length > 6) {
@@ -94,33 +85,26 @@ const IncomeVerification = () => {
       payslips: [...prev.payslips, ...validFiles],
     }));
     
-    // Initialize access codes for new files
-    const newAccessCodes = { ...accessCodes.payslips };
-    validFiles.forEach(file => {
-      const fileKey = generateFileKey(file);
-      if (!newAccessCodes[fileKey]) {
-        newAccessCodes[fileKey] = '';
+    // Add empty access codes for new files
+    setPayslipAccessCodes(prev => {
+      const newCodes = [...prev];
+      for (let i = 0; i < validFiles.length; i++) {
+        newCodes.push('');
       }
+      return newCodes;
     });
-    setAccessCodes(prev => ({ ...prev, payslips: newAccessCodes }));
-  };
+  }, [files.payslips.length]);
 
-  const removePayslip = (index: number) => {
-    const fileToRemove = files.payslips[index];
-    const fileKey = generateFileKey(fileToRemove);
-    
+  const removePayslip = useCallback((index: number) => {
     setFiles(prev => ({
       ...prev,
       payslips: prev.payslips.filter((_, i) => i !== index),
     }));
     
-    // Remove access code for the removed file
-    const updatedAccessCodes = { ...accessCodes.payslips };
-    delete updatedAccessCodes[fileKey];
-    setAccessCodes(prev => ({ ...prev, payslips: updatedAccessCodes }));
-  };
+    setPayslipAccessCodes(prev => prev.filter((_, i) => i !== index));
+  }, []);
 
-  const handleBankStatementUpload = (file: File | null) => {
+  const handleBankStatementUpload = useCallback((file: File | null) => {
     if (!file) return;
     const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
     if (!allowedTypes.includes(file.type)) {
@@ -129,12 +113,20 @@ const IncomeVerification = () => {
     }
     setFiles(prev => ({ ...prev, bankStatement: file }));
     setErrors(prev => ({ ...prev, bankStatement: '' }));
-  };
+  }, []);
 
-  const removeBankStatement = () => {
+  const removeBankStatement = useCallback(() => {
     setFiles(prev => ({ ...prev, bankStatement: null }));
-    setAccessCodes(prev => ({ ...prev, bankStatement: '' }));
-  };
+    setBankStatementAccessCode('');
+  }, []);
+
+  const updatePayslipAccessCode = useCallback((index: number, value: string) => {
+    setPayslipAccessCodes(prev => {
+      const newCodes = [...prev];
+      newCodes[index] = value;
+      return newCodes;
+    });
+  }, []);
 
   const handleContinue = async () => {
     if (!validateFiles()) return;
@@ -163,14 +155,10 @@ const IncomeVerification = () => {
         const payslipPayload = {
           borrowerId,
           documentType: 'SALARY_SLIP',
-          documents: payslipDocs.map(doc => {
-            const matchingFile = files.payslips.find(f => doc.fileName === f.name);
-            const fileKey = matchingFile ? generateFileKey(matchingFile) : '';
-            return {
-              url: doc.url,
-              passCode: accessCodes.payslips[fileKey] || '',
-            };
-          }),
+          documents: payslipDocs.map((doc, index) => ({
+            url: doc.url,
+            passCode: payslipAccessCodes[index] || '',
+          })),
         };
 
         await fetch(`${config.baseURL}kyc-docs/add`, {
@@ -187,7 +175,7 @@ const IncomeVerification = () => {
           documentType: 'BANK_STATEMENT',
           documents: [{
             url: bankDoc.url,
-            passCode: accessCodes.bankStatement || '',
+            passCode: bankStatementAccessCode || '',
           }],
         };
         await fetch(`${config.baseURL}kyc-docs/add`, {
@@ -231,42 +219,31 @@ const IncomeVerification = () => {
         </div>
       )}
 
-      {files.payslips.map((file, i) => {
-        const fileKey = generateFileKey(file);
-        return (
-          <div key={fileKey} className="border p-2 rounded-lg border-primary space-y-2">
-            <div className="flex items-center justify-between bg-gray-50 p-2 rounded-lg border">
-              <div className="flex items-center space-x-2">
-                <FileText className="h-4 w-4 text-gray-500" />
-                <span className="text-xs text-gray-700 truncate">{file.name}</span>
-              </div>
-              <button onClick={() => removePayslip(i)} className="text-red-500 hover:text-red-700">
-                <Trash2 className="h-4 w-4" />
-              </button>
+      {files.payslips.map((file, i) => (
+        <div key={`payslip-${i}`} className="border p-2 rounded-lg border-primary space-y-2">
+          <div className="flex items-center justify-between bg-gray-50 p-2 rounded-lg border">
+            <div className="flex items-center space-x-2">
+              <FileText className="h-4 w-4 text-gray-500" />
+              <span className="text-xs text-gray-700 truncate">{file.name}</span>
             </div>
-            <div className="space-y-1">
-              <label className="block text-xs font-medium text-gray-600">
-                Access Code (optional)
-              </label>
-              <Input
-                type="text"
-                placeholder="Enter access code"
-                value={accessCodes.payslips[fileKey] || ''}
-                onChange={(e) => {
-                  setAccessCodes(prev => ({
-                    ...prev,
-                    payslips: {
-                      ...prev.payslips,
-                      [fileKey]: e.target.value
-                    }
-                  }));
-                }}
-                className="text-xs"
-              />
-            </div>
+            <button onClick={() => removePayslip(i)} className="text-red-500 hover:text-red-700">
+              <Trash2 className="h-4 w-4" />
+            </button>
           </div>
-        );
-      })}
+          <div className="space-y-1">
+            <label className="block text-xs font-medium text-gray-600">
+              Access Code (optional)
+            </label>
+            <Input
+              type="text"
+              placeholder="Enter access code"
+              value={payslipAccessCodes[i] || ''}
+              onChange={(e) => updatePayslipAccessCode(i, e.target.value)}
+              className="text-xs"
+            />
+          </div>
+        </div>
+      ))}
       {errors.payslips && <p className="error-message">{errors.payslips}</p>}
     </div>
   );
@@ -314,8 +291,8 @@ const IncomeVerification = () => {
             <Input
               type="text"
               placeholder="Enter access code"
-              value={accessCodes.bankStatement}
-              onChange={(e) => setAccessCodes(prev => ({ ...prev, bankStatement: e.target.value }))}
+              value={bankStatementAccessCode}
+              onChange={(e) => setBankStatementAccessCode(e.target.value)}
               className="text-xs"
             />
           </div>
