@@ -6,6 +6,7 @@ import { config } from '../../config/environment'; // Adjust path as needed
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { CognitoIdentityClient } from "@aws-sdk/client-cognito-identity";
 import { fromCognitoIdentityPool } from "@aws-sdk/credential-provider-cognito-identity";
+import { Input } from '../ui/input';
 
 interface IncomeVerificationFormProps {
     onNext: (data: { paySlipsUrls: string[], bankStatementUrl: string | null }) => void;
@@ -82,6 +83,15 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
         payslips: [],
         bankStatement: null,
     });
+    
+    const [accessCodes, setAccessCodes] = useState<{
+        payslips: string[];
+        bankStatement: string;
+    }>({
+        payslips: [],
+        bankStatement: '',
+    });
+    
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     const validateFiles = () => {
@@ -186,12 +196,30 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
                         </div>
                     )}
                     {files.payslips.map((file, index) => (
-                        <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded-md border">
-                            <FileText className="h-5 w-5 text-gray-500 mr-2" />
-                            <span className="text-sm text-gray-700 truncate" title={file.name}>{file.name}</span>
-                            <button onClick={() => removePayslip(index)} className="ml-2 text-red-500 hover:text-red-700">
-                                <Trash2 size={18} />
-                            </button>
+                        <div key={index} className="border p-2 rounded-lg border-primary space-y-2">
+                            <div className="flex items-center justify-between bg-gray-50 p-2 rounded-md border">
+                                <FileText className="h-5 w-5 text-gray-500 mr-2" />
+                                <span className="text-sm text-gray-700 truncate" title={file.name}>{file.name}</span>
+                                <button onClick={() => removePayslip(index)} className="ml-2 text-red-500 hover:text-red-700">
+                                    <Trash2 size={18} />
+                                </button>
+                            </div>
+                            <div className="space-y-1">
+                                <label className="block text-xs font-medium text-gray-600">
+                                    Access Code (optional)
+                                </label>
+                                <Input
+                                    type="text"
+                                    placeholder="Enter access code"
+                                    value={accessCodes.payslips[index] || ''}
+                                    onChange={(e) => {
+                                        const newAccessCodes = [...accessCodes.payslips];
+                                        newAccessCodes[index] = e.target.value;
+                                        setAccessCodes(prev => ({ ...prev, payslips: newAccessCodes }));
+                                    }}
+                                    className="text-sm"
+                                />
+                            </div>
                         </div>
                     ))}
                     {errors.payslips && <p className="text-red-500 text-xs mt-1">{errors.payslips}</p>}
@@ -217,12 +245,26 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
                             </label>
                         </div>
                     ) : (
-                        <div className="flex items-center justify-between bg-gray-50 p-2 rounded-md border">
-                            <FileText className="h-5 w-5 text-gray-500 mr-2" />
-                            <span className="text-sm text-gray-700 truncate" title={files.bankStatement.name}>{files.bankStatement.name}</span>
-                            <button onClick={removeBankStatement} className="ml-2 text-red-500 hover:text-red-700">
-                                <Trash2 size={18} />
-                            </button>
+                        <div className="border p-2 rounded-lg border-primary space-y-2">
+                            <div className="flex items-center justify-between bg-gray-50 p-2 rounded-md border">
+                                <FileText className="h-5 w-5 text-gray-500 mr-2" />
+                                <span className="text-sm text-gray-700 truncate" title={files.bankStatement.name}>{files.bankStatement.name}</span>
+                                <button onClick={removeBankStatement} className="ml-2 text-red-500 hover:text-red-700">
+                                    <Trash2 size={18} />
+                                </button>
+                            </div>
+                            <div className="space-y-1">
+                                <label className="block text-xs font-medium text-gray-600">
+                                    Access Code (optional)
+                                </label>
+                                <Input
+                                    type="text"
+                                    placeholder="Enter access code"
+                                    value={accessCodes.bankStatement}
+                                    onChange={(e) => setAccessCodes(prev => ({ ...prev, bankStatement: e.target.value }))}
+                                    className="text-sm"
+                                />
+                            </div>
                         </div>
                     )}
                     {errors.bankStatement && <p className="text-red-500 text-xs mt-1">{errors.bankStatement}</p>}

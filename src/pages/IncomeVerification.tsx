@@ -8,6 +8,7 @@ import { CognitoIdentityClient } from "@aws-sdk/client-cognito-identity";
 import { fromCognitoIdentityPool } from "@aws-sdk/credential-provider-cognito-identity";
 import styles from '../pages-styles/EmployemntInfo.module.css';
 import { toast } from 'react-toastify';
+import { Input } from '../components/ui/input';
 
 const s3BucketConfig = config.componentImageUploading.S3TransferUtility.Default;
 const cognitoAuthConfig = config.componentImageUploading.CredentialsProvider.CognitoIdentity.Default;
@@ -221,20 +222,25 @@ const IncomeVerification = () => {
               <Trash2 className="h-4 w-4" />
             </button>
           </div>
-          <input
-            className="inputField1 !h-[40px] !text-xs"
-            placeholder="Enter Access Code (optional)"
-            style={{width:"100%"}}
-            value={accessCodes.payslips[i] || ''}
-            onChange={(e) => {
-              const newAccessCode = e.target.value;
-              setAccessCodes(prev => {
-                const updatedPayslips = [...prev.payslips];
-                updatedPayslips[i] = newAccessCode;
-                return { ...prev, payslips: updatedPayslips };
-              });
-            }}
-          />
+          <div className="space-y-1">
+            <label className="block text-xs font-medium text-gray-600">
+              Access Code (optional)
+            </label>
+            <Input
+              type="text"
+              placeholder="Enter access code"
+              value={accessCodes.payslips[i] || ''}
+              onChange={(e) => {
+                const newAccessCode = e.target.value;
+                setAccessCodes(prev => {
+                  const updatedPayslips = [...prev.payslips];
+                  updatedPayslips[i] = newAccessCode;
+                  return { ...prev, payslips: updatedPayslips };
+                });
+              }}
+              className="text-xs"
+            />
+          </div>
         </div>
       ))}
       {errors.payslips && <p className="error-message">{errors.payslips}</p>}
@@ -262,7 +268,7 @@ const IncomeVerification = () => {
           </label>
         </div>
       ) : (
-        <div className="border border-primary rounded-lg p-2">
+        <div className="border border-primary rounded-lg p-2 space-y-2">
           <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border">
             <div className="flex items-center space-x-2">
               <FileText className="h-4 w-4 text-gray-500" />
@@ -277,14 +283,18 @@ const IncomeVerification = () => {
               </button>
             </div>
           </div>
-          <input
-            className="inputField1 !h-[40px] !text-xs mt-2"
-            placeholder="Enter Access Code (optional)"
-            type='text'
-            value={accessCodes.bankStatement}
-            style={{width:"100%"}}
-            onChange={(e) => setAccessCodes(prev => ({ ...prev, bankStatement: e.target.value }))}
-          />
+          <div className="space-y-1">
+            <label className="block text-xs font-medium text-gray-600">
+              Access Code (optional)
+            </label>
+            <Input
+              type="text"
+              placeholder="Enter access code"
+              value={accessCodes.bankStatement}
+              onChange={(e) => setAccessCodes(prev => ({ ...prev, bankStatement: e.target.value }))}
+              className="text-xs"
+            />
+          </div>
         </div>
       )}
 
