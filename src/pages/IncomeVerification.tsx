@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -31,10 +32,10 @@ const IncomeVerification = () => {
   });
 
   const [accessCodes, setAccessCodes] = useState<{
-    payslips: string[];
+    payslips: { [key: string]: string };
     bankStatement: string;
   }>({
-    payslips: [],
+    payslips: {},
     bankStatement: '',
   });
 
@@ -74,6 +75,10 @@ const IncomeVerification = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const generateFileKey = (file: File) => {
+    return `${file.name}-${file.lastModified}-${file.size}`;
+  };
+
   const handlePayslipUpload = (selectedFilesList: FileList | null) => {
     if (!selectedFilesList) return;
     const newFiles = Array.from(selectedFilesList);
@@ -83,25 +88,36 @@ const IncomeVerification = () => {
     }
     const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
     const validFiles = newFiles.filter(f => allowedTypes.includes(f.type));
+    
     setFiles(prev => ({
       ...prev,
       payslips: [...prev.payslips, ...validFiles],
     }));
-    // Add corresponding empty access codes for the new files
-    setAccessCodes(prev => ({
-      ...prev,
-      payslips: [...prev.payslips, ...Array(validFiles.length).fill('')],
-    }));
+    
+    // Initialize access codes for new files
+    const newAccessCodes = { ...accessCodes.payslips };
+    validFiles.forEach(file => {
+      const fileKey = generateFileKey(file);
+      if (!newAccessCodes[fileKey]) {
+        newAccessCodes[fileKey] = '';
+      }
+    });
+    setAccessCodes(prev => ({ ...prev, payslips: newAccessCodes }));
   };
+
   const removePayslip = (index: number) => {
+    const fileToRemove = files.payslips[index];
+    const fileKey = generateFileKey(fileToRemove);
+    
     setFiles(prev => ({
       ...prev,
       payslips: prev.payslips.filter((_, i) => i !== index),
     }));
-    setAccessCodes(prev => ({
-      ...prev,
-      payslips: prev.payslips.filter((_, i) => i !== index),
-    }));
+    
+    // Remove access code for the removed file
+    const updatedAccessCodes = { ...accessCodes.payslips };
+    delete updatedAccessCodes[fileKey];
+    setAccessCodes(prev => ({ ...prev, payslips: updatedAccessCodes }));
   };
 
   const handleBankStatementUpload = (file: File | null) => {
@@ -147,10 +163,14 @@ const IncomeVerification = () => {
         const payslipPayload = {
           borrowerId,
           documentType: 'SALARY_SLIP',
-          documents: payslipDocs.map((doc, i) => ({
-            url: doc.url,
-            passCode: accessCodes.payslips[i] || '',
-          })),
+          documents: payslipDocs.map(doc => {
+            const matchingFile = files.payslips.find(f => doc.fileName === f.name);
+            const fileKey = matchingFile ? generateFileKey(matchingFile) : '';
+            return {
+              url: doc.url,
+              passCode: accessCodes.payslips[fileKey] || '',
+            };
+          }),
         };
 
         await fetch(`${config.baseURL}kyc-docs/add`, {
@@ -211,38 +231,42 @@ const IncomeVerification = () => {
         </div>
       )}
 
-      {files.payslips.map((file, i) => (
-        <div key={`${file.name}-${file.lastModified}-${i}`} className="border p-2 rounded-lg border-primary space-y-2">
-          <div className="flex items-center justify-between bg-gray-50 p-2 rounded-lg border">
-            <div className="flex items-center space-x-2">
-              <FileText className="h-4 w-4 text-gray-500" />
-              <span className="text-xs text-gray-700 truncate">{file.name}</span>
+      {files.payslips.map((file, i) => {
+        const fileKey = generateFileKey(file);
+        return (
+          <div key={fileKey} className="border p-2 rounded-lg border-primary space-y-2">
+            <div className="flex items-center justify-between bg-gray-50 p-2 rounded-lg border">
+              <div className="flex items-center space-x-2">
+                <FileText className="h-4 w-4 text-gray-500" />
+                <span className="text-xs text-gray-700 truncate">{file.name}</span>
+              </div>
+              <button onClick={() => removePayslip(i)} className="text-red-500 hover:text-red-700">
+                <Trash2 className="h-4 w-4" />
+              </button>
             </div>
-            <button onClick={() => removePayslip(i)} className="text-red-500 hover:text-red-700">
-              <Trash2 className="h-4 w-4" />
-            </button>
+            <div className="space-y-1">
+              <label className="block text-xs font-medium text-gray-600">
+                Access Code (optional)
+              </label>
+              <Input
+                type="text"
+                placeholder="Enter access code"
+                value={accessCodes.payslips[fileKey] || ''}
+                onChange={(e) => {
+                  setAccessCodes(prev => ({
+                    ...prev,
+                    payslips: {
+                      ...prev.payslips,
+                      [fileKey]: e.target.value
+                    }
+                  }));
+                }}
+                className="text-xs"
+              />
+            </div>
           </div>
-          <div className="space-y-1">
-            <label className="block text-xs font-medium text-gray-600">
-              Access Code (optional)
-            </label>
-            <Input
-              type="text"
-              placeholder="Enter access code"
-              value={accessCodes.payslips[i] || ''}
-              onChange={(e) => {
-                const newAccessCode = e.target.value;
-                setAccessCodes(prev => {
-                  const updatedPayslips = [...prev.payslips];
-                  updatedPayslips[i] = newAccessCode;
-                  return { ...prev, payslips: updatedPayslips };
-                });
-              }}
-              className="text-xs"
-            />
-          </div>
-        </div>
-      ))}
+        );
+      })}
       {errors.payslips && <p className="error-message">{errors.payslips}</p>}
     </div>
   );

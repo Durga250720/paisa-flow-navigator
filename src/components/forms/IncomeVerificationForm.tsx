@@ -1,3 +1,4 @@
+
 // src/components/forms/IncomeVerificationForm.tsx
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
@@ -85,10 +86,10 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
     });
     
     const [accessCodes, setAccessCodes] = useState<{
-        payslips: string[];
+        payslips: { [key: string]: string };
         bankStatement: string;
     }>({
-        payslips: [],
+        payslips: {},
         bankStatement: '',
     });
     
@@ -106,6 +107,10 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
         return Object.keys(newErrors).length === 0;
     };
 
+    const generateFileKey = (file: File) => {
+        return `${file.name}-${file.lastModified}-${file.size}`;
+    };
+
     const handlePayslipUpload = (selectedFilesList: FileList | null) => {
         if (!selectedFilesList) return;
         const newFilesArray = Array.from(selectedFilesList);
@@ -113,24 +118,43 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
             toast.error("Maximum 6 payslips allowed.");
             return;
         }
-        // Add type validation if needed
+        
         setFiles(prev => ({ ...prev, payslips: [...prev.payslips, ...newFilesArray].slice(0, 6) }));
+        
+        // Initialize access codes for new files
+        const newAccessCodes = { ...accessCodes.payslips };
+        newFilesArray.forEach(file => {
+            const fileKey = generateFileKey(file);
+            if (!newAccessCodes[fileKey]) {
+                newAccessCodes[fileKey] = '';
+            }
+        });
+        setAccessCodes(prev => ({ ...prev, payslips: newAccessCodes }));
+        
         if (errors.payslips) setErrors(prev => ({ ...prev, payslips: '' }));
     };
 
     const removePayslip = (indexToRemove: number) => {
+        const fileToRemove = files.payslips[indexToRemove];
+        const fileKey = generateFileKey(fileToRemove);
+        
         setFiles(prev => ({ ...prev, payslips: prev.payslips.filter((_, index) => index !== indexToRemove) }));
+        
+        // Remove access code for the removed file
+        const updatedAccessCodes = { ...accessCodes.payslips };
+        delete updatedAccessCodes[fileKey];
+        setAccessCodes(prev => ({ ...prev, payslips: updatedAccessCodes }));
     };
 
     const handleBankStatementUpload = (selectedFile: File | null) => {
         if (!selectedFile) return;
-        // Add type validation if needed
         setFiles(prev => ({ ...prev, bankStatement: selectedFile }));
         if (errors.bankStatement) setErrors(prev => ({ ...prev, bankStatement: '' }));
     };
 
     const removeBankStatement = () => {
         setFiles(prev => ({ ...prev, bankStatement: null }));
+        setAccessCodes(prev => ({ ...prev, bankStatement: '' }));
     };
 
     const handleSubmit = async () => {
@@ -139,7 +163,7 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
             return;
         }
 
-        const userName = localStorage.getItem('name'); // Or get from a more reliable source
+        const userName = localStorage.getItem('name');
         if (!userName) {
             toast.error("User information not found. Cannot upload files.");
             return;
@@ -195,33 +219,40 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
                             </label>
                         </div>
                     )}
-                    {files.payslips.map((file, index) => (
-                        <div key={index} className="border p-2 rounded-lg border-primary space-y-2">
-                            <div className="flex items-center justify-between bg-gray-50 p-2 rounded-md border">
-                                <FileText className="h-5 w-5 text-gray-500 mr-2" />
-                                <span className="text-sm text-gray-700 truncate" title={file.name}>{file.name}</span>
-                                <button onClick={() => removePayslip(index)} className="ml-2 text-red-500 hover:text-red-700">
-                                    <Trash2 size={18} />
-                                </button>
+                    {files.payslips.map((file, index) => {
+                        const fileKey = generateFileKey(file);
+                        return (
+                            <div key={fileKey} className="border p-2 rounded-lg border-primary space-y-2">
+                                <div className="flex items-center justify-between bg-gray-50 p-2 rounded-md border">
+                                    <FileText className="h-5 w-5 text-gray-500 mr-2" />
+                                    <span className="text-sm text-gray-700 truncate" title={file.name}>{file.name}</span>
+                                    <button onClick={() => removePayslip(index)} className="ml-2 text-red-500 hover:text-red-700">
+                                        <Trash2 size={18} />
+                                    </button>
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="block text-xs font-medium text-gray-600">
+                                        Access Code (optional)
+                                    </label>
+                                    <Input
+                                        type="text"
+                                        placeholder="Enter access code"
+                                        value={accessCodes.payslips[fileKey] || ''}
+                                        onChange={(e) => {
+                                            setAccessCodes(prev => ({
+                                                ...prev,
+                                                payslips: {
+                                                    ...prev.payslips,
+                                                    [fileKey]: e.target.value
+                                                }
+                                            }));
+                                        }}
+                                        className="text-sm"
+                                    />
+                                </div>
                             </div>
-                            <div className="space-y-1">
-                                <label className="block text-xs font-medium text-gray-600">
-                                    Access Code (optional)
-                                </label>
-                                <Input
-                                    type="text"
-                                    placeholder="Enter access code"
-                                    value={accessCodes.payslips[index] || ''}
-                                    onChange={(e) => {
-                                        const newAccessCodes = [...accessCodes.payslips];
-                                        newAccessCodes[index] = e.target.value;
-                                        setAccessCodes(prev => ({ ...prev, payslips: newAccessCodes }));
-                                    }}
-                                    className="text-sm"
-                                />
-                            </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                     {errors.payslips && <p className="text-red-500 text-xs mt-1">{errors.payslips}</p>}
                 </div>
 
@@ -261,7 +292,9 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
                                     type="text"
                                     placeholder="Enter access code"
                                     value={accessCodes.bankStatement}
-                                    onChange={(e) => setAccessCodes(prev => ({ ...prev, bankStatement: e.target.value }))}
+                                    onChange={(e) => {
+                                        setAccessCodes(prev => ({ ...prev, bankStatement: e.target.value }));
+                                    }}
                                     className="text-sm"
                                 />
                             </div>
