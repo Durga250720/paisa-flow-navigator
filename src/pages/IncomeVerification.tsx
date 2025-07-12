@@ -197,40 +197,38 @@ const IncomeVerification = () => {
   };
 
   // Memoized PayslipItem component to prevent unnecessary re-renders
-  const PayslipItem = useMemo(() => {
-    return React.memo(({ file, index, onRemove, accessCode, onAccessCodeChange }: {
-      file: File;
-      index: number;
-      onRemove: (index: number) => void;
-      accessCode: string;
-      onAccessCodeChange: (index: number, value: string) => void;
-    }) => (
-      <div className="border p-2 rounded-lg border-primary space-y-2">
-        <div className="flex items-center justify-between bg-gray-50 p-2 rounded-lg border">
-          <div className="flex items-center space-x-2">
-            <FileText className="h-4 w-4 text-gray-500" />
-            <span className="text-xs text-gray-700 truncate">{file.name}</span>
-          </div>
-          <button onClick={() => onRemove(index)} className="text-red-500 hover:text-red-700">
-            <Trash2 className="h-4 w-4" />
-          </button>
+  const PayslipItem = React.memo(({ file, index, onRemove, accessCode, onAccessCodeChange }: {
+    file: File;
+    index: number;
+    onRemove: (index: number) => void;
+    accessCode: string;
+    onAccessCodeChange: (index: number, value: string) => void;
+  }) => (
+    <div className="border p-2 rounded-lg border-primary space-y-2">
+      <div className="flex items-center justify-between bg-gray-50 p-2 rounded-lg border">
+        <div className="flex items-center space-x-2">
+          <FileText className="h-4 w-4 text-gray-500" />
+          <span className="text-xs text-gray-700 truncate">{file.name}</span>
         </div>
-        <div className="space-y-1">
-          <label className="block text-xs font-medium text-gray-600">
-            Access Code (optional)
-          </label>
-          <Input
-            type="text"
-            placeholder="Enter access code"
-            value={accessCode}
-            onChange={(e) => onAccessCodeChange(index, e.target.value)}
-            className="text-xs"
-            autoComplete="off"
-          />
-        </div>
+        <button onClick={() => onRemove(index)} className="text-red-500 hover:text-red-700">
+          <Trash2 className="h-4 w-4" />
+        </button>
       </div>
-    ));
-  }, []);
+      <div className="space-y-1">
+        <label className="block text-xs font-medium text-gray-600">
+          Access Code (optional)
+        </label>
+        <Input
+          type="text"
+          placeholder="Enter access code"
+          value={accessCode}
+          onChange={(e) => onAccessCodeChange(index, e.target.value)}
+          className="text-xs"
+          autoComplete="off"
+        />
+      </div>
+    </div>
+  ));
 
   const PayslipUploadArea = () => (
     <div className="space-y-3 w-[95%]">
@@ -257,7 +255,7 @@ const IncomeVerification = () => {
 
       {files.payslips.map((file, i) => (
         <PayslipItem
-          key={`payslip-${i}-${file.name}-${file.size}`}
+          key={`payslip-${i}-${file.name}`}
           file={file}
           index={i}
           onRemove={removePayslip}
