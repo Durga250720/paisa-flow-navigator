@@ -79,12 +79,12 @@ const IncomeVerification = () => {
     }
     const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
     const validFiles = newFiles.filter(f => allowedTypes.includes(f.type));
-    
+
     setFiles(prev => ({
       ...prev,
       payslips: [...prev.payslips, ...validFiles],
     }));
-    
+
     // Add empty access codes for new files
     setPayslipAccessCodes(prev => {
       const newCodes = [...prev];
@@ -100,17 +100,17 @@ const IncomeVerification = () => {
       ...prev,
       payslips: prev.payslips.filter((_, i) => i !== index),
     }));
-    
+
     setPayslipAccessCodes(prev => prev.filter((_, i) => i !== index));
   }, []);
 
   const handleBankStatementUpload = useCallback((file: File | null) => {
     if (!file) return;
-    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
-    if (!allowedTypes.includes(file.type)) {
-      setErrors(prev => ({ ...prev, bankStatement: 'Invalid file type' }));
-      return;
-    }
+    // const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+    // if (!allowedTypes.includes(file.type)) {
+    //   setErrors(prev => ({ ...prev, bankStatement: 'Invalid file type' }));
+    //   return;
+    // }
     setFiles(prev => ({ ...prev, bankStatement: file }));
     setErrors(prev => ({ ...prev, bankStatement: '' }));
   }, []);
@@ -232,98 +232,6 @@ const IncomeVerification = () => {
     ));
   }, []);
 
-  const PayslipUploadArea = () => (
-    <div className="space-y-3 w-[95%]">
-      <label className="block text-sm font-medium text-gray-700">
-        Pay Slips (Latest 6 months) <sup className="text-red-500">*</sup>
-      </label>
-
-      {files.payslips.length < 6 && (
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center hover:border-primary transition-colors">
-          <input
-            type="file"
-            accept=".pdf"
-            multiple
-            className="hidden"
-            id="payslips-upload"
-            onChange={(e) => handlePayslipUpload(e.target.files)}
-          />
-          <label htmlFor="payslips-upload" className="cursor-pointer flex items-center justify-center space-x-2">
-            <Upload className="h-4 w-4 text-gray-400" />
-            <p className="text-xs text-gray-600">Click to upload payslips</p>
-          </label>
-        </div>
-      )}
-
-      {files.payslips.map((file, i) => (
-        <PayslipItem
-          key={`payslip-${i}-${file.name}-${file.size}`}
-          file={file}
-          index={i}
-          onRemove={removePayslip}
-          accessCode={payslipAccessCodes[i] || ''}
-          onAccessCodeChange={updatePayslipAccessCode}
-        />
-      ))}
-      {errors.payslips && <p className="error-message">{errors.payslips}</p>}
-    </div>
-  );
-
-  const BankStatementUploadArea = () => (
-    <div className="space-y-3 w-[95%]">
-      <label className="block text-sm font-medium text-gray-700">
-        Bank Statement (Latest 6 months) <sup className="text-red-500">*</sup>
-      </label>
-
-      {!files.bankStatement ? (
-        <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
-          <input
-            type="file"
-            accept=".pdf"
-            className="hidden"
-            id="bankStatement-upload"
-            onChange={(e) => handleBankStatementUpload(e.target.files?.[0] || null)}
-          />
-          <label htmlFor="bankStatement-upload" className="cursor-pointer">
-            <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-            <p className="text-xs text-gray-600">Click to upload your bank statement</p>
-          </label>
-        </div>
-      ) : (
-        <div className="border border-primary rounded-lg p-2 space-y-2">
-          <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border">
-            <div className="flex items-center space-x-2">
-              <FileText className="h-4 w-4 text-gray-500" />
-              <span className="text-sm text-gray-700 truncate">{files.bankStatement.name}</span>
-            </div>
-            <div className="flex space-x-2">
-              <button className="text-blue-500 hover:text-blue-700 text-sm" onClick={() => document.getElementById('bankStatement-upload')?.click()}>
-                Change
-              </button>
-              <button className="text-red-500 hover:text-red-700" onClick={removeBankStatement}>
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-          <div className="space-y-1">
-            <label className="block text-xs font-medium text-gray-600">
-              Access Code (optional)
-            </label>
-            <Input
-              type="text"
-              placeholder="Enter access code"
-              value={bankStatementAccessCode}
-              onChange={(e) => setBankStatementAccessCode(e.target.value)}
-              className="text-xs focus-visible:ring-0 focus-visible:ring-offset-0"
-              autoComplete="off"
-            />
-          </div>
-        </div>
-      )}
-
-      {errors.bankStatement && <p className="error-message">{errors.bankStatement}</p>}
-    </div>
-  );
 
   return (
     <div className={styles.container}>
@@ -339,8 +247,101 @@ const IncomeVerification = () => {
               <p className={styles.description}>Upload your payslips and bank statements</p>
             </div>
             <div className={`space-y-3 ${styles.formContainer} h-[75%]`}>
-              <PayslipUploadArea />
-              <BankStatementUploadArea />
+              {/* <PayslipUploadArea /> */}
+              {/* <BankStatementUploadArea /> */}
+
+              {/* Payslips Uploading Area */}
+
+              <div className="space-y-3 w-[95%]">
+                <label className="block text-sm font-medium text-gray-700">
+                  Pay Slips (Latest 6 months) <sup className="text-red-500">*</sup>
+                </label>
+
+                {files.payslips.length < 6 && (
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center hover:border-primary transition-colors">
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      multiple
+                      className="hidden"
+                      id="payslips-upload"
+                      onChange={(e) => handlePayslipUpload(e.target.files)}
+                    />
+                    <label htmlFor="payslips-upload" className="cursor-pointer flex items-center justify-center space-x-2">
+                      <Upload className="h-4 w-4 text-gray-400" />
+                      <p className="text-xs text-gray-600">Click to upload payslips</p>
+                    </label>
+                  </div>
+                )}
+
+                {files.payslips.map((file, i) => (
+                  <PayslipItem
+                    key={`payslip-${i}-${file.name}-${file.size}`}
+                    file={file}
+                    index={i}
+                    onRemove={removePayslip}
+                    accessCode={payslipAccessCodes[i] || ''}
+                    onAccessCodeChange={updatePayslipAccessCode}
+                  />
+                ))}
+                {errors.payslips && <p className="error-message">{errors.payslips}</p>}
+              </div>
+
+              {/* Bank Statement Uploading Area */}
+              <div className="space-y-3 w-[95%]">
+                <label className="block text-sm font-medium text-gray-700">
+                  Bank Statement (Latest 6 months) <sup className="text-red-500">*</sup>
+                </label>
+
+                {!files.bankStatement ? (
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      className="hidden"
+                      id="bankStatement-upload"
+                      onChange={(e) => handleBankStatementUpload(e.target.files?.[0] || null)}
+                    />
+                    <label htmlFor="bankStatement-upload" className="cursor-pointer">
+                      <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                      <p className="text-xs text-gray-600">Click to upload your bank statement</p>
+                    </label>
+                  </div>
+                ) : (
+                  <div className="border border-primary rounded-lg p-2 space-y-2">
+                    <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border">
+                      <div className="flex items-center space-x-2">
+                        <FileText className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm text-gray-700 truncate">{files.bankStatement.name}</span>
+                      </div>
+                      <div className="flex space-x-2">
+                        <button className="text-blue-500 hover:text-blue-700 text-sm" onClick={() => document.getElementById('bankStatement-upload')?.click()}>
+                          Change
+                        </button>
+                        <button className="text-red-500 hover:text-red-700" onClick={removeBankStatement}>
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="block text-xs font-medium text-gray-600">
+                        Access Code (optional)
+                      </label>
+                      <Input
+                        type="text"
+                        placeholder="Enter access code"
+                        value={bankStatementAccessCode}
+                        onChange={(e) => setBankStatementAccessCode(e.target.value)}
+                        className="text-xs focus-visible:ring-0 focus-visible:ring-offset-0"
+                        autoComplete="off"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {errors.bankStatement && <p className="error-message">{errors.bankStatement}</p>}
+              </div>
+
             </div>
             {errors.submit && <p className="error-message text-center mt-4">{errors.submit}</p>}
             <div className={`${styles.bottomContainer} text-center mt-6`}>
