@@ -224,7 +224,7 @@ const IncomeVerification = () => {
             placeholder="Enter access code"
             value={accessCode}
             onChange={(e) => onAccessCodeChange(index, e.target.value)}
-            className="text-xs"
+            className="text-xs focus-visible:ring-0 focus-visible:ring-offset-0"
             autoComplete="off"
           />
         </div>
@@ -314,7 +314,7 @@ const IncomeVerification = () => {
               placeholder="Enter access code"
               value={bankStatementAccessCode}
               onChange={(e) => setBankStatementAccessCode(e.target.value)}
-              className="text-xs"
+              className="text-xs focus-visible:ring-0 focus-visible:ring-offset-0"
               autoComplete="off"
             />
           </div>
@@ -338,7 +338,7 @@ const IncomeVerification = () => {
               <div className={styles.heading}>Income Verification Documents</div>
               <p className={styles.description}>Upload your payslips and bank statements</p>
             </div>
-            <div className={`space-y-3 ${styles.formContainer}`}>
+            <div className={`space-y-3 ${styles.formContainer} h-[75%]`}>
               <PayslipUploadArea />
               <BankStatementUploadArea />
             </div>
