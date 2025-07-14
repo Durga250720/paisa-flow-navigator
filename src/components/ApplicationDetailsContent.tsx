@@ -224,6 +224,23 @@ const ApplicationDetailsContent = () => {
                 </div>
               )}
 
+              {/* Application Stepper - After Employment Details */}
+              <div className="bg-white rounded-lg shadow-sm p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-6">Application Progress</h2>
+                <ApplicationStepper 
+                  steps={steps}
+                  currentStep={currentStep}
+                  applicationStatus={applicationData?.applicationStatus}
+                />
+                <div className="mt-8">
+                  <StatusMessage 
+                    applicationStatus={applicationData?.applicationStatus}
+                    approvedAmount={applicationData?.approvedAmount}
+                    remarks={applicationData?.remarks}
+                  />
+                </div>
+              </div>
+
               {/* Bank Details */}
               {applicationData?.bankDetails && (
                 <div className="bg-white rounded-lg shadow-sm p-6">
@@ -273,22 +290,6 @@ const ApplicationDetailsContent = () => {
                 </div>
               )}
 
-              {/* Application Stepper - Positioned at Bottom */}
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">Application Progress</h2>
-                <ApplicationStepper 
-                  steps={steps}
-                  currentStep={currentStep}
-                  applicationStatus={applicationData?.applicationStatus}
-                />
-                <div className="mt-8">
-                  <StatusMessage 
-                    applicationStatus={applicationData?.applicationStatus}
-                    approvedAmount={applicationData?.approvedAmount}
-                    remarks={applicationData?.remarks}
-                  />
-                </div>
-              </div>
             </div>
           )}
         </div>
