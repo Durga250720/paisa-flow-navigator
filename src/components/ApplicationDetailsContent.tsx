@@ -131,7 +131,7 @@ const ApplicationDetailsContent = () => {
                       />
                       <StatusMessage
                         applicationStatus={applicationData?.applicationStatus}
-                        approvedAmount={applicationData?.approvedAmount}
+                        approvedAmount={applicationData?.loanAmount}
                         remarks={applicationData?.remarks}
                       />
                     </div>

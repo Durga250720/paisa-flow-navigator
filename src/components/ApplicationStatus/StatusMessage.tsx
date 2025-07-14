@@ -10,6 +10,7 @@ interface StatusMessageProps {
 
 const animationMap: { [key: string]: () => Promise<any> } = {
   APPROVED_WITH_CONDITION : () => import('../../../public/animations/success.json'),
+  CLOSED : () => import('../../../public/animations/success.json'),
   APPROVED: () => import('../../../public/animations/success.json'),
   REJECTED: () => import('../../../public/animations/rejected.json'),
   PENDING: () => import('../../../public/animations/pending.json'),
@@ -57,7 +58,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
   }, [applicationStatus]);
 
   const getHeadingMessage = () => {
-    if (applicationStatus === 'APPROVED' || applicationStatus === 'APPROVED_WITH_CONDITION') {
+    if (applicationStatus === 'APPROVED' || applicationStatus === 'APPROVED_WITH_CONDITION' || applicationStatus === 'CLOSED') {
       return `Congratulations! ₹ ${approvedAmount} loan is approved.`;
     } else if (applicationStatus === 'REJECTED') {
       return "Sorry! Your application is rejected.";
