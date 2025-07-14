@@ -10,7 +10,7 @@ interface StatusMessageProps {
 
 const animationMap: { [key: string]: () => Promise<any> } = {
   APPROVED_WITH_CONDITION : () => import('../../../public/animations/success.json'),
-  CLOSED : () => import('../../../public/animations/success.json'),
+  CLOSED : () => import('../../../public/animations/closed.json'),
   APPROVED: () => import('../../../public/animations/success.json'),
   REJECTED: () => import('../../../public/animations/rejected.json'),
   PENDING: () => import('../../../public/animations/pending.json'),
@@ -58,9 +58,13 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
   }, [applicationStatus]);
 
   const getHeadingMessage = () => {
-    if (applicationStatus === 'APPROVED' || applicationStatus === 'APPROVED_WITH_CONDITION' || applicationStatus === 'CLOSED') {
+    if (applicationStatus === 'APPROVED' || applicationStatus === 'APPROVED_WITH_CONDITION') {
       return `Congratulations! ₹ ${approvedAmount} loan is approved.`;
-    } else if (applicationStatus === 'REJECTED') {
+    } 
+    else if (applicationStatus === 'CLOSED'){
+      return `Loan Application Closed with  ₹ ${approvedAmount}`;
+    }
+    else if (applicationStatus === 'REJECTED') {
       return "Sorry! Your application is rejected.";
     } else {
       return "We've received your loan request and are reviewing your eligibility.";
@@ -70,7 +74,11 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
   const getSubMessage = () => {
     if (applicationStatus === 'APPROVED' || applicationStatus === 'APPROVED_WITH_CONDITION') {
       return 'You can proceed to the next step.';
-    } else if (applicationStatus === 'REJECTED') {
+    } 
+    else if (applicationStatus === 'CLOSED'){
+      
+    }
+    else if (applicationStatus === 'REJECTED') {
       return remarks || 'Your application was rejected.';
     } else {
       return "We'll notify you as soon as your application is ready for disbursement.";
