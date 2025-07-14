@@ -47,7 +47,23 @@ export const ApplicationStepper: React.FC<ApplicationStepperProps> = ({
                     isRejected={isRejectedFinalStep}
                   />
                 )} 
-                className='text-xs'
+                className="text-xs"
+                sx={{
+                  '& .MuiStepLabel-label': {
+                    fontSize: '0.75rem',
+                    fontWeight: 500,
+                    color: step.completed ? '#1f2937' : '#6b7280',
+                    marginTop: '8px'
+                  },
+                  '& .MuiStepLabel-label.Mui-active': {
+                    color: '#784af4',
+                    fontWeight: 600
+                  },
+                  '& .MuiStepLabel-label.Mui-completed': {
+                    color: '#059669',
+                    fontWeight: 600
+                  }
+                }}
               >
                 {step.label}
               </StepLabel>

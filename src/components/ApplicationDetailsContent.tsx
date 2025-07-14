@@ -110,7 +110,7 @@ const ApplicationDetailsContent = () => {
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-6">
+      <div className="flex-1 p-6 scrollContainer" style={{overflowY: "scroll"}}>
         <div className="max-w-6xl mx-auto">
           {loading ? (
             <div className="text-center py-20">
