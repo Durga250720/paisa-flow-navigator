@@ -25,27 +25,27 @@ const KYCDocumentsContent = () => {
   // Move documents array into state
   const [documents, setDocuments] = useState([
     {
+      type: "Aadhaar Verified",
+      status: "Unverified",
+      icon: UserCheck,
+      documentValue: ''
+    },
+    {
       type: "PAN Card",
-      status: "Unverified", // Initial status
+      status: "Unverified",
       icon: IdCard,
       documentValue: ''
     },
     {
       type: "Salary Slips",
-      status: "Unverified", // Initial status
+      status: "Unverified",
       icon: Banknote,
       documentValue: ''
     },
     {
-      type: "Overall KYC Status", // Changed from "KYC Verified"
-      status: "Unverified", // Initial status
+      type: "Overall KYC Status",
+      status: "Unverified",
       icon: BadgeCheck,
-      documentValue: ''
-    },
-    {
-      type: "Aadhaar Verified",
-      status: "Unverified", // Initial status
-      icon: UserCheck,
       documentValue: ''
     }
   ]);
@@ -89,26 +89,26 @@ const KYCDocumentsContent = () => {
         setDocuments(prevDocuments => prevDocuments.map(doc => {
           if (doc.type === "PAN Card") {
             return {
-              ...doc, status: data.data.kycDocuments.find(verify => verify.documentType === 'PAN')?.verified ? 'Verified' : 'Unverified',
+              ...doc, status: data?.data?.kycDocuments?.find(verify => verify.documentType === 'PAN')?.verified ? 'Verified' : 'Unverified',
               docUrl: data?.data?.kycDocuments?.find(kyc => kyc.documentType === 'PAN')?.documentUrls || '',
-              documentValue: data.data.kycDocuments.find(verify => verify.documentType === 'PAN')?.documentNumber
+              documentValue: data?.data?.kycDocuments?.find(verify => verify.documentType === 'PAN')?.documentNumber
             };
           } else if (doc.type === "Salary Slips") {
             return {
-              ...doc, status: data.data.payslips.verified ? 'Verified' : 'Unverified',
+              ...doc, status: data?.data?.payslips?.verified ? 'Verified' : 'Unverified',
               docUrl: data?.data?.payslips?.documentUrls,
               documentValue: ''
             };
           } else if (doc.type === "Overall KYC Status") { // Changed from "KYC Verified"
             return {
-              ...doc, status: data.data.kycverified ? 'Verified' : 'Unverified', docUrl: '',
+              ...doc, status: data?.data?.kycverified ? 'Verified' : 'Unverified', docUrl: '',
               documentValue: ''
             };
           } else if (doc.type === "Aadhaar Verified") {
             return {
-              ...doc, status: data.data.kycDocuments.find(verify => verify.documentType === 'AADHAAR')?.verified ? 'Verified' : 'Unverified',
+              ...doc, status: data?.data?.kycDocuments?.find(verify => verify.documentType === 'AADHAAR')?.verified ? 'Verified' : 'Unverified',
               docUrl: data?.data?.kycDocuments?.find(kyc => kyc.documentType === 'AADHAAR')?.documentUrls || '',
-              documentValue: data.data.kycDocuments.find(verify => verify.documentType === 'AADHAAR')?.documentNumber
+              documentValue: data?.data?.kycDocuments?.find(verify => verify.documentType === 'AADHAAR')?.documentNumber
             };
           }
           return doc;
@@ -136,7 +136,7 @@ const KYCDocumentsContent = () => {
 
   return (
     <div className="p-4 bg-gray-50 min-h-full h-full">
-      <div className="h-full w-full" style={{overflowY:"scroll"}}>
+      <div className="h-full w-full scrollContainer" style={{overflowY:"scroll"}}>
         {/* Borrower Profile Section */}
         {profileData && (
           <div className={`${styles.firstContainer} bg-white rounded-lg p-6 shadow-sm mb-6`}>
