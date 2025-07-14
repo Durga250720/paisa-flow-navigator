@@ -11,16 +11,16 @@ export const useApplicationSteps = (applicationData: any) => {
       : (applicationData?.loanDocuments ? applicationData.loanDocuments.every(doc => doc.verified === true) : false);
     const step5Completed = applicationData?.loanProgress.KYC_DONE;
     const step6Completed = applicationData?.loanProgress.ELIGIBILITY_PASSED
-    const step7Completed = applicationData?.applicationStatus === 'APPROVED' || applicationData?.applicationStatus === 'APPROVED_WITH_CONDITION';
+    const step7Completed = applicationData?.applicationStatus === 'APPROVED' || applicationData?.applicationStatus === 'APPROVED_WITH_CONDITION' || applicationData?.applicationStatus === 'CLOSED';
 
     return [
       { id: 1, label: 'Profile Creation', completed: step1Completed },
       { id: 2, label: 'Aadhar Verified', completed: step2Completed },
       { id: 3, label: 'Pan Verified', completed: step3Completed },
       { id: 4, label: 'Documents Uploaded', completed: step4Completed },
-      { id: 5, label: applicationData?.applicationStatus === 'APPROVED' || applicationData?.applicationStatus === 'APPROVED_WITH_CONDITION' ? 'KYC Verified !' : 'KYC Verification', completed: step5Completed },
-      { id: 6, label: applicationData?.applicationStatus === 'APPROVED' || applicationData?.applicationStatus === 'APPROVED_WITH_CONDITION' ? 'Credit Check Completed' : 'Credit Check in Progress', completed: step6Completed },
-      { id: 7, label: applicationData?.applicationStatus === 'APPROVED' || applicationData?.applicationStatus === 'APPROVED_WITH_CONDITION' ? 'Loan Approved' : 'Loan Approval', completed: step7Completed }
+      { id: 5, label: applicationData?.applicationStatus === 'APPROVED' || applicationData?.applicationStatus === 'APPROVED_WITH_CONDITION' || applicationData?.applicationStatus === 'CLOSED' ? 'KYC Verified !' : 'KYC Verification', completed: step5Completed },
+      { id: 6, label: applicationData?.applicationStatus === 'APPROVED' || applicationData?.applicationStatus === 'APPROVED_WITH_CONDITION' || applicationData?.applicationStatus === 'CLOSED' ? 'Credit Check Completed' : 'Credit Check in Progress', completed: step6Completed },
+      { id: 7, label: applicationData?.applicationStatus === 'APPROVED' || applicationData?.applicationStatus === 'APPROVED_WITH_CONDITION' || applicationData?.applicationStatus === 'CLOSED' ? 'Loan Approved' : 'Loan Approval', completed: step7Completed }
     ];
   }, [applicationData]);
 };
