@@ -9,6 +9,7 @@ import { ApplicationStepper } from './ApplicationStepper/ApplicationStepper';
 import { StatusBadge } from './ApplicationStatus/StatusBadge';
 import { StatusMessage } from './ApplicationStatus/StatusMessage';
 import { useApplicationSteps } from '../hooks/useApplicationSteps';
+import { formatIndianNumber, formatDate } from '../lib/utils';
 
 const ApplicationDetailsContent = () => {
   const [applicationData, setApplicationData] = useState<any | null>(null);
@@ -66,41 +67,18 @@ const ApplicationDetailsContent = () => {
     }
   }, [steps, navigate]);
 
-  const formatIndianNumber = (value: number | string) => {
-    if (!value) return '0';
-    const numValue = typeof value === 'string' ? parseFloat(value) : value;
-    return new Intl.NumberFormat('en-IN').format(numValue);
-  };
-
-  const toTitleCase = (str: string) => {
-    if (!str) return '';
-    return str.replace(/\w\S*/g, (txt) => 
-      txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()
-    );
-  };
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric'
-    });
-  };
-
   return (
-    <div className="min-h-full bg-gray-50 flex flex-col">
-      {/* Header */}
-      <div className="flex justify-between items-center px-4 sm:px-6 py-4 border-b bg-white shadow-sm">
+    <div className="min-h-full bg-white flex flex-col h-full">
+      <div className="flex justify-between items-center px-4 sm:px-6 py-4 border-b bg-white h-[8%]">
         <div className="flex items-center gap-3">
-          <button 
-            onClick={() => navigate('/admin/my-application')} 
-            className="text-gray-600 hover:text-gray-900 focus:outline-none transition-colors"
+          <button
+            onClick={() => navigate('/admin/my-application')}
+            className="text-gray-600 hover:text-gray-900 focus:outline-none"
             aria-label="Back to applications"
           >
             <ArrowLeft size={20} />
           </button>
-          <h1 className="text-lg font-semibold text-gray-900">Loan Application Details</h1>
+          <h1 className="text-lg font-medium text-gray-900">Your Loan Application</h1>
         </div>
         <div className="flex items-center gap-4">
           {applicationData?.applicationStatus && (
@@ -109,188 +87,87 @@ const ApplicationDetailsContent = () => {
         </div>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 p-6 scrollContainer" style={{overflowY: "scroll"}}>
-        <div className="max-w-6xl mx-auto">
+      <div className={`flex-1 flex items-start justify-center bg-gray-100 p-4 ${loading ? 'items-center' : 'items-center'} h-[92%] overflow-y-auto scrollContainer`}>
+        <div className="w-full h-full">
           {loading ? (
-            <div className="text-center py-20">
+            <div className="text-center py-10">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <p className="mt-4 text-gray-600">Loading application details...</p>
+              <p className="mt-4 text-gray-600">Loading application status...</p>
             </div>
           ) : error ? (
-            <div className="text-center py-20">
+            <div className="text-center py-10">
               <p className="text-red-500">Error: {error}</p>
             </div>
           ) : (
-            <div className="space-y-8">
-              {/* Application Overview */}
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">Application Overview</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div className="bg-primary/5 p-4 rounded-lg">
-                    <h3 className="text-sm font-medium text-gray-500 mb-1">Application ID</h3>
-                    <p className="text-lg font-semibold text-primary">{applicationData?.displayId || 'N/A'}</p>
-                  </div>
-                  <div className="bg-green-50 p-4 rounded-lg">
-                    <h3 className="text-sm font-medium text-gray-500 mb-1">Loan Amount</h3>
-                    <p className="text-lg font-semibold text-green-700">₹{formatIndianNumber(applicationData?.loanAmount || 0)}</p>
-                  </div>
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <h3 className="text-sm font-medium text-gray-500 mb-1">Applied Date</h3>
-                    <p className="text-lg font-semibold text-blue-700">{formatDate(applicationData?.createdAt)}</p>
-                  </div>
-                  <div className="bg-orange-50 p-4 rounded-lg">
-                    <h3 className="text-sm font-medium text-gray-500 mb-1">Approved Amount</h3>
-                    <p className="text-lg font-semibold text-orange-700">₹{formatIndianNumber(applicationData?.approvedAmount || 0)}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Borrower Information */}
-              {applicationData?.borrowerProfileData && (
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-6">Borrower Information</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500 mb-1">Full Name</h3>
-                      <p className="text-base font-medium text-gray-900">{applicationData.borrowerProfileData.name || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500 mb-1">Mobile Number</h3>
-                      <p className="text-base text-gray-900">{applicationData.borrowerProfileData.mobileNumber || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500 mb-1">Date of Birth</h3>
-                      <p className="text-base text-gray-900">{formatDate(applicationData.borrowerProfileData.dob)}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500 mb-1">Gender</h3>
-                      <p className="text-base text-gray-900">{toTitleCase(applicationData.borrowerProfileData.gender || '')}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500 mb-1">Father's Name</h3>
-                      <p className="text-base text-gray-900">{applicationData.borrowerProfileData.fathersName || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500 mb-1">CIBIL Score</h3>
-                      <p className="text-base font-semibold text-blue-600">{applicationData.borrowerProfileData.borrowerCibilData?.score || 'N/A'}</p>
-                    </div>
-                  </div>
-                  
-                  {/* Address Information */}
-                  <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500 mb-2">Current Address</h3>
-                      <p className="text-base text-gray-900 break-words">{applicationData.borrowerProfileData.currentAddress?.address || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500 mb-2">Permanent Address</h3>
-                      <p className="text-base text-gray-900 break-words">{applicationData.borrowerProfileData.permanentAddress?.address || 'N/A'}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Employment Details */}
-              {applicationData?.employmentDetails && (
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-6">Employment Details</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500 mb-1">Employment Type</h3>
-                      <p className="text-base text-gray-900">{toTitleCase(applicationData.employmentDetails.employmentType?.replace(/_/g, ' ') || '')}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500 mb-1">Company Name</h3>
-                      <p className="text-base text-gray-900">{applicationData.employmentDetails.companyName || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500 mb-1">Work Experience</h3>
-                      <p className="text-base text-gray-900">{applicationData.employmentDetails.workExperience || 'N/A'} years</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500 mb-1">Take Home Salary</h3>
-                      <p className="text-base font-semibold text-green-600">₹{formatIndianNumber(applicationData.employmentDetails.takeHomeSalary || 0)}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500 mb-1">Gross Salary</h3>
-                      <p className="text-base text-gray-900">₹{formatIndianNumber(applicationData.employmentDetails.grossSalary || 0)}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500 mb-1">Office Address</h3>
-                      <p className="text-base text-gray-900 break-words">{applicationData.employmentDetails.officeAddress || 'N/A'}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Application Stepper - After Employment Details */}
-              <div className="bg-white rounded-lg shadow-sm p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">Application Progress</h2>
-                <ApplicationStepper 
-                  steps={steps}
-                  currentStep={currentStep}
-                  applicationStatus={applicationData?.applicationStatus}
-                />
-                <div className="mt-8">
-                  <StatusMessage 
-                    applicationStatus={applicationData?.applicationStatus}
-                    approvedAmount={applicationData?.approvedAmount}
-                    remarks={applicationData?.remarks}
-                  />
-                </div>
-              </div>
-
-              {/* Bank Details */}
-              {applicationData?.bankDetails && (
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-6">Bank Details</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500 mb-1">Bank Name</h3>
-                      <p className="text-base text-gray-900">{applicationData.bankDetails.bankName || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500 mb-1">Account Number</h3>
-                      <p className="text-base text-gray-900">{applicationData.bankDetails.accountNumber || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500 mb-1">IFSC Code</h3>
-                      <p className="text-base text-gray-900">{applicationData.bankDetails.ifscCode || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500 mb-1">Account Holder Name</h3>
-                      <p className="text-base text-gray-900">{applicationData.bankDetails.accountHolderName || 'N/A'}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Document Status */}
-              {applicationData?.loanDocuments && (
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-6">Document Status</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {applicationData.loanDocuments.map((doc: any, index: number) => (
-                      <div key={index} className="border rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="text-sm font-medium text-gray-900">{toTitleCase(doc.documentType?.replace(/_/g, ' ') || '')}</h3>
-                          <span className={`px-2 py-1 text-xs rounded-full ${
-                            doc.verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                          }`}>
-                            {doc.verified ? 'Verified' : 'Pending'}
-                          </span>
+            <>
+              <div className="flex gap-2 w-full h-full">
+                <div className="leftPanel w-[70%] h-full flex flex-col">
+                  <div className="space-y-6">
+                    <div className="bg-white rounded-lg shadow-sm p-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div className="bg-primary/5 p-4 rounded-lg">
+                          <div className="text-sm font-normal text-gray-500 mb-1">Application ID</div>
+                          <div className="text-sm font-medium text-primary">{applicationData?.displayId || 'N/A'}</div>
                         </div>
-                        {doc.documentNumber && (
-                          <p className="text-sm text-gray-600">Number: {doc.documentNumber}</p>
-                        )}
+                        <div className="bg-blue-50 p-4 rounded-lg">
+                          <div className="text-xs font-normal text-gray-500 mb-1">Applied Date</div>
+                          <div className="text-sm font-medium text-blue-700">{formatDate(applicationData?.createdAt)}</div>
+                        </div>
+                        <div className="bg-green-50 p-4 rounded-lg">
+                          <div className="text-xs font-normal text-gray-500 mb-1">Transfered Amount</div>
+                          <div className="text-sm font-medium text-green-700">₹{formatIndianNumber(applicationData?.totalTransferredAmount || 0)}</div>
+                        </div>
+                        <div className="bg-orange-50 p-4 rounded-lg">
+                          <div className="text-sm font-normal text-gray-500 mb-1">CIBIL</div>
+                          <div className="text-md font-medium text-orange-700">{applicationData?.cibil || 0}</div>
+                        </div>
                       </div>
-                    ))}
+                    </div>
+                    <div className="bottomSection bg-white rounded-lg shadow-sm p-6">
+                      <ApplicationStepper
+                        steps={steps}
+                        currentStep={currentStep}
+                        applicationStatus={applicationData?.applicationStatus}
+                      />
+                      <StatusMessage
+                        applicationStatus={applicationData?.applicationStatus}
+                        approvedAmount={applicationData?.approvedAmount}
+                        remarks={applicationData?.remarks}
+                      />
+                    </div>
                   </div>
                 </div>
-              )}
-
-            </div>
+                <div className="rightPanel w-[30%] h-full">
+                  <div className="bg-white rounded-lg shadow-sm p-4 w-full">
+                    <div className="loanAmountCalculation">
+                      <h2 className="text-primary">Calculation</h2>
+                    </div>
+                    <div className="border-b mt-2"></div>
+                    <div className='flex justify-between items-center mt-4'>
+                      <div className="text-sm font-normal text-gray-700">Loan Amount</div>
+                      <div className="text-sm font-medium text-orange-700">₹ {formatIndianNumber(applicationData?.loanAmount) || 'N/A'}</div>
+                    </div>
+                    <div className='flex justify-between items-center mt-4'>
+                      <div className="text-sm font-normal text-gray-700">Loan Interest ({applicationData?.loanConfig?.loanInterestPercentage}% per day)</div>
+                      <div className="text-sm font-medium text-orange-700">₹ {formatIndianNumber(applicationData?.loanConfig?.loanInterest) || 'N/A'}</div>
+                    </div>
+                    <div className='flex justify-between items-center mt-4'>
+                      <div className="text-sm font-normal text-gray-700">Processing Fee ({applicationData?.loanConfig?.processingFeePercentage}%)</div>
+                      <div className="text-sm font-medium text-orange-700">₹ {formatIndianNumber(applicationData?.loanConfig?.processingFee) || 'N/A'}</div>
+                    </div>
+                    <div className='flex justify-between items-center mt-4'>
+                      <div className="text-sm font-normal text-gray-700">Gst On Processing Fee ({applicationData?.loanConfig?.gstOnProcessingFeePercentage}%)</div>
+                      <div className="text-sm font-medium text-orange-700">₹ {formatIndianNumber(applicationData?.loanConfig?.gstOnProcessingFee) || 'N/A'}</div>
+                    </div>
+                    <div className="border-b mt-8"></div>
+                    <div className="flex justify-between items-center mt-4">
+                      <div className="text-md font-medium text-gray-700">Total Repayment Amount</div>
+                      <div className="text-md font-medium text-green-700">₹ {formatIndianNumber(applicationData?.totalRepaymentAmount) || 'N/A'}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>

@@ -79,7 +79,7 @@ export const StatusMessage: React.FC<StatusMessageProps> = ({
   return (
     <div className="text-center mt-10">
       {animationData && (
-        <div className="mb-4 mx-auto w-30 h-30 md:w-32 md:h-32"> {/* Adjust size as needed */}
+        <div className="mb-4 mx-auto w-20 h-20 md:w-20 md:h-20"> {/* Adjust size as needed */}
           <Lottie animationData={animationData} loop={true} autoPlay={true} />
         </div>
       )}
