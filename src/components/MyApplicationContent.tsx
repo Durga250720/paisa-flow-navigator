@@ -34,7 +34,8 @@ const MyApplicationContent = () => {
     purpose: "",
     employmentDetails: {
       employmentType: "SALARIED", industry: "", companyName: "",
-      designation: "", takeHomeSalary: 0, totalExperienceInMonths: 0
+      designation: "", takeHomeSalary: 0, totalExperienceInMonths: 0,
+      officialEmail: ""
     },
     paySlips: { // For payload consistency
       documentType: "SALARY_SLIP",
@@ -50,7 +51,7 @@ const MyApplicationContent = () => {
     // addressDetail is in user's example payload but no form for it.
   };
 
-  const [showApplyLoanModal, setShowApplyLoanModal] = useState(false);
+    const [showApplyLoanModal, setShowApplyLoanModal] = useState(true);
   const [currentPopupStep, setCurrentPopupStep] = useState(0); // 0: closed, 1: Emp, 2: Income, 3: Bank, 4: Initial Loan, 5: Final Loan
   const [newApplicationData, setNewApplicationData] = useState<any>(initialNewApplicationData);
   const [modalLoading, setModalLoading] = useState(false);
@@ -256,7 +257,7 @@ const MyApplicationContent = () => {
       {/* Apply Loan Modal */}
       {showApplyLoanModal && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[1000] p-2">
-          <div className="bg-white p-4 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col h-full">
+          <div className="bg-white p-4 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col h-auto">
             <div className="h-full w-full">
               <div className="flex justify-between items-center mb-2 border-b pb-2 h-[10%]">
                 <h3 className="text-lg font-medium text-gray-800">

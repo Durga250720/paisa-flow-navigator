@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import OTPInput from '../OTPInput';
+import { config } from '../../config/environment';
 
 interface EmploymentInfoFormProps {
     initialData: {
@@ -25,7 +26,7 @@ const EmploymentInfoForm: React.FC<EmploymentInfoFormProps> = ({ initialData, on
         designation: initialData.designation || '',
         takeHomeSalary: initialData.takeHomeSalary || '',
         totalExperienceInMonths: initialData.totalExperienceInMonths ? Number(initialData.totalExperienceInMonths) / 12 : '', // Convert months to years for display if needed, or keep as months
-        companyEmail: ''
+        officialEmail: ''
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [otpSent, setOtpSent] = useState(false);
@@ -43,8 +44,8 @@ const EmploymentInfoForm: React.FC<EmploymentInfoFormProps> = ({ initialData, on
         else if (isNaN(Number(formData.takeHomeSalary)) || Number(formData.takeHomeSalary) <= 0) newErrors.takeHomeSalary = 'Please enter a valid income';
         if (!formData.totalExperienceInMonths.toString().trim()) newErrors.totalExperienceInMonths = 'Work experience is required';
         else if (isNaN(Number(formData.totalExperienceInMonths)) || Number(formData.totalExperienceInMonths) < 0) newErrors.totalExperienceInMonths = 'Please enter valid experience';
-        if (!formData.companyEmail.trim()) newErrors.companyEmail = 'Company email is required';
-        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.companyEmail)) newErrors.companyEmail = 'Please enter a valid email';
+        if (!formData.officialEmail.trim()) newErrors.officialEmail = 'Company email is required';
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.officialEmail)) newErrors.officialEmail = 'Please enter a valid email';
         if (!otpVerified && otpSent) newErrors.otp = 'Please verify your email with OTP';
 
         setErrors(newErrors);
@@ -52,18 +53,46 @@ const EmploymentInfoForm: React.FC<EmploymentInfoFormProps> = ({ initialData, on
     };
 
     const handleSendOTP = async () => {
-        if (!formData.companyEmail.trim()) {
-            setErrors(prev => ({ ...prev, companyEmail: 'Company email is required' }));
+        if (!formData.officialEmail.trim()) {
+            setErrors(prev => ({ ...prev, officialEmail: 'Company email is required' }));
             return;
         }
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.companyEmail)) {
-            setErrors(prev => ({ ...prev, companyEmail: 'Please enter a valid email' }));
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.officialEmail)) {
+            setErrors(prev => ({ ...prev, officialEmail: 'Please enter a valid email' }));
             return;
         }
 
+
+        const emailDomain = formData.officialEmail.split('@')[1]?.toLowerCase();
+        const authToken = localStorage.getItem('authToken');
         try {
             // Simulate OTP sending - replace with actual API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const response = await fetch(config.baseURL + 'kyc-docs/company-otp', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    borrowerId: authToken,
+                    companyEmail: formData.officialEmail
+                })
+            });
+
+            if (!response.ok) {
+                let errorMessage = 'Failed to send OTP.';
+                try {
+                    const errorData = await response.json();
+                    if (errorData && errorData.message) errorMessage = errorData.message;
+                } catch (e) {
+                    // Ignore JSON parsing errors
+                }
+                throw new Error(errorMessage);
+            }
+
+            toast.success(`OTP sent to ${formData.officialEmail}`);
+            //   setShowOtpInput(true);
+            //   setResendTimer(30);
             setOtpSent(true);
             toast.success('OTP sent to your company email');
         } catch (error) {
@@ -77,9 +106,33 @@ const EmploymentInfoForm: React.FC<EmploymentInfoFormProps> = ({ initialData, on
             return;
         }
 
+        const authToken = localStorage.getItem('authToken');
         try {
             // Simulate OTP verification - replace with actual API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const response = await fetch(config.baseURL + 'kyc-docs/company-otp-verify', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    borrowerId: authToken,
+                    companyEmail: formData.officialEmail,
+                    otp: otp
+                })
+            });
+            if (!response.ok) {
+                let errorMessage = 'OTP verification failed.';
+                try {
+                    const errorData = await response.json();
+                    if (errorData && errorData.message) {
+                        errorMessage = errorData.message;
+                    }
+                } catch (e) {
+                    // Ignore JSON parsing errors
+                }
+                throw new Error(errorMessage);
+            }
             setOtpVerified(true);
             setOtpError('');
             toast.success('Email verified successfully');
@@ -111,7 +164,7 @@ const EmploymentInfoForm: React.FC<EmploymentInfoFormProps> = ({ initialData, on
     };
 
     return (
-        <div className="flex flex-col h-full"> 
+        <div className="flex flex-col h-full">
             <div className="flex-grow overflow-y-auto pr-2 space-y-2">
                 {/* <div className='form-group'> 
                     <label className="block text-sm font-medium text-gray-700 mb-1">Employment Type <span className="text-red-500">*</span></label>
@@ -199,8 +252,8 @@ const EmploymentInfoForm: React.FC<EmploymentInfoFormProps> = ({ initialData, on
                     <div className="flex gap-2">
                         <input
                             type="email"
-                            value={formData.companyEmail}
-                            onChange={(e) => handleInputChange('companyEmail', e.target.value)}
+                            value={formData.officialEmail}
+                            onChange={(e) => handleInputChange('officialEmail', e.target.value)}
                             placeholder="Enter Company Email"
                             className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary inputField"
                             disabled={otpVerified}
@@ -209,7 +262,7 @@ const EmploymentInfoForm: React.FC<EmploymentInfoFormProps> = ({ initialData, on
                             <button
                                 type="button"
                                 onClick={handleSendOTP}
-                                disabled={!formData.companyEmail || otpSent}
+                                disabled={!formData.officialEmail || otpSent}
                                 className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-dark rounded-md focus:outline-none disabled:bg-gray-400"
                             >
                                 {otpSent ? 'OTP Sent' : 'Send OTP'}
@@ -228,9 +281,9 @@ const EmploymentInfoForm: React.FC<EmploymentInfoFormProps> = ({ initialData, on
                     <div className='form-group'>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Enter OTP <span className="text-red-500">*</span></label>
                         <div className="space-y-3">
-                            <OTPInput 
-                                length={6} 
-                                onComplete={setOtp} 
+                            <OTPInput
+                                length={6}
+                                onComplete={setOtp}
                                 error={otpError}
                             />
                             <button

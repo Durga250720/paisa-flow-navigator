@@ -21,7 +21,30 @@ const InitialLoanAmountForm: React.FC<InitialLoanAmountFormProps> = ({ initialDa
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const minLoanAmount = 1000;
-    const maxLoanAmount = 25000;
+    const maxLoanAmount = 55000;
+    const purposeOptions = [
+        { value: '', label: 'Select Purpose of Borrowing' }, // Default/placeholder option
+        { value: 'Home Renovation', label: 'Home Renovation' },
+        { value: 'Medical Emergency', label: 'Medical Emergency' },
+        { value: 'Education Expenses', label: 'Education Expenses' },
+        { value: 'Wedding/Marriage', label: 'Wedding/Marriage' },
+        { value: 'Business Expansion', label: 'Business Expansion' },
+        { value: 'Debt Consolidation', label: 'Debt Consolidation' },
+        { value: 'Vehicle Purchase', label: 'Vehicle Purchase' },
+        { value: 'Travel or Vacation', label: 'Travel or Vacation' },
+        { value: 'House Purchase', label: 'House Purchase' },
+        { value: 'Rent Deposit', label: 'Rent Deposit' },
+        { value: 'Personal Use', label: 'Personal Use' },
+        { value: 'Gadget Purchase', label: 'Gadget Purchase' },
+        { value: 'Home Appliance Purchase', label: 'Home Appliance Purchase' },
+        { value: 'Investment', label: 'Investment' },
+        { value: 'Agricultural Needs', label: 'Agricultural Needs' },
+        { value: 'Construction of Property', label: 'Construction of Property' },
+        { value: 'Loan Repayment', label: 'Loan Repayment' },
+        { value: 'Credit Card Bill Payment', label: 'Credit Card Bill Payment' },
+        { value: 'Utility Bill Payment', label: 'Utility Bill Payment' },
+        { value: 'Others', label: 'Others' }
+    ];
 
     useEffect(() => {
         let currentAmount = typeof formData.amount === 'number' ? formData.amount : minLoanAmount;
@@ -109,18 +132,11 @@ const InitialLoanAmountForm: React.FC<InitialLoanAmountFormProps> = ({ initialDa
 
     const commonInputClass = "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary";
     const sliderPercentage = maxLoanAmount > minLoanAmount ? ((Number(formData.amount) - minLoanAmount) / (maxLoanAmount - minLoanAmount)) * 100 : 0;
-
-    const flatFee = configData?.platformFee;
-    const interest = (formData?.amount)*(configData?.interestPercentage); // This might need to be dynamic based on loanAmount
-    const loanProtectionFee = configData?.protectionFee;
-    const loanProcessingFee = formData?.amount * configData?.processingFeePercentage;
-    const gstOnProcessingFee = loanProcessingFee * 0.18
-    const totalAmount = formData.amount + interest;
-    const disbursingAmount = formData.amount -  loanProtectionFee - gstOnProcessingFee - loanProcessingFee - flatFee;
+    
 
 
     return (
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-auto">
             <div className="flex-grow overflow-y-auto pr-2 space-y-4">
                 <div className="mb-1">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -151,7 +167,7 @@ const InitialLoanAmountForm: React.FC<InitialLoanAmountFormProps> = ({ initialDa
                     {errors.amount && <p className="text-red-500 text-xs mt-1 text-center">{errors.amount}</p>}
                 </div>
                 {/* Fee Breakdown */}
-                <div className="space-y-2 mb-6 text-left">
+                {/* <div className="space-y-2 mb-6 text-left">
                     <div className="flex justify-between items-center text-sm">
                         <div className="flex items-center">
                             <span className="text-gray-600">Platform fee (inc. GST)</span>
@@ -170,7 +186,6 @@ const InitialLoanAmountForm: React.FC<InitialLoanAmountFormProps> = ({ initialDa
                     <div className="flex justify-between text-sm">
                         <div className="flex items-center">
                             <span className="text-gray-600">Loan Protection Fee</span>
-                            {/* <span className="text-primary text-xs ml-2 cursor-pointer">Remove</span> */}
                         </div>
                         <span className="font-medium">₹ {loanProtectionFee}</span>
                     </div>
@@ -186,20 +201,30 @@ const InitialLoanAmountForm: React.FC<InitialLoanAmountFormProps> = ({ initialDa
                     </div>
 
                     <div className="flex justify-between text-sm font-medium pt-2 border-t mt-2">
-                        <span className="text-gray-700">Pay total by [Due Date]</span> {/* Placeholder for Due Date */}
+                        <span className="text-gray-700">Pay total by [Due Date]</span>
                         <span className="text-gray-900">₹ {totalAmount}</span>
                     </div>
 
                     <div className="flex justify-between text-sm font-medium pt-1">
-                        <span className="text-gray-700">Total Disbursing Amount</span> {/* Placeholder for Due Date */}
+                        <span className="text-gray-700">Total Disbursing Amount</span>
                         <span className="text-gray-900">₹ {disbursingAmount}</span>
                     </div>
-                </div>
+                </div> */}
 
 
                 <div className='py-6'>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Purpose of Borrowing <span className="text-red-500">*</span></label>
-                    <input type="text" value={formData.purpose} onChange={(e) => handleInputChange('purpose', e.target.value)} placeholder="e.g., Medical Emergency, Education" className={`${commonInputClass} inputField`} />
+                    {/* <input type="text" value={formData.purpose} onChange={(e) => handleInputChange('purpose', e.target.value)} placeholder="e.g., Medical Emergency, Education" className={`${commonInputClass} inputField`} /> */}
+                    <select
+                                    id="purpose"
+                                    value={formData.purpose}
+                                    onChange={(e) => handleInputChange('purpose', e.target.value)}
+                                    className="inputField" // Ensure this class styles select elements appropriately
+                                >
+                                    {purposeOptions.map(option => (
+                                        <option key={option.value} value={option.value}>{option.label}</option>
+                                    ))}
+                                </select>
                     {errors.purpose && <p className="text-red-500 text-xs mt-1">{errors.purpose}</p>}
                 </div>
             </div>

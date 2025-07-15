@@ -1,7 +1,7 @@
 
 // src/components/forms/IncomeVerificationForm.tsx
 import React, { useState, useCallback, useMemo } from 'react';
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 import { Upload, X, FileText, Trash2, Check } from 'lucide-react';
 import { config } from '../../config/environment'; // Adjust path as needed
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
@@ -106,10 +106,10 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
         if (!selectedFilesList) return;
         const newFilesArray = Array.from(selectedFilesList);
         if (files.payslips.length + newFilesArray.length > 6) {
-            toast.error("Maximum 6 payslips allowed.");
+            toast.warning("Maximum 6 payslips allowed.");
             return;
         }
-        
+
         setFiles(prev => ({ ...prev, payslips: [...prev.payslips, ...newFilesArray].slice(0, 6) }));
         
         // Add empty access codes for new files
@@ -120,7 +120,7 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
             }
             return newCodes.slice(0, 6);
         });
-        
+
         if (errors.payslips) setErrors(prev => ({ ...prev, payslips: '' }));
     }, [files.payslips.length, errors.payslips]);
 
@@ -144,7 +144,7 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
         setPayslipAccessCodes(prev => {
             const newCodes = [...prev];
             newCodes[index] = value;
-            return newCodes;
+            return newCodes; 
         });
     }, []);
 
@@ -176,7 +176,7 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
             const paySlipsUrls = results.filter(r => r.type === 'payslips').map(r => r.url);
             const bankStatementResult = results.find(r => r.type === 'bankStatements');
 
-            onNext({
+            onNext({ 
                 paySlipsUrls,
                 bankStatementUrl: bankStatementResult ? bankStatementResult.url : null,
             });
@@ -185,6 +185,7 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
             console.error("Upload error:", error);
         }
     };
+    const commonInputClass = "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary";
 
     return (
         <div className="flex flex-col h-full"> 
@@ -205,7 +206,7 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
                                 id="payslips-upload-modal"
                             />
                             <label htmlFor="payslips-upload-modal" className="cursor-pointer flex items-center justify-center space-x-2">
-                                <Upload className="h-5 w-5 text-gray-500" />
+                                <Upload className="h-5 w-5 text-gray-500" /> 
                                 <span className="text-sm text-gray-600">Click to upload payslips</span>
                             </label>
                         </div>
@@ -250,7 +251,7 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
                                 className="hidden"
                                 id="bankstatement-upload-modal"
                             />
-                            <label htmlFor="bankstatement-upload-modal" className="cursor-pointer flex items-center justify-center space-x-2">
+                            <label htmlFor="bankstatement-upload-modal" className="cursor-pointer flex items-center justify-center space-x-2"> 
                                 <Upload className="h-5 w-5 text-gray-500" />
                                 <span className="text-sm text-gray-600">Click to upload bank statement</span>
                             </label>
@@ -273,7 +274,7 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
                                     placeholder="Enter access code"
                                     value={bankStatementAccessCode}
                                     onChange={(e) => setBankStatementAccessCode(e.target.value)}
-                                    className="text-sm"
+                                    className="text-sm" // Consider applying commonInputClass if needed
                                 />
                             </div>
                         </div>
@@ -282,7 +283,7 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
                 </div>
             </div>
 
-            <div className="flex-shrink-0 flex justify-end gap-3 pt-4 border-t">
+            <div className="flex-shrink-0 flex justify-end gap-3 pt-4 border-t"> 
                 <button
                     type="button"
                     onClick={onPrevious}
