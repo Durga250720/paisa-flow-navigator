@@ -150,6 +150,9 @@ const MyApplicationContent = () => {
       payloadToSend = { ...payloadToSend, ...finalStepData };
     }
 
+    // Log the complete payload to verify data structure
+    console.log("Final Payload:", JSON.stringify(payloadToSend, null, 2));
+
     try {
       const response = await fetch(`${config.baseURL}loan-application/apply/dashboard`, {
         method: 'POST',

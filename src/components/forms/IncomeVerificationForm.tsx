@@ -10,7 +10,10 @@ import { fromCognitoIdentityPool } from "@aws-sdk/credential-provider-cognito-id
 import { Input } from '../ui/input';
 
 interface IncomeVerificationFormProps {
-    onNext: (data: { paySlipsUrls: string[], bankStatementUrl: string | null }) => void;
+    onNext: (data: { 
+        paySlipsUrls: { url: string, passCode: string }[], 
+        bankStatementUrl: { url: string, passCode: string } | null 
+    }) => void;
     onPrevious: () => void;
     loading: boolean;
 }
@@ -173,12 +176,24 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
 
         try {
             const results = await Promise.all(uploadPromises);
-            const paySlipsUrls = results.filter(r => r.type === 'payslips').map(r => r.url);
+            const paySlipsResults = results.filter(r => r.type === 'payslips');
             const bankStatementResult = results.find(r => r.type === 'bankStatements');
+
+            // Format payslips with access codes
+            const paySlipsUrls = paySlipsResults.map((result, index) => ({
+                url: result.url,
+                passCode: payslipAccessCodes[index] || ''
+            }));
+
+            // Format bank statement with access code
+            const bankStatementUrl = bankStatementResult ? {
+                url: bankStatementResult.url,
+                passCode: bankStatementAccessCode || ''
+            } : null;
 
             onNext({ 
                 paySlipsUrls,
-                bankStatementUrl: bankStatementResult ? bankStatementResult.url : null,
+                bankStatementUrl,
             });
         } catch (error: any) {
             toast.error(`Upload failed: ${error.message}`);

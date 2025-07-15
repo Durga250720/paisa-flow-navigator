@@ -156,7 +156,8 @@ const EmploymentInfoForm: React.FC<EmploymentInfoFormProps> = ({ initialData, on
                 companyName: formData.companyName,
                 designation: formData.designation,
                 takeHomeSalary: Number(formData.takeHomeSalary),
-                totalExperienceInMonths: Number(formData.totalExperienceInMonths) * 12 // Assuming input is in years, convert to months for payload
+                totalExperienceInMonths: Number(formData.totalExperienceInMonths) * 12, // Assuming input is in years, convert to months for payload
+                officialEmail: formData.officialEmail
             });
         } else {
             toast.error("Please fill all required fields correctly.");
