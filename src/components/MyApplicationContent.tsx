@@ -51,7 +51,7 @@ const MyApplicationContent = () => {
     // addressDetail is in user's example payload but no form for it.
   };
 
-    const [showApplyLoanModal, setShowApplyLoanModal] = useState(true);
+  const [showApplyLoanModal, setShowApplyLoanModal] = useState(false);
   const [currentPopupStep, setCurrentPopupStep] = useState(0); // 0: closed, 1: Emp, 2: Income, 3: Bank, 4: Initial Loan, 5: Final Loan
   const [newApplicationData, setNewApplicationData] = useState<any>(initialNewApplicationData);
   const [modalLoading, setModalLoading] = useState(false);
