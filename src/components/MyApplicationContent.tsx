@@ -33,7 +33,7 @@ const MyApplicationContent = () => {
     amount: 0,
     purpose: "",
     employmentDetails: {
-      employmentType: "", industry: "", companyName: "",
+      employmentType: "SALARIED", industry: "", companyName: "",
       designation: "", takeHomeSalary: 0, totalExperienceInMonths: 0
     },
     paySlips: { // For payload consistency

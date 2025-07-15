@@ -68,7 +68,7 @@ const EmploymentInfoForm: React.FC<EmploymentInfoFormProps> = ({ initialData, on
     return (
         <div className="flex flex-col h-full"> 
             <div className="flex-grow overflow-y-auto pr-2 space-y-2">
-                <div className='form-group'> 
+                {/* <div className='form-group'> 
                     <label className="block text-sm font-medium text-gray-700 mb-1">Employment Type <span className="text-red-500">*</span></label>
                     <select
                         value={formData.employmentType}
@@ -80,7 +80,7 @@ const EmploymentInfoForm: React.FC<EmploymentInfoFormProps> = ({ initialData, on
                         <option value="SELF_EMPLOYED">Self Employed</option>
                     </select>
                     {errors.employmentType && <p className="text-red-500 text-xs mt-1">{errors.employmentType}</p>}
-                </div>
+                </div> */}
 
                 <div className='form-group'>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Industry <span className="text-red-500">*</span></label>
@@ -90,9 +90,12 @@ const EmploymentInfoForm: React.FC<EmploymentInfoFormProps> = ({ initialData, on
                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary inputField"
                     >
                         <option value="">Select Industry</option>
-                        <option value="IT_SOFTWARE">Information Technology</option>
-                        <option value="BANKING_FINANCE">Banking & Finance</option>
-                        <option value="HEALTHCARE">Healthcare</option>
+                        <option value="it">Information Technology</option>
+                        <option value="banking">Banking & Finance</option>
+                        <option value="healthcare">Healthcare</option>
+                        <option value="education">Education</option>
+                        <option value="retail">Retail</option>
+                        <option value="manufacturing">Manufacturing</option>
                         {/* Add other industries */}
                     </select>
                     {errors.industry && <p className="text-red-500 text-xs mt-1">{errors.industry}</p>}
@@ -138,7 +141,7 @@ const EmploymentInfoForm: React.FC<EmploymentInfoFormProps> = ({ initialData, on
                     <label className="block text-sm font-medium text-gray-700 mb-1">Work Experience (Years) <span className="text-red-500">*</span></label>
                     <input
                         type="number"
-                        value={formData.totalExperienceInMonths} // Assuming this field now takes years
+                        value={formData.totalExperienceInMonths}
                         onChange={(e) => handleInputChange('totalExperienceInMonths', e.target.value)}
                         placeholder="Enter Work Experience in Years"
                         className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary inputField"
