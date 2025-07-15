@@ -121,8 +121,14 @@ const OTP = () => {
         navigate('/digi-kyc', { state: { userId: userId } });
       }
       else{
+        console.log(res.data)
         localStorage.setItem('name',res.data.name)
-        navigate('/admin/my-application');
+        if(!res.data.kycverified){
+          navigate('/digi-kyc', { state: { userId: userId } });
+        }
+        else{
+          navigate('/admin/my-application');
+        }
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Invalid OTP. Please try again.');

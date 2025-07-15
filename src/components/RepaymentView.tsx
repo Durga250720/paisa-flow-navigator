@@ -360,6 +360,7 @@ const RepaymentView = () => {
         description: `Repayment for Loan ${details.loanDisplayId}`,
         image: "/lovable-uploads/53f43cc9-5dc2-4799-81fd-84c9577132eb.png",
         order_id: orderData.id,
+        callback_url:window.location.origin+`/admin/payment-success?orderId=${orderData.id}`,
         handler: async function (response: RazorpayResponse) {
           try {
             const verificationResponse = await fetch(`${config.baseURL}payment/razorpay/verify-payment`, {
@@ -382,7 +383,7 @@ const RepaymentView = () => {
               title: "Payment Successful!",
               description: "Your payment has been verified and recorded.",
             });
-            fetchRepaymentDetails(); // Refresh data
+            fetchRepaymentDetails();
           } catch (error) {
             const typedErr = error as Error;
             toast({

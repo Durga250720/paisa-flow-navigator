@@ -8,6 +8,7 @@ import PrivacyPolicyContent from './PrivacyPolicyContent';
 import CreateMyBorrowing from './CreateMyBorrowing';
 import ApplicationDetailsContent from './ApplicationDetailsContent';
 import RepaymentView from "@/components/RepaymentView.tsx";
+import RazorPaySuccess from '../pages/razorpay-status/RazorPaySuccess';
 
 const AdminOutlet = () => {
     return (
@@ -21,6 +22,7 @@ const AdminOutlet = () => {
             <Route path="/kyc-documents" element={<KYCDocumentsContent/>}/>
             <Route path="/privacy-policy" element={<PrivacyPolicyContent/>}/>
             <Route path="/create-borrowing" element={<CreateMyBorrowing/>}/>
+            <Route path="/payment-success" element={<RazorPaySuccess/>}/>
         </Routes>
     );
 };

@@ -75,7 +75,6 @@ const MyApplicationContent = () => {
         throw new Error(errorData.message || 'Failed to fetch loan application details.');
       }
       const result = await response.json();
-      console.log(result)
       setApplicationData(result.data)
 
       setLoading(false)
@@ -150,9 +149,6 @@ const MyApplicationContent = () => {
       payloadToSend = { ...payloadToSend, ...finalStepData };
     }
 
-    // Log the complete payload to verify data structure
-    console.log("Final Payload:", JSON.stringify(payloadToSend, null, 2));
-
     try {
       const response = await fetch(`${config.baseURL}loan-application/apply/dashboard`, {
         method: 'POST',
@@ -169,12 +165,10 @@ const MyApplicationContent = () => {
 
       const result = await response.json();
       toast.success("Application submitted successfully!");
-      console.log("API Response:", result);
       handleCloseApplyModal();
       fetchApplications(); 
     } catch (error: any) {
       toast.error(`Submission Error: ${error.message}`);
-      console.error("API Error:", error);
     } finally {
       setModalLoading(false);
     }
@@ -260,7 +254,7 @@ const MyApplicationContent = () => {
       {/* Apply Loan Modal */}
       {showApplyLoanModal && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[1000] p-2">
-          <div className="bg-white p-4 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col h-auto">
+          <div className={`${(currentPopupStep === 2 || currentPopupStep === 4) ? 'h-auto' : 'h-full'} bg-white p-4 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col`}>
             <div className="h-full w-full">
               <div className="flex justify-between items-center mb-2 border-b pb-2 h-[10%]">
                 <h3 className="text-lg font-medium text-gray-800">
