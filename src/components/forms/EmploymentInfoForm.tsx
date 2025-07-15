@@ -1,6 +1,7 @@
 // src/components/forms/EmploymentInfoForm.tsx
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
+import OTPInput from '../OTPInput';
 
 interface EmploymentInfoFormProps {
     initialData: {
@@ -23,9 +24,14 @@ const EmploymentInfoForm: React.FC<EmploymentInfoFormProps> = ({ initialData, on
         companyName: initialData.companyName || '',
         designation: initialData.designation || '',
         takeHomeSalary: initialData.takeHomeSalary || '',
-        totalExperienceInMonths: initialData.totalExperienceInMonths ? Number(initialData.totalExperienceInMonths) / 12 : '' // Convert months to years for display if needed, or keep as months
+        totalExperienceInMonths: initialData.totalExperienceInMonths ? Number(initialData.totalExperienceInMonths) / 12 : '', // Convert months to years for display if needed, or keep as months
+        companyEmail: ''
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [otpSent, setOtpSent] = useState(false);
+    const [otpVerified, setOtpVerified] = useState(false);
+    const [otp, setOtp] = useState('');
+    const [otpError, setOtpError] = useState('');
 
     const validateForm = () => {
         const newErrors: Record<string, string> = {};
@@ -37,10 +43,49 @@ const EmploymentInfoForm: React.FC<EmploymentInfoFormProps> = ({ initialData, on
         else if (isNaN(Number(formData.takeHomeSalary)) || Number(formData.takeHomeSalary) <= 0) newErrors.takeHomeSalary = 'Please enter a valid income';
         if (!formData.totalExperienceInMonths.toString().trim()) newErrors.totalExperienceInMonths = 'Work experience is required';
         else if (isNaN(Number(formData.totalExperienceInMonths)) || Number(formData.totalExperienceInMonths) < 0) newErrors.totalExperienceInMonths = 'Please enter valid experience';
-
+        if (!formData.companyEmail.trim()) newErrors.companyEmail = 'Company email is required';
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.companyEmail)) newErrors.companyEmail = 'Please enter a valid email';
+        if (!otpVerified && otpSent) newErrors.otp = 'Please verify your email with OTP';
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
+    };
+
+    const handleSendOTP = async () => {
+        if (!formData.companyEmail.trim()) {
+            setErrors(prev => ({ ...prev, companyEmail: 'Company email is required' }));
+            return;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.companyEmail)) {
+            setErrors(prev => ({ ...prev, companyEmail: 'Please enter a valid email' }));
+            return;
+        }
+
+        try {
+            // Simulate OTP sending - replace with actual API call
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            setOtpSent(true);
+            toast.success('OTP sent to your company email');
+        } catch (error) {
+            toast.error('Failed to send OTP. Please try again.');
+        }
+    };
+
+    const handleVerifyOTP = async () => {
+        if (otp.length !== 6) {
+            setOtpError('Please enter a valid 6-digit OTP');
+            return;
+        }
+
+        try {
+            // Simulate OTP verification - replace with actual API call
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            setOtpVerified(true);
+            setOtpError('');
+            toast.success('Email verified successfully');
+        } catch (error) {
+            setOtpError('Invalid OTP. Please try again.');
+        }
     };
 
     const handleInputChange = (field: string, value: string) => {
@@ -148,6 +193,58 @@ const EmploymentInfoForm: React.FC<EmploymentInfoFormProps> = ({ initialData, on
                     />
                     {errors.totalExperienceInMonths && <p className="text-red-500 text-xs mt-1">{errors.totalExperienceInMonths}</p>}
                 </div>
+
+                <div className='form-group'>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Company Email ID <span className="text-red-500">*</span></label>
+                    <div className="flex gap-2">
+                        <input
+                            type="email"
+                            value={formData.companyEmail}
+                            onChange={(e) => handleInputChange('companyEmail', e.target.value)}
+                            placeholder="Enter Company Email"
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary inputField"
+                            disabled={otpVerified}
+                        />
+                        {!otpVerified && (
+                            <button
+                                type="button"
+                                onClick={handleSendOTP}
+                                disabled={!formData.companyEmail || otpSent}
+                                className="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-dark rounded-md focus:outline-none disabled:bg-gray-400"
+                            >
+                                {otpSent ? 'OTP Sent' : 'Send OTP'}
+                            </button>
+                        )}
+                        {otpVerified && (
+                            <span className="px-4 py-2 text-sm font-medium text-green-600 bg-green-100 rounded-md">
+                                Verified ✓
+                            </span>
+                        )}
+                    </div>
+                    {errors.companyEmail && <p className="text-red-500 text-xs mt-1">{errors.companyEmail}</p>}
+                </div>
+
+                {otpSent && !otpVerified && (
+                    <div className='form-group'>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Enter OTP <span className="text-red-500">*</span></label>
+                        <div className="space-y-3">
+                            <OTPInput 
+                                length={6} 
+                                onComplete={setOtp} 
+                                error={otpError}
+                            />
+                            <button
+                                type="button"
+                                onClick={handleVerifyOTP}
+                                disabled={otp.length !== 6}
+                                className="w-full px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary-dark rounded-md focus:outline-none disabled:bg-gray-400"
+                            >
+                                Verify OTP
+                            </button>
+                        </div>
+                        {errors.otp && <p className="text-red-500 text-xs mt-1">{errors.otp}</p>}
+                    </div>
+                )}
             </div>
             {/* This div will be the fixed footer for buttons */}
             <div className="flex-shrink-0 flex justify-end gap-3 pt-4 border-t"> {/* Adjusted classes for fixed footer */}
