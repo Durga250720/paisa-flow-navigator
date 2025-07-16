@@ -18,14 +18,16 @@ const UnderwritingVerification = () => {
   const applicationId = searchParams.get('appId');
 
   useEffect(() => {
-    // Validate token on component mount
-    // if (!verificationToken) {
-    //   setError('Invalid verification link. Please check your email for the correct link.');
-    // }
+    // Redirect to 404 if required query parameters are missing
+    if (!verificationToken || !applicationId) {
+      navigate('/404', { replace: true });
+      return;
+    }
+    
     if (verificationToken === 'COMPLETED') {
       setVerified(true)
     }
-  }, [verificationToken]);
+  }, [verificationToken, applicationId, navigate]);
 
   const handleVerify = async () => {
 
