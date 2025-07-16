@@ -1,0 +1,108 @@
+.container {
+  @apply min-h-screen bg-gray-50;
+  height: calc(100vh - 0px);
+}
+
+.navbarWrapper {
+  height: 9%;
+}
+
+.mainContainer {
+  @apply flex h-[calc(100%-9%)] p-8;
+}
+
+.leftPanel {
+  @apply hidden lg:flex lg:w-1/2 items-center justify-center;
+}
+
+.imageContainer {
+  @apply relative;
+}
+
+.heroImage {
+  @apply max-w-[85%] h-auto;
+}
+
+.rightPanel {
+  @apply w-full lg:w-1/2 flex items-center justify-center;
+}
+
+.formWrapper {
+  @apply w-full max-w-lg flex lg:bg-white h-[85%] flex-col lg:p-8 lg:shadow-lg lg:rounded-lg justify-center;
+}
+
+.innerContainer {
+  @apply lg:m-auto lg:w-[65%] w-[100%] flex items-center justify-center;
+}
+
+.verificationCard {
+  @apply w-full max-w-md flex flex-col items-center text-center space-y-6;
+}
+
+.iconContainer {
+  @apply flex items-center justify-center w-20 h-20 bg-primary/10 rounded-full;
+}
+
+.textContainer {
+  @apply space-y-4;
+}
+
+.heading {
+  @apply text-2xl font-semibold text-gray-800;
+}
+
+.titleContainer {
+  @apply flex items-center justify-center text-xl font-semibold text-green-600 mb-4;
+}
+
+.subtitle {
+  @apply text-sm text-gray-600 leading-relaxed;
+}
+
+.description {
+  @apply text-sm text-gray-600 mt-4;
+}
+
+.errorContainer {
+  @apply flex items-center justify-center bg-red-50 border border-red-200 rounded-lg p-3 text-red-700;
+}
+
+.errorText {
+  @apply text-sm;
+}
+
+.infoCard {
+  @apply bg-blue-50 border border-blue-200 rounded-lg p-4 text-left w-full;
+}
+
+.infoTitle {
+  @apply text-sm font-semibold text-blue-800 mb-2;
+}
+
+.infoList {
+  @apply text-sm text-blue-700 space-y-1;
+}
+
+.buttonContainer {
+  @apply w-full;
+}
+
+.verifyButton {
+  @apply w-full bg-primary text-white font-medium py-3 px-6 rounded-lg hover:bg-primary/90 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+.footerText {
+  @apply text-xs text-gray-500 mt-4;
+}
+
+.gifImageContainer {
+  @apply flex items-center justify-center mb-4;
+}
+
+.verificationGif {
+  @apply w-16 h-16 lg:w-20 lg:h-20;
+}

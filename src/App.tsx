@@ -30,6 +30,7 @@ import Login from "./pages/Login";
 import { ToastContainer } from 'react-toastify';
 import PreApprovedLoadAmount from "./pages/PreApprovedLoanAmount";
 import KycVerificationPage from "@/pages/KycVerificationPage.tsx";
+import UnderwritingVerification from "./pages/UnderwritingVerification";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,7 @@ const App = () => (
           <Route path="/transfer-success" element={<TransferSuccess />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-conditions" element={<TermsConditions />} />
+          <Route path="/underwriting-verification" element={<UnderwritingVerification />} />
           <Route path="/admin/*" element={<Admin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
