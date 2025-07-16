@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import styles from '../pages-styles/UnderwritingVerification.module.css';
 import { CheckCircle, FileText, AlertCircle } from 'lucide-react';
+import { config } from '@/config/environment';
 
 const UnderwritingVerification = () => {
   const [loading, setLoading] = useState(false);
@@ -12,43 +13,40 @@ const UnderwritingVerification = () => {
   const [searchParams] = useSearchParams();
   
   // Get token from URL params (would be in the email link)
-  const verificationToken = searchParams.get('token');
-  const applicationId = searchParams.get('applicationId');
+  // const verificationToken = searchParams.get('appId');
+  const applicationId = searchParams.get('appId');
 
   useEffect(() => {
     // Validate token on component mount
-    if (!verificationToken) {
-      setError('Invalid verification link. Please check your email for the correct link.');
-    }
-  }, [verificationToken]);
+    // if (!verificationToken) {
+    //   setError('Invalid verification link. Please check your email for the correct link.');
+    // }
+  }, [applicationId]);
 
   const handleVerify = async () => {
-    if (!verificationToken) {
-      setError('Invalid verification token');
-      return;
-    }
+    // if (!verificationToken) {
+    //   setError('Invalid verification token');
+    //   return;
+    // }
 
     setLoading(true);
     setError('');
     
     try {
       // Simulate API call for verification
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // In a real application, you would validate the token with your backend
-      // For now, we'll simulate a successful verification
-      setVerified(true);
-      
-      // Store verification status
-      localStorage.setItem('underwritingVerified', 'true');
-      if (applicationId) {
-        localStorage.setItem('verifiedApplicationId', applicationId);
+      const response = await fetch(`${config.baseURL}loan-application/${applicationId}/verify-underwriting-mail`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const results = await response.json();
+
+      if(results != null){
+        setVerified(true);
+        navigate('/admin/my-application')
       }
-      
-      // Redirect after 2 seconds
-      setTimeout(() => {
-        navigate('/admin/my-application');
-      }, 2000);
       
     } catch (err) {
       setError('Verification failed. Please try again or contact support.');
@@ -141,8 +139,8 @@ const UnderwritingVerification = () => {
               <div className={styles.buttonContainer}>
                 <button
                   onClick={handleVerify}
-                  disabled={loading || !verificationToken}
-                  className={`${styles.verifyButton} ${!verificationToken ? styles.disabled : ''}`}
+                  disabled={loading}
+                  className={`${styles.verifyButton}`}
                 >
                   {loading ? 'Verifying...' : 'Verify Application'}
                 </button>
