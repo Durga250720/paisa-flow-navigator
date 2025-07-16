@@ -383,6 +383,7 @@ const RepaymentView = () => {
               title: "Payment Successful!",
               description: "Your payment has been verified and recorded.",
             });
+            navigate(window.location.origin+`/admin/payment-status?orderId=${orderData.id}&status=SUCCESS`)
             fetchRepaymentDetails();
           } catch (error) {
             const typedErr = error as Error;

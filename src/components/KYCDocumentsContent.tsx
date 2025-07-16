@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { IdCard, Banknote, UserCheck, BadgeCheck, CheckCircle, User, XCircle } from 'lucide-react';
+import { IdCard, Banknote, UserCheck, BadgeCheck, CheckCircle, User, XCircle, Eye } from 'lucide-react';
 import styles from './KYCDocumentsContent.module.css';
 import { config } from '../config/environment'; // Assuming config is here
 import { formatIndianNumber, getCibilColor, toTitleCase } from '../lib/utils';
@@ -20,6 +20,9 @@ const KYCDocumentsContent = () => {
   const [error, setError] = useState<string | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+
+  const [isDocPreviewOpen, setIsDocPreviewOpen] = useState(false);
+  const [previewDocs, setPreviewDocs] = useState<any>(null);
   const navigate = useNavigate();
 
   // Move documents array into state
@@ -46,7 +49,8 @@ const KYCDocumentsContent = () => {
       type: "Overall KYC Status",
       status: "Unverified",
       icon: BadgeCheck,
-      documentValue: ''
+      documentValue: '',
+      docUrl: ''
     }
   ]);
 
@@ -54,6 +58,16 @@ const KYCDocumentsContent = () => {
     setPreviewImageUrl(imageUrl);
     setIsPreviewOpen(true);
   };
+
+  const handleDocumentPreview = (doc: any) => {    
+    setIsDocPreviewOpen(true);
+    setPreviewDocs(doc);
+  }
+
+  const closeDocumentPreview = () => {
+    setIsDocPreviewOpen(false);
+    setPreviewDocs(null);
+  }
 
   const closeImagePreview = () => {
     setIsPreviewOpen(false);
@@ -112,7 +126,7 @@ const KYCDocumentsContent = () => {
             };
           }
           return doc;
-        }));
+        }));        
 
         setProfileData(data.data);
 
@@ -136,7 +150,7 @@ const KYCDocumentsContent = () => {
 
   return (
     <div className="p-4 bg-gray-50 min-h-full h-full">
-      <div className="h-full w-full scrollContainer" style={{overflowY:"scroll"}}>
+      <div className="h-full w-full scrollContainer" style={{ overflowY: "scroll" }}>
         {/* Borrower Profile Section */}
         {profileData && (
           <div className={`${styles.firstContainer} bg-white rounded-lg p-6 shadow-sm mb-6`}>
@@ -231,6 +245,14 @@ const KYCDocumentsContent = () => {
                   }
                 </div>
                 <div className="flex items-center gap-3">
+                  {
+                    doc?.docUrl != '' ?
+                      <div className="viewIcon cursor-pointer" onClick={() => handleDocumentPreview(doc)}>
+                        <Eye className='w-5 h-5 text-green-600' />
+                      </div>
+                      :
+                      <></>
+                  }
                   <div className="flex items-center gap-1">
                     {doc.status === 'Verified' ? (
                       <CheckCircle className="w-4 h-4 text-green-600" />
@@ -268,6 +290,45 @@ const KYCDocumentsContent = () => {
             </div>
           </div>
         )}
+
+
+        {/* Document Preview Modal */}
+
+        {
+          isDocPreviewOpen && previewDocs && (
+            <div
+              className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+              onClick={closeDocumentPreview}
+            >
+              <div
+                className="relative bg-white p-4 rounded-lg shadow-lg max-w-lg w-full"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="titleSection flex items-center">
+                  <div className="text-md text-medium">
+                    {previewDocs.type}
+                  </div>
+                </div>
+                <div className="border-b mt-2"></div>
+                <div className="mt-3">
+                  {
+                    previewDocs.docUrl.map((doc, index) => (
+                      <div key={index} className='mb-4'>
+                        <iframe
+                          src={doc.url}
+                          width="100%"
+                          height="500px"
+                          className="border"
+                          title={`preview-${index}`}
+                        />
+                      </div>
+                    ))
+                  }
+                </div>
+              </div>
+            </div>
+          )
+        }
       </div>
     </div>
   );

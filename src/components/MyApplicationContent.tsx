@@ -30,7 +30,7 @@ const MyApplicationContent = () => {
   // --- New State for Apply Loan Modal ---
   const initialNewApplicationData = {
     borrowerId: localStorage.getItem('authToken') || "",
-    amount: 0,
+    amount: 5000,
     purpose: "",
     employmentDetails: {
       employmentType: "SALARIED", industry: "", companyName: "",
@@ -254,7 +254,7 @@ const MyApplicationContent = () => {
       {/* Apply Loan Modal */}
       {showApplyLoanModal && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[1000] p-2">
-          <div className={`${(currentPopupStep === 2 || currentPopupStep === 4) ? 'h-auto' : 'h-full'} bg-white p-4 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col`}>
+          <div className={`${(currentPopupStep === 2 || currentPopupStep === 3 ||currentPopupStep === 4) ? 'h-auto' : 'h-full'} bg-white p-4 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col`}>
             <div className="h-full w-full">
               <div className="flex justify-between items-center mb-2 border-b pb-2 h-[10%]">
                 <h3 className="text-lg font-medium text-gray-800">

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Eye, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { config } from '../config/environment';
 import { toast } from 'sonner';
@@ -18,6 +18,9 @@ const ApplicationDetailsContent = () => {
   const { id } = useParams();
   const [currentStep, setCurrentStep] = useState(0);
   const navigate = useNavigate();
+
+  const [openDocPreview, setIsOpenDocPreview] = useState(false);
+  const [storeDoc, setIsStoreDoc] = useState<any>(null);
 
   const steps = useApplicationSteps(applicationData);
 
@@ -66,6 +69,17 @@ const ApplicationDetailsContent = () => {
       setCurrentStep(firstUncompletedStepIndex !== -1 ? firstUncompletedStepIndex : 0);
     }
   }, [steps, navigate]);
+
+  const handleDigoDocsView = (label: any, doc: any) => {
+    // console.log(doc)
+    setIsOpenDocPreview(true);
+    setIsStoreDoc({ label: label, url: doc })
+  }
+
+  const closeDocumentPreview = () => {
+    setIsOpenDocPreview(false);
+    setIsStoreDoc(null)
+  }
 
   return (
     <div className="min-h-full bg-white flex flex-col h-full">
@@ -138,7 +152,7 @@ const ApplicationDetailsContent = () => {
                   </div>
                 </div>
                 <div className="rightPanel w-[30%] h-full">
-                  <div className="bg-white rounded-lg shadow-sm p-4 w-full">
+                  <div className="bg-white rounded-lg shadow-sm p-4 w-full mb-1">
                     <div className="loanAmountCalculation">
                       <h2 className="text-primary">Calculation</h2>
                     </div>
@@ -165,6 +179,62 @@ const ApplicationDetailsContent = () => {
                       <div className="text-md font-medium text-green-700">₹ {formatIndianNumber(applicationData?.totalRepaymentAmount) || 'N/A'}</div>
                     </div>
                   </div>
+                  {
+                    applicationData?.digioDocuments &&
+                    <div className="bg-white rounded-lg shadow-sm p-4 w-full">
+                      <div className="loanAmountCalculation">
+                        <h2 className="text-primary">Digio Documents</h2>
+                      </div>
+                      <div className="border-b mt-2"></div>
+                      <div className="mt-2">
+                        {
+                          Object.entries(applicationData?.digioDocuments).map(([label, url], index) => (
+                            <div className="mb-3" key={index}>
+                              <div className="flex justify-between items-center">
+                                <div className="text-sm">{label}</div>
+                                <Eye className="text-primary cursor-pointer" onClick={() => handleDigoDocsView(label, url)} />
+                              </div>
+                              <div className="border-b mt-2"></div>
+                            </div>
+                          ))
+                        }
+                      </div>
+                    </div>
+                  }
+
+                  {/* document preview section */}
+                  {
+                    openDocPreview && storeDoc && (
+                      <div
+                        className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+                        onClick={closeDocumentPreview}
+                      >
+                        <div
+                          className="relative bg-white p-4 rounded-lg shadow-lg max-w-lg w-full"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="titleSection flex items-center justify-between">
+                            <div className="text-md text-medium">
+                              {storeDoc.label}
+                            </div>
+                            <div className="closeIcon cursor-pointer">
+                              <X className="w-5 h-5" onClick={closeDocumentPreview} />
+                            </div>
+                          </div>
+                          <div className="border-b mt-2"></div>
+                          <div className="mt-3">
+                            <iframe
+                              src={storeDoc.url}
+                              width="100%"
+                              height="500px"
+                              className="border"
+                              title={`preview-${storeDoc.label}`}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  }
                 </div>
               </div>
             </>

@@ -22,7 +22,7 @@ const AdminOutlet = () => {
             <Route path="/kyc-documents" element={<KYCDocumentsContent/>}/>
             <Route path="/privacy-policy" element={<PrivacyPolicyContent/>}/>
             <Route path="/create-borrowing" element={<CreateMyBorrowing/>}/>
-            <Route path="/payment-success" element={<RazorPaySuccess/>}/>
+            <Route path="/payment-status" element={<RazorPaySuccess/>}/>
         </Routes>
     );
 };
