@@ -180,8 +180,7 @@ const ApplicationDetailsContent = () => {
                     </div>
                   </div>
                   {
-                    applicationData?.digioDocuments &&
-  Object.keys(applicationData.digioDocuments).length > 0 &&
+                    applicationData?.digioDocuments != "{}" &&
                     <div className="bg-white rounded-lg shadow-sm p-4 w-full">
                       <div className="loanAmountCalculation">
                         <h2 className="text-primary">Digio Documents</h2>
