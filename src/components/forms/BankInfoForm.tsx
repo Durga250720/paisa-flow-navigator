@@ -1,5 +1,6 @@
 // src/components/forms/BankInfoForm.tsx
-import React, { useState } from 'react';
+import { config } from '@/config/environment';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 interface BankInfoFormProps {
@@ -46,6 +47,10 @@ const indianBanks = [
 ];
 
 const BankInfoForm: React.FC<BankInfoFormProps> = ({ initialData, onNext, onPrevious, loading }) => {
+
+    const [getBankDetails, setIsBankDetails] = useState<any>();
+    const [internalLoading, setIsLoading] = useState(true);
+
     const [formData, setFormData] = useState({
         bankName: initialData.bankName || '',
         accountNumber: initialData.accountNumber || '',
@@ -70,6 +75,29 @@ const BankInfoForm: React.FC<BankInfoFormProps> = ({ initialData, onNext, onPrev
         return Object.keys(newErrors).length === 0;
     };
 
+    useEffect(() => {
+        fetchExistingBankDetails()
+    }, [])
+
+    const fetchExistingBankDetails = async () => {
+        setIsLoading(true)
+        const authToken = localStorage.getItem('authToken')
+        try {
+            const response = await fetch(`${config.baseURL}bank-detail/${authToken}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            const results = await response.json();
+            setIsBankDetails(results.data)
+            setIsLoading(false);
+        } catch (error) {
+            toast.error(`${error.message}`);
+            setIsLoading(false);
+        }
+    }
+
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
         if (errors[field]) {
@@ -77,11 +105,37 @@ const BankInfoForm: React.FC<BankInfoFormProps> = ({ initialData, onNext, onPrev
         }
     };
 
-    const handleFormSubmit = () => {
+    const handleFormSubmit = async () => {
         if (validateForm()) {
-            // Exclude reEnterAccountNumber from the data passed to onNext
-            const { reEnterAccountNumber, ...dataToSubmit } = formData;
-            onNext(dataToSubmit);
+            if(getBankDetails && getBankDetails.length > 0){
+                const { reEnterAccountNumber, ...dataToSubmit } = formData;
+                onNext(dataToSubmit);
+            }
+            else{
+                const payload = {
+                    "borrowerId": localStorage.getItem('authToken'),
+                    "bankName": formData.bankName,
+                    "accountNumber": formData.accountNumber,
+                    "ifscNumber": formData.ifscCode,
+                    "accountHolderName": formData.accountHolderName
+                }
+                try {
+                    const response = await fetch(`${config.baseURL}bank-detail`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload),
+                    });
+                    const results = await response.json();
+                    if(results != null){
+                        const { reEnterAccountNumber, ...dataToSubmit } = formData;
+                        onNext(dataToSubmit);
+                    }
+                } catch (error) {
+                    toast.error(`${error.message}`);
+                }
+            }
         } else {
             toast.error("Please fill all required fields correctly.");
         }
@@ -91,39 +145,78 @@ const BankInfoForm: React.FC<BankInfoFormProps> = ({ initialData, onNext, onPrev
 
     return (
         <div className="flex flex-col h-full">
-            <div className="flex-grow overflow-y-auto pr-2 space-y-2">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Bank Name <span className="text-red-500">*</span></label>
-                    <select value={formData.bankName} onChange={(e) => handleInputChange('bankName', e.target.value)} className={`${commonInputClass} inputField`}>
-                        {indianBanks.map(bank => (<option key={bank.value} value={bank.value}>{bank.label}</option>))}
-                    </select>
-                    {errors.bankName && <p className="text-red-500 text-xs mt-1">{errors.bankName}</p>}
-                </div>
+            {
+                internalLoading ?
+                    <section className="h-full flex items-center justify-center text-md text-primary">
+                        <div className="dot-loader h-full w-full flex justify-center items-center">
+                            <span></span><span></span><span></span> Fetching Bank Details
+                        </div>
+                    </section>
+                    :
+                    <section className='h-full'>
+                        {
+                            getBankDetails && getBankDetails.length > 0 ?
+                                <div className="flex-grow overflow-y-auto pr-2 mt-2">
+                                    <div className="flex flex-wrap gap-x-8">
+                                        <div className="flex-1 min-w-[150px] mb-4">
+                                            <label className="block text-xs font-normal text-gray-700 mb-1">Account Holder Name</label>
+                                            <div className='text-sm font-medium text-black'>{getBankDetails[0]?.accountHolderName}</div>
+                                        </div>
+                                        <div className="flex-1 min-w-[150px] mb-4">
+                                            <label className="block text-xs font-normal text-gray-700 mb-1">Bank Name</label>
+                                            <div className='text-sm font-medium text-black'>{getBankDetails[0]?.bankName}</div>
+                                        </div>
+                                        <div className="flex-1 min-w-[150px] mb-4">
+                                            <label className="block text-xs font-normal text-gray-700 mb-1">Account Number</label>
+                                            <div className='text-sm font-medium text-black'>{getBankDetails[0]?.accountNumber}</div>
+                                        </div>
+                                        <div className="flex-1 min-w-[150px] mb-4">
+                                            <label className="block text-xs font-normal text-gray-700 mb-1">IFSC Code</label>
+                                            <div className='text-sm font-medium text-black'>{getBankDetails[0]?.ifscNumber}</div>
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-end text-sm text-gray-600 mt-4">
+                                        Need to add new acccount? &nbsp;<span className='text-md text-primary cursor-pointer'>Contact Support Team</span>
+                                    </div>
+                                </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Bank Account Number <span className="text-red-500">*</span></label>
-                    <input type="number" value={formData.accountNumber} onChange={(e) => handleInputChange('accountNumber', e.target.value)} placeholder="Enter Account Number" className={`${commonInputClass} inputField`}/>
-                    {errors.accountNumber && <p className="text-red-500 text-xs mt-1">{errors.accountNumber}</p>}
-                </div>
+                                :
+                                <div className="flex-grow overflow-y-auto pr-2 space-y-2">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Bank Name <span className="text-red-500">*</span></label>
+                                        <select value={formData.bankName} onChange={(e) => handleInputChange('bankName', e.target.value)} className={`${commonInputClass} inputField`}>
+                                            {indianBanks.map(bank => (<option key={bank.value} value={bank.value}>{bank.label}</option>))}
+                                        </select>
+                                        {errors.bankName && <p className="text-red-500 text-xs mt-1">{errors.bankName}</p>}
+                                    </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Re-Enter Bank Account Number <span className="text-red-500">*</span></label>
-                    <input type="number" value={formData.reEnterAccountNumber} onChange={(e) => handleInputChange('reEnterAccountNumber', e.target.value)} placeholder="Re-Enter Account Number" className={`${commonInputClass} inputField`} />
-                    {errors.reEnterAccountNumber && <p className="text-red-500 text-xs mt-1">{errors.reEnterAccountNumber}</p>}
-                </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Bank Account Number <span className="text-red-500">*</span></label>
+                                        <input type="number" value={formData.accountNumber} onChange={(e) => handleInputChange('accountNumber', e.target.value)} placeholder="Enter Account Number" className={`${commonInputClass} inputField`} />
+                                        {errors.accountNumber && <p className="text-red-500 text-xs mt-1">{errors.accountNumber}</p>}
+                                    </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">IFSC Code <span className="text-red-500">*</span></label>
-                    <input type="text" value={formData.ifscCode} onChange={(e) => handleInputChange('ifscCode', e.target.value.toUpperCase())} placeholder="Enter IFSC Code" className={`${commonInputClass} inputField`} maxLength={15} />
-                    {errors.ifscCode && <p className="text-red-500 text-xs mt-1">{errors.ifscCode}</p>}
-                </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Re-Enter Bank Account Number <span className="text-red-500">*</span></label>
+                                        <input type="number" value={formData.reEnterAccountNumber} onChange={(e) => handleInputChange('reEnterAccountNumber', e.target.value)} placeholder="Re-Enter Account Number" className={`${commonInputClass} inputField`} />
+                                        {errors.reEnterAccountNumber && <p className="text-red-500 text-xs mt-1">{errors.reEnterAccountNumber}</p>}
+                                    </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Account Holder Name <span className="text-red-500">*</span></label>
-                    <input type="text" value={formData.accountHolderName} onChange={(e) => handleInputChange('accountHolderName', e.target.value)} placeholder="Enter Account Holder Name" className={`${commonInputClass} inputField`} />
-                    {errors.accountHolderName && <p className="text-red-500 text-xs mt-1">{errors.accountHolderName}</p>}
-                </div>
-            </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">IFSC Code <span className="text-red-500">*</span></label>
+                                        <input type="text" value={formData.ifscCode} onChange={(e) => handleInputChange('ifscCode', e.target.value.toUpperCase())} placeholder="Enter IFSC Code" className={`${commonInputClass} inputField`} maxLength={15} />
+                                        {errors.ifscCode && <p className="text-red-500 text-xs mt-1">{errors.ifscCode}</p>}
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Account Holder Name <span className="text-red-500">*</span></label>
+                                        <input type="text" value={formData.accountHolderName} onChange={(e) => handleInputChange('accountHolderName', e.target.value)} placeholder="Enter Account Holder Name" className={`${commonInputClass} inputField`} />
+                                        {errors.accountHolderName && <p className="text-red-500 text-xs mt-1">{errors.accountHolderName}</p>}
+                                    </div>
+                                </div>
+                        }
+                    </section>
+            }
 
             <div className="flex-shrink-0 flex justify-end gap-3 pt-4 border-t">
                 <button

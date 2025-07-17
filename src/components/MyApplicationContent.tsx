@@ -45,7 +45,7 @@ const MyApplicationContent = () => {
       documentType: "BANK_STATEMENT",
       documentUrls: [],
     },
-    bankDetails: { // To collect data from BankInfoForm
+    bankDetail: { // To collect data from BankInfoForm
       accountNumber: "", ifscCode: "", accountHolderName: "", bankName: ""
     }
     // addressDetail is in user's example payload but no form for it.
@@ -288,8 +288,8 @@ const MyApplicationContent = () => {
                 )}
                 {currentPopupStep === 3 && (
                   <BankInfoForm
-                    initialData={newApplicationData.bankDetails}
-                    onNext={(data) => handleModalNext({ bankDetails: data })}
+                    initialData={newApplicationData.bankDetail}
+                    onNext={(data) => handleModalNext({ bankDetail: data })}
                     onPrevious={handleModalPrevious}
                     loading={modalLoading}
                   />
