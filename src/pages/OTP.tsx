@@ -118,11 +118,11 @@ const OTP = () => {
       if(localStorage.getItem('from') === 'signup'){
         // localStorage.setItem('basicInfoCompleted', 'true');
         // handleFetchDetails(res.data.id)
-        console.log(`Signup successful. Navigating to KYC verification for user: ${userId}`);
+        // console.log(`Signup successful. Navigating to KYC verification for user: ${userId}`);
         navigate('/digi-kyc', { state: { userId: userId } });
       }
       else{
-        console.log(res.data)
+        // console.log(res.data)
         localStorage.setItem('name',res.data.name)
         if(!res.data.kycverified){
           navigate('/digi-kyc', { state: { userId: userId } });
