@@ -43,22 +43,29 @@ const UnderwritingVerification = () => {
         },
       });
 
+      if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+
       const results = await response.json();
 
       if (results != null) {
-        if (results?.details.includes("Underwriting Already Completed for")) {
-          setVerified(true);
-          toast.success(results.data.details);
-        }
-        else {
+        if (results?.data.underwriting === 'COMPLETED') {
           setVerified(true);
           setTimeout(() => {
             navigate('/admin/my-application')
           }, 2000);
         }
+        else {
+          setVerified(true);
+          toast.success(results.data.details);
+        }
       }
 
     } catch (err) {
+      const errorMessage = err.message || 'Verification failed. Please try again or contact support.';
+      toast.error(errorMessage)
       setError('Verification failed. Please try again or contact support.');
     } finally {
       setLoading(false);
