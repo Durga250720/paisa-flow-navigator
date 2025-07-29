@@ -5,7 +5,7 @@ const axiosInstance = axios.create({
   baseURL: config.baseURL,
 });
 
-axios.interceptors.request.use(
+axiosInstance.interceptors.request.use(
   (config) => {
     const token = sessionStorage.getItem('authToken');
     console.log(sessionStorage.getItem('authToken'))

@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { config } from '../../config/environment';
+import axios from 'axios';
+import axiosInstance from '@/lib/axiosInstance';
 
 interface InitialLoanAmountFormProps {
     initialData: {
@@ -54,27 +56,42 @@ const InitialLoanAmountForm: React.FC<InitialLoanAmountFormProps> = ({ initialDa
         fetchLoanConfig()
     }, []);
 
-    const fetchLoanConfig = async () => {
-        try {
 
-            const response =  await fetch(`${config.baseURL}loan-application/loan-config`,{
-                method:'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            })
+const fetchLoanConfig = async () => {
+    try {
+        const response = await axiosInstance.get(`${config.baseURL}loan-application/loan-config`, {
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
 
-            const res = await response.json();
-            setConfigData(res.data)
-            console.log(res.data)
+        // Axios automatically parses JSON response
+        setConfigData(response.data.data);
+        console.log(response.data.data);
 
-        } catch (error) {
-
+    } catch (error) {
+        let errorMessage = 'Failed to fetch loan configuration.';
+        
+        // Handle axios error response
+        if (error.response) {
+            // Server responded with error status
+            const errorData = error.response.data;
+            errorMessage = errorData?.message || `Request failed with status ${error.response.status}`;
+        } else if (error.request) {
+            // Request was made but no response received
+            errorMessage = 'Network error. Please check your connection.';
+        } else {
+            // Something else happened
+            errorMessage = error.message || errorMessage;
         }
-        finally {
 
-        }
+        console.error('Error fetching loan config:', errorMessage);
+        // You can add toast.error(errorMessage) if you want to show user feedback
+    } finally {
+        // Add any cleanup code here if needed
     }
+};
+
 
     const validateForm = () => {
         const newErrors: Record<string, string> = {};

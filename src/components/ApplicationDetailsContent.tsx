@@ -36,7 +36,7 @@ const ApplicationDetailsContent = () => {
     const fetchLoanApplicationDetails = async () => {
       setLoading(true);
       setError(null);
-      axios.get(`${config.baseURL}loan-application/${id}/details`)
+      axiosInstance.get(`${config.baseURL}loan-application/${id}/details`)
       .then(
         (res:any) => {
           setLoading(false);

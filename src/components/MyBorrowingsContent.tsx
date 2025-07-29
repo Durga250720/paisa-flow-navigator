@@ -4,6 +4,8 @@ import { config } from '../config/environment';
 import { format } from 'date-fns';
 import { ChevronRight } from 'lucide-react'; // Import the icon
 import styles from './styles/MyBorrowingsContent.module.css';
+import axios from 'axios';
+import axiosInstance from '@/lib/axiosInstance';
 
 const MyBorrowingsContent = () => {
   const [borrowings, setBorrowings] = useState<any[]>([]);
@@ -21,53 +23,42 @@ const MyBorrowingsContent = () => {
   // };
 
   useEffect(() => {
-    const fetchBorrowingsData = async (page: number) => {
-      const authToken = localStorage.getItem('authToken');
-      if (!authToken) {
+const fetchBorrowingsData = async (page: number) => {
+    const authToken = localStorage.getItem('authToken');
+    if (!authToken) {
         navigate('/');
         return;
-      }
+    }
 
-      setLoading(true);
-      setError(null);
+    setLoading(true);
+    setError(null);
 
-      try {
-        const response = await fetch(`${config.baseURL}loan-application/${localStorage.getItem('authToken')}/user-borrowings/filter?pageNo=0&size=10`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          // body: JSON.stringify({
-          //   pageNo: page,
-          //   pageSize: ITEMS_PER_PAGE,
-          //   searchText: ""
-          // }),
-        });
+    try {
+        // GET requests don't usually need Content-Type headers
+        const response = await axiosInstance.get(
+            `${config.baseURL}loan-application/${authToken}/user-borrowings/filter?pageNo=0&size=10`
+        );
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: 'Failed to fetch borrowing history.' }));
-          throw new Error(errorData.message || 'Failed to fetch borrowing history.');
-        }
-
-
-        const res = await response.json();
+        const res = response.data;
+        
         if (res.data && Array.isArray(res.data.data)) {
-          setTotalItems(res.data.count || 0);
-          setBorrowings(res.data.data);
-          setHasMorePages(res.data.data.length === ITEMS_PER_PAGE);
+            setTotalItems(res.data.count || 0);
+            setBorrowings(res.data.data);
+            setHasMorePages(res.data.data.length === ITEMS_PER_PAGE);
         } else {
-          setBorrowings([]);
-          setTotalItems(0);
-          setHasMorePages(false);
-          console.error("Unexpected API response structure:", res);
+            setBorrowings([]);
+            setTotalItems(0);
+            setHasMorePages(false);
         }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
+
+    } catch (err) {
+        const errorMessage = err.response?.data?.message || 'Failed to fetch borrowing history.';
+        setError(errorMessage);
         setBorrowings([]);
-      } finally {
+    } finally {
         setLoading(false);
-      }
-    };
+    }
+};
 
     fetchBorrowingsData(currentPage);
   }, [navigate, currentPage, ITEMS_PER_PAGE]);

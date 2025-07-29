@@ -9,6 +9,7 @@ import { format, differenceInDays, isToday, startOfDay } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import axios from 'axios';
 import { useToast } from "@/components/ui/use-toast";
 
 // Icons
@@ -28,6 +29,7 @@ import {
   Link as LinkIcon,
   Wallet
 } from 'lucide-react';
+import axiosInstance from '@/lib/axiosInstance';
 
 // --- MODIFICATION: Add Razorpay to the Window type for TypeScript ---
 declare global {
@@ -204,41 +206,56 @@ const RepaymentView = () => {
 
   const isRazorpayLoaded = useRazorpayScript();
 
-  const fetchRepaymentDetails = useCallback(async () => {
+
+const fetchRepaymentDetails = useCallback(async () => {
     if (!repaymentId) {
-      setError("Repayment ID is missing from the URL.");
-      setLoading(false);
-      return;
+        setError("Repayment ID is missing from the URL.");
+        setLoading(false);
+        return;
     }
+    
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(`${config.baseURL}repayment/${repaymentId}/details`);
+        const response = await axiosInstance.get(`${config.baseURL}repayment/${repaymentId}/details`);
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `API Error: ${response.statusText} (Status: ${response.status})`);
-      }
+        // Axios automatically parses JSON response
+        const result = response.data;
+        
+        if (result.data) {
+            setDetails(result.data);
+        } else {
+            throw new Error('Repayment details not found in the API response.');
+        }
 
-      const result = await response.json();
-      if (result.data) {
-        setDetails(result.data);
-      } else {
-        throw new Error('Repayment details not found in the API response.');
-      }
     } catch (err) {
-      const typedErr = err as Error;
-      setError(typedErr.message);
-      toast({
-        variant: "destructive",
-        title: "API Error",
-        description: typedErr.message || "Could not fetch repayment data.",
-      });
+        let errorMessage = 'Could not fetch repayment data.';
+        
+        // Handle axios error response
+        if (err.response) {
+            // Server responded with error status
+            const errorData = err.response.data;
+            errorMessage = errorData?.message || `API Error: ${err.response.statusText} (Status: ${err.response.status})`;
+        } else if (err.request) {
+            // Request was made but no response received
+            errorMessage = 'Network error. Please check your connection.';
+        } else if (err.message) {
+            // Custom error (like the one we throw above)
+            errorMessage = err.message;
+        }
+
+        setError(errorMessage);
+        toast({
+            variant: "destructive",
+            title: "API Error",
+            description: errorMessage,
+        });
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  }, [repaymentId, toast]);
+}, [repaymentId, toast]);
+
 
   useEffect(() => {
     fetchRepaymentDetails();

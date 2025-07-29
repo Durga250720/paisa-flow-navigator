@@ -5,6 +5,8 @@ import Navbar from '../components/Navbar';
 import { config } from '../config/environment';
 import styles from '../pages-styles/EmployemntInfo.module.css';
 import {toast } from 'react-toastify';
+import axios from 'axios';
+import axiosInstance from '@/lib/axiosInstance';
 
 const BankInfo = () => {
     const [formData, setFormData] = useState({
@@ -96,77 +98,60 @@ const BankInfo = () => {
         if (errors[field]) {
             setErrors(prev => ({ ...prev, [field]: '' }));
         }
-    };
+    };    
 
-    const handleContinue = async () => {
-        if (!validateForm()) return;
+const handleContinue = async () => {
+    if (!validateForm()) return;
 
-        setLoading(true);
-        // try {
-        //     // Simulate API call
-        //     await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            // toast.success("Bank details saved successfully!");
-            // localStorage.setItem('bankInfoCompleted', 'true');
-            // navigate('/income-verification');
-        // } catch (err) {
-        //     const errorMessage = err instanceof Error ? err.message : 'Failed to save bank information. Please try again.';
-        //     setErrors({ submit: errorMessage });
-        //     toast.error(errorMessage);
-        // } finally {
-        //     setLoading(false);
-        // }
-        const authToken = localStorage.getItem('authToken');
+    const authToken = localStorage.getItem('authToken');
 
-        setLoading(true);
-        try {
-            const payload = {
-                borrowerId: authToken,
-                accountNumber: formData.bankAccountNumber,
-                ifscNumber: formData.ifscCode.toUpperCase(),
-                accountHolderName: formData.accountHolderName,
-                bankName: formData.bankName, // Add bankName to payload
-            };
+    setLoading(true);
+    try {
+        const payload = {
+            borrowerId: authToken,
+            accountNumber: formData.bankAccountNumber,
+            ifscNumber: formData.ifscCode.toUpperCase(),
+            accountHolderName: formData.accountHolderName,
+            bankName: formData.bankName,
+        };
 
+        // API call to bank-detail using axios
+        const apiUrl = `${config.baseURL}bank-detail`;
 
-            // API call to bank-detail
-            const apiUrl = `${config.baseURL}bank-detail`;
-
-            const response = await fetch(apiUrl, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-
-                let errorData;
-                try {
-                    errorData = JSON.parse(errorText);
-                } catch {
-                    errorData = { message: 'Failed to save bank information. Please try again.' };
-                }
-
-                throw new Error(errorData.message || 'Failed to save bank information.');
+        const response = await axiosInstance.put(apiUrl, payload, {
+            headers: {
+                'Content-Type': 'application/json',
             }
+        });
 
-            const responseData = await response.json();
-            // console.log('API success response:', responseData);
-            toast.success("Bank details saved successfully!");
-            localStorage.setItem('bankInfoCompleted', 'true');
-            navigate('/approved-loan-amount');
-        } catch (err) {
-            setLoading(false);
-            const errorMessage = err instanceof Error ? err.message : 'Failed to save bank information. Please try again.';
-            setErrors({ submit: errorMessage });
-            toast.error(errorMessage);
-        } finally {
-            setLoading(false);
+        // Axios automatically parses JSON response
+        toast.success("Bank details saved successfully!");
+        localStorage.setItem('bankInfoCompleted', 'true');
+        navigate('/approved-loan-amount');
+
+    } catch (err) {
+        let errorMessage = 'Failed to save bank information. Please try again.';
+        
+        // Handle axios error response
+        if (err.response) {
+            // Server responded with error status
+            const errorData = err.response.data;
+            errorMessage = errorData.message || errorMessage;
+        } else if (err.request) {
+            // Request was made but no response received
+            errorMessage = 'Network error. Please check your connection.';
+        } else {
+            // Something else happened
+            errorMessage = err.message || errorMessage;
         }
-    };
+
+        setErrors({ submit: errorMessage });
+        toast.error(errorMessage);
+    } finally {
+        setLoading(false);
+    }
+};
+
 
     return (
         <div className={styles.container}>

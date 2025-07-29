@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useDigioSDK } from '../hooks/userDigioSDK.tsx';
+import axiosInstance from '@/lib/axiosInstance.ts';
 
 // --- Environment Variable Configuration ---
 // This setup ensures the component automatically uses the correct endpoints
@@ -79,7 +80,7 @@ const DigiKycButton: React.FC<DigiKycButtonProps> = ({ userId, onSuccess, disabl
             const kycInitiateUrl = `${API_BASE_URL}kyc-docs/digi-kyc/${userId}/initiate`;
             console.log(`Initiating KYC via: ${kycInitiateUrl}`);
 
-            const response = await axios.put<ApiResponse>(kycInitiateUrl);
+            const response = await axiosInstance.put<ApiResponse>(kycInitiateUrl);
 
             // 4. Extract data and submit to the Digio SDK
             const digioData = response.data.data;

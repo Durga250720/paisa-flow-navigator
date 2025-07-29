@@ -7,6 +7,8 @@ import { config } from '../config/environment';
 import { toast } from 'react-toastify'; // Assuming this is sonner or react-toastify
 import { ChevronRight, Check } from 'lucide-react';
 import { formatIndianNumber } from '../lib/utils';
+import axios from 'axios';
+import axiosInstance from '@/lib/axiosInstance';
 
 const PreApprovedLoadAmount = () => {
     const [loanAmount, setLoanAmount] = useState<number>(6000); // Min loan amount as initial
@@ -54,25 +56,41 @@ const PreApprovedLoadAmount = () => {
 
     }, [navigate]);
 
+
+
     const fetchConfigData = async () => {
         try {
-            const response = await fetch(config.baseURL + `loan-application/loan-config`, {
-                method: 'GET',
+            const response = await axiosInstance.get(`${config.baseURL}loan-application/loan-config`, {
                 headers: {
                     'Content-Type': 'application/json',
                 }
             });
-            const res = await response.json();
-            setLoanAmount(55000)
-            setLoanConfig(res.data)
+
+            // Axios automatically parses JSON response
+            setLoanAmount(55000);
+            setLoanConfig(response.data.data);
 
         } catch (error) {
-            toast.error(error instanceof Error ? error.message : 'An unexpected error occurred.');
-        }
-        finally {
+            let errorMessage = 'An unexpected error occurred.';
 
+            // Handle axios error response
+            if (error.response) {
+                // Server responded with error status
+                errorMessage = error.response.data?.message || `Request failed with status ${error.response.status}`;
+            } else if (error.request) {
+                // Request was made but no response received
+                errorMessage = 'Network error. Please check your connection.';
+            } else {
+                // Something else happened
+                errorMessage = error.message || errorMessage;
+            }
+
+            toast.error(errorMessage);
+        } finally {
+            // You can add any cleanup code here if needed
         }
-    }
+    };
+
 
     const handleLoanAmountChange = (valueString: string) => {
         if (errors.loanAmount) {
@@ -97,6 +115,7 @@ const PreApprovedLoadAmount = () => {
         }
         setLoanAmount(value);
     };
+
 
     const handleContinue = async () => {
         const newErrors: Record<string, string> = {};
@@ -126,29 +145,39 @@ const PreApprovedLoadAmount = () => {
                 borrowerId: localStorage.getItem('authToken'),
                 loanAmount: loanAmount || 0,
                 purpose: purpose,
-            }
+            };
 
-            const response = await fetch(config.baseURL + `loan-application/apply`, {
-                method: 'POST',
+            const response = await axiosInstance.post(`${config.baseURL}loan-application/apply`, payload, {
                 headers: {
                     'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(payload),
+                }
             });
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ message: 'Failed to submit loan application. Please try again.' }));
-                throw new Error(errorData.message || 'Failed to submit loan application.');
-            }
             navigate('/admin/my-application');
+
         } catch (err: any) {
-            setLoading(false);
-            toast.error(err ? err.message : 'An unexpected error occurred.');
-            setErrors({ submit: err instanceof Error ? err.message : 'An unexpected error occurred.' });
+            let errorMessage = 'An unexpected error occurred.';
+
+            // Handle axios error response
+            if (err.response) {
+                // Server responded with error status
+                const errorData = err.response.data;
+                errorMessage = errorData.message || 'Failed to submit loan application. Please try again.';
+            } else if (err.request) {
+                // Request was made but no response received
+                errorMessage = 'Network error. Please check your connection.';
+            } else {
+                // Something else happened
+                errorMessage = err.message || errorMessage;
+            }
+
+            toast.error(errorMessage);
+            setErrors({ submit: errorMessage });
         } finally {
             setLoading(false);
         }
     };
+
 
     // Fees and total calculation from CreateMyBorrowing.tsx
     const flatFee = configData?.platformFee;

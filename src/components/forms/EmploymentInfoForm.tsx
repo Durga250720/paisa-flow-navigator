@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import OTPInput from '../OTPInput';
 import { config } from '../../config/environment';
+import axios from 'axios';
+import axiosInstance from '@/lib/axiosInstance';
 
 interface EmploymentInfoFormProps {
     initialData: {
@@ -52,6 +54,7 @@ const EmploymentInfoForm: React.FC<EmploymentInfoFormProps> = ({ initialData, on
         return Object.keys(newErrors).length === 0;
     };
 
+
     const handleSendOTP = async () => {
         if (!formData.officialEmail.trim()) {
             setErrors(prev => ({ ...prev, officialEmail: 'Company email is required' }));
@@ -62,43 +65,48 @@ const EmploymentInfoForm: React.FC<EmploymentInfoFormProps> = ({ initialData, on
             return;
         }
 
-
         const emailDomain = formData.officialEmail.split('@')[1]?.toLowerCase();
         const authToken = localStorage.getItem('authToken');
+
         try {
-            // Simulate OTP sending - replace with actual API call
-            const response = await fetch(config.baseURL + 'kyc-docs/company-otp', {
-                method: 'PUT',
+            const payload = {
+                borrowerId: authToken,
+                companyEmail: formData.officialEmail
+            };
+
+            const response = await axiosInstance.put(`${config.baseURL}kyc-docs/company-otp`, payload, {
                 headers: {
                     'Content-Type': 'application/json',
                     'accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    borrowerId: authToken,
-                    companyEmail: formData.officialEmail
-                })
+                }
             });
 
-            if (!response.ok) {
-                let errorMessage = 'Failed to send OTP.';
-                try {
-                    const errorData = await response.json();
-                    if (errorData && errorData.message) errorMessage = errorData.message;
-                } catch (e) {
-                    // Ignore JSON parsing errors
-                }
-                throw new Error(errorMessage);
-            }
-
+            // Axios automatically handles JSON parsing and status codes
             toast.success(`OTP sent to ${formData.officialEmail}`);
-            //   setShowOtpInput(true);
-            //   setResendTimer(30);
             setOtpSent(true);
             toast.success('OTP sent to your company email');
+
         } catch (error) {
-            toast.error('Failed to send OTP. Please try again.');
+            let errorMessage = 'Failed to send OTP. Please try again.';
+
+            // Handle axios error response
+            if (error.response) {
+                // Server responded with error status
+                const errorData = error.response.data;
+                errorMessage = errorData?.message || 'Failed to send OTP.';
+            } else if (error.request) {
+                // Request was made but no response received
+                errorMessage = 'Network error. Please check your connection.';
+            } else {
+                // Something else happened
+                errorMessage = error.message || errorMessage;
+            }
+
+            toast.error(errorMessage);
         }
     };
+
+
 
     const handleVerifyOTP = async () => {
         if (otp.length !== 6) {
@@ -107,39 +115,46 @@ const EmploymentInfoForm: React.FC<EmploymentInfoFormProps> = ({ initialData, on
         }
 
         const authToken = localStorage.getItem('authToken');
+
         try {
-            // Simulate OTP verification - replace with actual API call
-            const response = await fetch(config.baseURL + 'kyc-docs/company-otp-verify', {
-                method: 'PUT',
+            const payload = {
+                borrowerId: authToken,
+                companyEmail: formData.officialEmail,
+                otp: otp
+            };
+
+            const response = await axiosInstance.put(`${config.baseURL}kyc-docs/company-otp-verify`, payload, {
                 headers: {
                     'Content-Type': 'application/json',
                     'accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    borrowerId: authToken,
-                    companyEmail: formData.officialEmail,
-                    otp: otp
-                })
-            });
-            if (!response.ok) {
-                let errorMessage = 'OTP verification failed.';
-                try {
-                    const errorData = await response.json();
-                    if (errorData && errorData.message) {
-                        errorMessage = errorData.message;
-                    }
-                } catch (e) {
-                    // Ignore JSON parsing errors
                 }
-                throw new Error(errorMessage);
-            }
+            });
+
+            // Axios automatically handles JSON parsing and status codes
             setOtpVerified(true);
             setOtpError('');
             toast.success('Email verified successfully');
+
         } catch (error) {
-            setOtpError('Invalid OTP. Please try again.');
+            let errorMessage = 'Invalid OTP. Please try again.';
+
+            // Handle axios error response
+            if (error.response) {
+                // Server responded with error status
+                const errorData = error.response.data;
+                errorMessage = errorData?.message || 'OTP verification failed.';
+            } else if (error.request) {
+                // Request was made but no response received
+                errorMessage = 'Network error. Please check your connection.';
+            } else {
+                // Something else happened
+                errorMessage = error.message || errorMessage;
+            }
+
+            setOtpError(errorMessage);
         }
     };
+
 
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));

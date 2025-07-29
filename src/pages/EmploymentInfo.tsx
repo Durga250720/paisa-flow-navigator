@@ -10,6 +10,7 @@ import { CognitoIdentityClient } from "@aws-sdk/client-cognito-identity";
 import { fromCognitoIdentityPool } from "@aws-sdk/credential-provider-cognito-identity";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import axios from 'axios';
+import axiosInstance from '@/lib/axiosInstance';
 
 const EmploymentInfo = () => {
   const [formData, setFormData] = useState({
@@ -113,7 +114,7 @@ const EmploymentInfo = () => {
     setEmailLoading(true);
     setErrors(prev => ({ ...prev, officialEmail: '', otp: '' }));
 
-    await axios.put(config.baseURL + 'kyc-docs/company-otp', {borrowerId: authToken,companyEmail: formData.officialEmail})
+    await axiosInstance.put(config.baseURL + 'kyc-docs/company-otp', {borrowerId: authToken,companyEmail: formData.officialEmail})
     .then(
       (res:any) => {
         toast.success(`OTP sent to ${formData.officialEmail}`);
@@ -154,7 +155,7 @@ const EmploymentInfo = () => {
     setEmailLoading(true);
     setErrors(prev => ({ ...prev, otp: '' }));
 
-    await axios.put(config.baseURL + 'kyc-docs/company-otp-verify', { borrowerId: authToken,companyEmail: formData.officialEmail,otp: otp})
+    await axiosInstance.put(config.baseURL + 'kyc-docs/company-otp-verify', { borrowerId: authToken,companyEmail: formData.officialEmail,otp: otp})
     .then(
       (res:any) => {
         toast.success("Email verified successfully!");
@@ -255,7 +256,7 @@ const EmploymentInfo = () => {
         employeeCardImageUrl:empIdCardUrl
       };
 
-      await axios.put(config.baseURL + `kyc-docs/${authToken}/update-employment`,payload)
+      await axiosInstance.put(config.baseURL + `kyc-docs/${authToken}/update-employment`,payload)
       .then(
         (res:any) => {
           setLoading(false);

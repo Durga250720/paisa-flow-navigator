@@ -11,6 +11,7 @@ import styles from '../pages-styles/EmployemntInfo.module.css';
 import { toast } from 'react-toastify';
 import { Input } from '../components/ui/input';
 import axios from 'axios';
+import axiosInstance from '@/lib/axiosInstance';
 
 const s3BucketConfig = config.componentImageUploading.S3TransferUtility.Default;
 const cognitoAuthConfig = config.componentImageUploading.CredentialsProvider.CognitoIdentity.Default;
@@ -162,7 +163,7 @@ const handleContinue = async () => {
         })),
       };
       
-      await axios.post(`${config.baseURL}kyc-docs/add`, payslipPayload, {
+      await axiosInstance.post(`${config.baseURL}kyc-docs/add`, payslipPayload, {
         headers: { 
           'Content-Type': 'application/json' 
         }
@@ -180,7 +181,7 @@ const handleContinue = async () => {
         }],
       };
       
-      await axios.post(`${config.baseURL}kyc-docs/add`, bankStatementPayload, {
+      await axiosInstance.post(`${config.baseURL}kyc-docs/add`, bankStatementPayload, {
         headers: { 
           'Content-Type': 'application/json' 
         }

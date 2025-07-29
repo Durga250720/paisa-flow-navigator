@@ -9,6 +9,7 @@ import IncomeVerificationForm from './forms/IncomeVerificationForm';
 import BankInfoForm from './forms/BankInfoForm';
 import InitialLoanAmountForm from './forms/InitialLoanAmountForm';
 import { toTitleCase } from '../lib/utils';
+import axios from 'axios';
 import axiosInstance from '@/lib/axiosInstance';
 
 const MyApplicationContent = () => {
@@ -72,7 +73,6 @@ const MyApplicationContent = () => {
     .catch(
       (err:any) => {
         setLoading(false)
-        console.log(err)
         toast.error(err.message || err.detail)
       }
     )  

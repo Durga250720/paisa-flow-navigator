@@ -4,6 +4,8 @@ import { IdCard, Banknote, UserCheck, BadgeCheck, CheckCircle, User, XCircle, Ey
 import styles from './KYCDocumentsContent.module.css';
 import { config } from '../config/environment'; // Assuming config is here
 import { formatIndianNumber, getCibilColor, toTitleCase } from '../lib/utils';
+import axios from 'axios';
+import axiosInstance from '@/lib/axiosInstance';
 
 // A reusable loader component that matches the theme
 const Loader = ({ text = "Loading..." }: { text?: string }) => (
@@ -59,7 +61,7 @@ const KYCDocumentsContent = () => {
     setIsPreviewOpen(true);
   };
 
-  const handleDocumentPreview = (doc: any) => {    
+  const handleDocumentPreview = (doc: any) => {
     setIsDocPreviewOpen(true);
     setPreviewDocs(doc);
   }
@@ -75,6 +77,7 @@ const KYCDocumentsContent = () => {
   };
 
   useEffect(() => {
+
     const fetchProfileData = async () => {
       const authToken = localStorage.getItem('authToken');
       if (!authToken) {
@@ -86,56 +89,73 @@ const KYCDocumentsContent = () => {
       setError(null);
 
       try {
-        const response = await fetch(`${config.baseURL}borrower/${authToken}/profile`, {
-          method: 'GET',
+        const response = await axiosInstance.get(`${config.baseURL}borrower/${authToken}/profile`, {
           headers: {
             'Content-Type': 'application/json',
-          },
+          }
         });
 
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: 'Failed to fetch profile data.' }));
-          throw new Error(errorData.message || 'Failed to fetch profile data.');
-        }
-        const data = await response.json();
+        // Axios automatically parses JSON response
+        const data = response.data;
 
         // Update documents state based on API response
         setDocuments(prevDocuments => prevDocuments.map(doc => {
           if (doc.type === "PAN Card") {
             return {
-              ...doc, status: data?.data?.kycDocuments?.find(verify => verify.documentType === 'PAN')?.verified ? 'Verified' : 'Unverified',
+              ...doc,
+              status: data?.data?.kycDocuments?.find(verify => verify.documentType === 'PAN')?.verified ? 'Verified' : 'Unverified',
               docUrl: data?.data?.kycDocuments?.find(kyc => kyc.documentType === 'PAN')?.documentUrls || '',
               documentValue: data?.data?.kycDocuments?.find(verify => verify.documentType === 'PAN')?.documentNumber
             };
           } else if (doc.type === "Salary Slips") {
             return {
-              ...doc, status: data?.data?.payslips?.verified ? 'Verified' : 'Unverified',
+              ...doc,
+              status: data?.data?.payslips?.verified ? 'Verified' : 'Unverified',
               docUrl: data?.data?.payslips?.documentUrls,
               documentValue: ''
             };
-          } else if (doc.type === "Overall KYC Status") { // Changed from "KYC Verified"
+          } else if (doc.type === "Overall KYC Status") {
             return {
-              ...doc, status: data?.data?.kycverified ? 'Verified' : 'Unverified', docUrl: '',
+              ...doc,
+              status: data?.data?.kycverified ? 'Verified' : 'Unverified',
+              docUrl: '',
               documentValue: ''
             };
           } else if (doc.type === "Aadhaar Verified") {
             return {
-              ...doc, status: data?.data?.kycDocuments?.find(verify => verify.documentType === 'AADHAAR')?.verified ? 'Verified' : 'Unverified',
+              ...doc,
+              status: data?.data?.kycDocuments?.find(verify => verify.documentType === 'AADHAAR')?.verified ? 'Verified' : 'Unverified',
               docUrl: data?.data?.kycDocuments?.find(kyc => kyc.documentType === 'AADHAAR')?.documentUrls || '',
               documentValue: data?.data?.kycDocuments?.find(verify => verify.documentType === 'AADHAAR')?.documentNumber
             };
           }
           return doc;
-        }));        
+        }));
 
         setProfileData(data.data);
 
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
+        let errorMessage = 'An unexpected error occurred.';
+
+        // Handle axios error response
+        if (err.response) {
+          // Server responded with error status
+          const errorData = err.response.data;
+          errorMessage = errorData?.message || 'Failed to fetch profile data.';
+        } else if (err.request) {
+          // Request was made but no response received
+          errorMessage = 'Network error. Please check your connection.';
+        } else {
+          // Something else happened
+          errorMessage = err.message || errorMessage;
+        }
+
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
     };
+
 
     fetchProfileData();
   }, [navigate]);

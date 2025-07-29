@@ -1,7 +1,9 @@
 // src/components/forms/BankInfoForm.tsx
 import { config } from '@/config/environment';
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { toast } from 'react-toastify';
+import axiosInstance from '@/lib/axiosInstance';
 
 interface BankInfoFormProps {
     initialData: {
@@ -62,14 +64,14 @@ const BankInfoForm: React.FC<BankInfoFormProps> = ({ initialData, onNext, onPrev
 
     const validateForm = () => {
         const newErrors: Record<string, string> = {};
-        if (!formData.bankName) newErrors.bankName = 'Please select your bank name';
-        if (!formData.accountNumber.trim()) newErrors.accountNumber = 'Bank account number is required';
-        else if (formData.accountNumber.length < 9 || formData.accountNumber.length > 18) newErrors.accountNumber = 'Account number should be 9-18 digits';
-        if (!formData.reEnterAccountNumber.trim()) newErrors.reEnterAccountNumber = 'Please re-enter bank account number';
-        else if (formData.accountNumber !== formData.reEnterAccountNumber) newErrors.reEnterAccountNumber = 'Account numbers do not match';
-        if (!formData.ifscCode.trim()) newErrors.ifscCode = 'IFSC code is required';
-        else if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(formData.ifscCode.toUpperCase())) newErrors.ifscCode = 'Please enter a valid IFSC code';
-        if (!formData.accountHolderName.trim()) newErrors.accountHolderName = 'Account holder name is required';
+        // if (!formData.bankName) newErrors.bankName = 'Please select your bank name';
+        // if (!formData.accountNumber.trim()) newErrors.accountNumber = 'Bank account number is required';
+        // else if (formData.accountNumber.length < 9 || formData.accountNumber.length > 18) newErrors.accountNumber = 'Account number should be 9-18 digits';
+        // if (!formData.reEnterAccountNumber.trim()) newErrors.reEnterAccountNumber = 'Please re-enter bank account number';
+        // else if (formData.accountNumber !== formData.reEnterAccountNumber) newErrors.reEnterAccountNumber = 'Account numbers do not match';
+        // if (!formData.ifscCode.trim()) newErrors.ifscCode = 'IFSC code is required';
+        // else if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(formData.ifscCode.toUpperCase())) newErrors.ifscCode = 'Please enter a valid IFSC code';
+        // if (!formData.accountHolderName.trim()) newErrors.accountHolderName = 'Account holder name is required';
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -79,24 +81,43 @@ const BankInfoForm: React.FC<BankInfoFormProps> = ({ initialData, onNext, onPrev
         fetchExistingBankDetails()
     }, [])
 
+
     const fetchExistingBankDetails = async () => {
-        setIsLoading(true)
-        const authToken = localStorage.getItem('authToken')
+        setIsLoading(true);
+        const authToken = localStorage.getItem('authToken');
+
         try {
-            const response = await fetch(`${config.baseURL}bank-detail/${authToken}`, {
-                method: 'GET',
+            const response = await axiosInstance.get(`${config.baseURL}bank-detail/${authToken}`, {
                 headers: {
                     'Content-Type': 'application/json',
-                },
+                }
             });
-            const results = await response.json();
-            setIsBankDetails(results.data)
+
+            // Axios automatically parses JSON response
+            setIsBankDetails(response.data.data);
             setIsLoading(false);
+
         } catch (error) {
-            toast.error(`${error.message}`);
+            let errorMessage = 'Failed to fetch bank details.';
+
+            // Handle axios error response
+            if (error.response) {
+                // Server responded with error status
+                const errorData = error.response.data;
+                errorMessage = errorData?.message || `Request failed with status ${error.response.status}`;
+            } else if (error.request) {
+                // Request was made but no response received
+                errorMessage = 'Network error. Please check your connection.';
+            } else {
+                // Something else happened
+                errorMessage = error.message || errorMessage;
+            }
+
+            toast.error(errorMessage);
             setIsLoading(false);
         }
-    }
+    };
+
 
     const handleInputChange = (field: string, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -105,41 +126,58 @@ const BankInfoForm: React.FC<BankInfoFormProps> = ({ initialData, onNext, onPrev
         }
     };
 
+
     const handleFormSubmit = async () => {
         if (validateForm()) {
-            if(getBankDetails && getBankDetails.length > 0){
+            if (getBankDetails && getBankDetails.length > 0) {
                 const { reEnterAccountNumber, ...dataToSubmit } = formData;
                 onNext(dataToSubmit);
-            }
-            else{
+            } else {
                 const payload = {
                     "borrowerId": localStorage.getItem('authToken'),
                     "bankName": formData.bankName,
                     "accountNumber": formData.accountNumber,
                     "ifscNumber": formData.ifscCode,
                     "accountHolderName": formData.accountHolderName
-                }
+                };
+
                 try {
-                    const response = await fetch(`${config.baseURL}bank-detail`, {
-                        method: 'PUT',
+                    const response = await axiosInstance.put(`${config.baseURL}bank-detail`, payload, {
                         headers: {
                             'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(payload),
+                        }
                     });
-                    const results = await response.json();
-                    if(results != null){
+
+                    // Axios automatically parses JSON response
+                    if (response.data != null) {
                         const { reEnterAccountNumber, ...dataToSubmit } = formData;
                         onNext(dataToSubmit);
                     }
+
                 } catch (error) {
-                    toast.error(`${error.message}`);
+                    let errorMessage = 'Failed to save bank details.';
+
+                    // Handle axios error response
+                    if (error.response) {
+                        // Server responded with error status
+                        const errorData = error.response.data;
+                        errorMessage = errorData?.message || `Request failed with status ${error.response.status}`;
+                    } else if (error.request) {
+                        // Request was made but no response received
+                        errorMessage = 'Network error. Please check your connection.';
+                    } else {
+                        // Something else happened
+                        errorMessage = error.message || errorMessage;
+                    }
+
+                    toast.error(errorMessage);
                 }
             }
         } else {
             toast.error("Please fill all required fields correctly.");
         }
     };
+
 
     const commonInputClass = "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary";
 
