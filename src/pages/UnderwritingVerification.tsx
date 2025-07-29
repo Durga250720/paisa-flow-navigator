@@ -5,6 +5,7 @@ import styles from '../pages-styles/UnderwritingVerification.module.css';
 import { CheckCircle, FileText, AlertCircle } from 'lucide-react';
 import { config } from '@/config/environment';
 import {toast } from 'react-toastify';
+import axiosInstance from '@/lib/axiosInstance';
 
 const UnderwritingVerification = () => {
   const [loading, setLoading] = useState(false);
@@ -36,19 +37,14 @@ const UnderwritingVerification = () => {
 
     try {
       // Simulate API call for verification
-      const response = await fetch(`${config.baseURL}loan-application/${applicationId}/verify-underwriting-mail`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await axiosInstance.get(`${config.baseURL}loan-application/${applicationId}/verify-underwriting-mail`);
 
-      if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-    }
+    //   if (!response.ok) {
+    //   const errorData = await response.json();
+    //   throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    // }
 
-      const results = await response.json();
+      const results = await response.data;
 
       if (results != null) {
         if (results?.data.underwriting === 'COMPLETED') {
