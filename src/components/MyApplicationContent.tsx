@@ -9,6 +9,7 @@ import IncomeVerificationForm from './forms/IncomeVerificationForm';
 import BankInfoForm from './forms/BankInfoForm';
 import InitialLoanAmountForm from './forms/InitialLoanAmountForm';
 import { toTitleCase } from '../lib/utils';
+import axiosInstance from '@/lib/axiosInstance';
 
 const MyApplicationContent = () => {
   const [applicationData, setApplicationData] = useState<any | null>([]);
@@ -61,31 +62,20 @@ const MyApplicationContent = () => {
   const fetchApplications = async () => {
     setLoading(true);
     const authToken = localStorage.getItem('authToken');
-    try {
-
-      const response = await fetch(`${config.baseURL}loan-application/${authToken}/detail`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Failed to fetch loan application details.' }));
-        throw new Error(errorData.message || 'Failed to fetch loan application details.');
+    axiosInstance.get(`${config.baseURL}loan-application/${authToken}/detail`)
+    .then(
+      (res:any) => {
+        setLoading(false)
+        setApplicationData(res.data.data)
       }
-      const result = await response.json();
-      setApplicationData(result.data)
-
-      setLoading(false)
-    } catch (error) {
-
-      setLoading(false)
-    }
-    finally {
-
-      setLoading(false)
-    }
+    )
+    .catch(
+      (err:any) => {
+        setLoading(false)
+        console.log(err)
+        toast.error(err.message || err.detail)
+      }
+    )  
   }
 
   const formatDate = (date) => {
@@ -149,29 +139,21 @@ const MyApplicationContent = () => {
       payloadToSend = { ...payloadToSend, ...finalStepData };
     }
 
-    try {
-      const response = await fetch(`${config.baseURL}loan-application/apply/dashboard`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payloadToSend),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: 'Application submission failed.' }));
-        throw new Error(errorData.message || 'Application submission failed.');
+    axiosInstance.post(`${config.baseURL}loan-application/apply/dashboard`, payloadToSend)
+    .then(
+      (res:any) => {
+        toast.success("Application submitted successfully!");
+        handleCloseApplyModal();
+        fetchApplications(); 
+        setModalLoading(false);
       }
-
-      const result = await response.json();
-      toast.success("Application submitted successfully!");
-      handleCloseApplyModal();
-      fetchApplications(); 
-    } catch (error: any) {
-      toast.error(`Submission Error: ${error.message}`);
-    } finally {
-      setModalLoading(false);
-    }
+    )
+    .catch(
+      (err:any) => {
+        setModalLoading(false);
+        toast.error(err.response.data.message || err.response.data.detail)
+      }
+    )
   };
   // --- End Modal Control Functions ---
 

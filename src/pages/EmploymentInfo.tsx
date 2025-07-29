@@ -9,6 +9,7 @@ import { FileText, Upload, X } from 'lucide-react';
 import { CognitoIdentityClient } from "@aws-sdk/client-cognito-identity";
 import { fromCognitoIdentityPool } from "@aws-sdk/credential-provider-cognito-identity";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import axios from 'axios';
 
 const EmploymentInfo = () => {
   const [formData, setFormData] = useState({
@@ -112,40 +113,22 @@ const EmploymentInfo = () => {
     setEmailLoading(true);
     setErrors(prev => ({ ...prev, officialEmail: '', otp: '' }));
 
-    try {
-      const response = await fetch(config.baseURL + 'kyc-docs/company-otp', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'accept': 'application/json'
-        },
-        body: JSON.stringify({
-          borrowerId: authToken,
-          companyEmail: formData.officialEmail
-        })
-      });
-
-      if (!response.ok) {
-        let errorMessage = 'Failed to send OTP.';
-        try {
-          const errorData = await response.json();
-          if (errorData && errorData.message) errorMessage = errorData.message;
-        } catch (e) {
-          // Ignore JSON parsing errors
-        }
-        throw new Error(errorMessage);
+    await axios.put(config.baseURL + 'kyc-docs/company-otp', {borrowerId: authToken,companyEmail: formData.officialEmail})
+    .then(
+      (res:any) => {
+        toast.success(`OTP sent to ${formData.officialEmail}`);
+        setShowOtpInput(true);
+        setResendTimer(30);
+        setEmailLoading(false);
       }
-
-      toast.success(`OTP sent to ${formData.officialEmail}`);
-      setShowOtpInput(true);
-      setResendTimer(30);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to send OTP.';
-      toast.error(message);
-      setErrors(prev => ({ ...prev, officialEmail: message }));
-    } finally {
-      setEmailLoading(false);
-    }
+    )
+    .catch(
+      (err:any) => {
+        setEmailLoading(false);
+        toast.error(err.response.data.message || err.response.data.detail || 'Failed to send OTP.');
+        setErrors(prev => ({ ...prev, officialEmail: err.response.data.message }));
+      }
+    )
   };
 
   const handleOtpInputChange = (otpValue: string) => {
@@ -171,43 +154,23 @@ const EmploymentInfo = () => {
     setEmailLoading(true);
     setErrors(prev => ({ ...prev, otp: '' }));
 
-    try {
-      const response = await fetch(config.baseURL + 'kyc-docs/company-otp-verify', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'accept': 'application/json'
-        },
-        body: JSON.stringify({
-          borrowerId: authToken,
-          companyEmail: formData.officialEmail,
-          otp: otp
-        })
-      });
-
-      if (!response.ok) {
-        let errorMessage = 'OTP verification failed.';
-        try {
-          const errorData = await response.json();
-          if (errorData && errorData.message) {
-            errorMessage = errorData.message;
-          }
-        } catch (e) {
-          // Ignore JSON parsing errors
-        }
-        throw new Error(errorMessage);
+    await axios.put(config.baseURL + 'kyc-docs/company-otp-verify', { borrowerId: authToken,companyEmail: formData.officialEmail,otp: otp})
+    .then(
+      (res:any) => {
+        toast.success("Email verified successfully!");
+        setIsEmailVerified(true);
+        setShowOtpInput(false);
+        setEmailLoading(false);
       }
-
-      toast.success("Email verified successfully!");
-      setIsEmailVerified(true);
-      setShowOtpInput(false);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'OTP verification failed.';
-      toast.error(message);
-      setErrors(prev => ({ ...prev, otp: message }));
-    } finally {
-      setEmailLoading(false);
-    }
+    )
+    .catch(
+      (err:any) => {
+        setEmailLoading(false);
+        const message = err.response.data.message || err.response.data.detail || 'OTP verification failed.';
+        toast.error(message);
+        setErrors(prev => ({ ...prev, otp: message }));
+      }
+    )
   };
 
   const s3BucketConfig = config.componentImageUploading.S3TransferUtility.Default;
@@ -255,14 +218,12 @@ const EmploymentInfo = () => {
                       const url = `https://${s3BucketConfig.Bucket}.s3.${s3BucketConfig.Region}.amazonaws.com/${key}`;
                       resolve({ fileName: file.name, url, type: pathPrefix });
                   } catch (error) {
-                      console.error(`Error uploading ${file.name} to S3:`, error);
                       const awsError = error as Error;
                       reject(new Error(`S3 Upload Failed for ${file.name}: ${awsError.message}`));
                   }
               };
   
               reader.onerror = (error) => {
-                  console.error(`FileReader error for ${file.name}:`, error);
                   reject(new Error(`Failed to read file ${file.name}`));
               };
   
@@ -294,37 +255,25 @@ const EmploymentInfo = () => {
         employeeCardImageUrl:empIdCardUrl
       };
 
-      const response = await fetch(config.baseURL + `kyc-docs/${authToken}/update-employment`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(payload),
+      await axios.put(config.baseURL + `kyc-docs/${authToken}/update-employment`,payload)
+      .then(
+        (res:any) => {
+          setLoading(false);
+          toast.success("Employment information saved successfully!");
+          localStorage.setItem('employmentInfoCompleted', 'true');
+          navigate('/income-verification');
         }
-      );
-
-      if (!response.ok) {
-        let errorMessage = 'Failed to save employment information. Please try again.';
-        try {
-          const errorData = await response.json();
-          if (errorData && errorData.message) errorMessage = errorData.message;
-        } catch (e) {
-          // ignore
+      )
+      .catch(
+        (err:any) => {
+          setLoading(false);
+          const message = err.response.data.message || err.response.data.detail;
+          setErrors({ submit: message });
+          toast.error(message);
         }
-        throw new Error(errorMessage);
-      }
-
-      toast.success("Employment information saved successfully!");
-      localStorage.setItem('employmentInfoCompleted', 'true');
-      navigate('/income-verification');
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'An unexpected error occurred.';
-      setErrors({ submit: message });
-      toast.error(message);
-    } finally {
-      setLoading(false);
+      )
     }
+    catch{}
   };
 
   const handleEmpIdUpload = (selectedFile: File | null) => {

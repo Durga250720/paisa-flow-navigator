@@ -114,6 +114,7 @@ const OTP = () => {
 
       localStorage.setItem('authToken', res.data.id); // Assuming res.data.id is the borrowerId/authToken
       localStorage.setItem('token',res.data.token);
+      sessionStorage.setItem('authToken',res.data.token)
       localStorage.setItem('otpVerified', 'true');
       if(localStorage.getItem('from') === 'signup'){
         // localStorage.setItem('basicInfoCompleted', 'true');

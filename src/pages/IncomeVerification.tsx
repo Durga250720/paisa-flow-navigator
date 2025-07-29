@@ -10,6 +10,7 @@ import { fromCognitoIdentityPool } from "@aws-sdk/credential-provider-cognito-id
 import styles from '../pages-styles/EmployemntInfo.module.css';
 import { toast } from 'react-toastify';
 import { Input } from '../components/ui/input';
+import axios from 'axios';
 
 const s3BucketConfig = config.componentImageUploading.S3TransferUtility.Default;
 const cognitoAuthConfig = config.componentImageUploading.CredentialsProvider.CognitoIdentity.Default;
@@ -128,73 +129,74 @@ const IncomeVerification = () => {
     });
   }, []);
 
-  const handleContinue = async () => {
-    if (!validateFiles()) return;
+const handleContinue = async () => {
+  if (!validateFiles()) return;
 
-    const borrowerId = localStorage.getItem('authToken');
-    const userName = localStorage.getItem('name')?.replace(/[^a-zA-Z0-9_-]/g, '_');
+  const borrowerId = localStorage.getItem('authToken');
+  const userName = localStorage.getItem('name')?.replace(/[^a-zA-Z0-9_-]/g, '_');
 
-    if (!borrowerId || !userName) {
-      toast.error("Login required.");
-      return navigate('/');
+  if (!borrowerId || !userName) {
+    toast.error("Login required.");
+    return navigate('/');
+  }
+
+  setLoading(true);
+  try {
+    const uploadPromises = [
+      ...files.payslips.map(f => uploadFileToS3(f, 'payslips', userName)),
+      ...(files.bankStatement ? [uploadFileToS3(files.bankStatement, 'bankStatements', userName)] : []),
+    ];
+    const uploaded = await Promise.all(uploadPromises);
+
+    const payslipDocs = uploaded.filter(d => d.type === 'payslips');
+    const bankDoc = uploaded.find(d => d.type === 'bankStatements');
+
+    // Payslip API with axios
+    if (payslipDocs.length) {
+      const payslipPayload = {
+        borrowerId,
+        documentType: 'SALARY_SLIP',
+        documents: payslipDocs.map((doc, index) => ({
+          url: doc.url,
+          passCode: payslipAccessCodes[index] || '',
+        })),
+      };
+      
+      await axios.post(`${config.baseURL}kyc-docs/add`, payslipPayload, {
+        headers: { 
+          'Content-Type': 'application/json' 
+        }
+      });
     }
 
-    setLoading(true);
-    try {
-      const uploadPromises = [
-        ...files.payslips.map(f => uploadFileToS3(f, 'payslips', userName)),
-        ...(files.bankStatement ? [uploadFileToS3(files.bankStatement, 'bankStatements', userName)] : []),
-      ];
-      const uploaded = await Promise.all(uploadPromises);
-
-      const payslipDocs = uploaded.filter(d => d.type === 'payslips');
-      const bankDoc = uploaded.find(d => d.type === 'bankStatements');
-
-      // Payslip API
-      if (payslipDocs.length) {
-        const payslipPayload = {
-          borrowerId,
-          documentType: 'SALARY_SLIP',
-          documents: payslipDocs.map((doc, index) => ({
-            url: doc.url,
-            passCode: payslipAccessCodes[index] || '',
-          })),
-        };
-
-        await fetch(`${config.baseURL}kyc-docs/add`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payslipPayload),
-        });
-      }
-
-      // Bank Statement API
-      if (bankDoc) {
-        const bankStatementPayload = {
-          borrowerId,
-          documentType: 'BANK_STATEMENT',
-          documents: [{
-            url: bankDoc.url,
-            passCode: bankStatementAccessCode || '',
-          }],
-        };
-        await fetch(`${config.baseURL}kyc-docs/add`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(bankStatementPayload),
-        });
-      }
-
-      toast.success('Documents uploaded successfully!');
-      localStorage.setItem('incomeVerificationCompleted', 'true');
-      navigate('/bank-info');
-    } catch (err) {
-      toast.error('Upload failed. Try again.');
-      console.error(err);
-    } finally {
-      setLoading(false);
+    // Bank Statement API with axios
+    if (bankDoc) {
+      const bankStatementPayload = {
+        borrowerId,
+        documentType: 'BANK_STATEMENT',
+        documents: [{
+          url: bankDoc.url,
+          passCode: bankStatementAccessCode || '',
+        }],
+      };
+      
+      await axios.post(`${config.baseURL}kyc-docs/add`, bankStatementPayload, {
+        headers: { 
+          'Content-Type': 'application/json' 
+        }
+      });
     }
-  };
+
+    toast.success('Documents uploaded successfully!');
+    localStorage.setItem('incomeVerificationCompleted', 'true');
+    navigate('/bank-info');
+  } catch (err) {
+    toast.error('Upload failed. Try again.');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // Memoized PayslipItem component to prevent unnecessary re-renders
   const PayslipItem = useMemo(() => {

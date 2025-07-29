@@ -10,6 +10,8 @@ import { StatusBadge } from './ApplicationStatus/StatusBadge';
 import { StatusMessage } from './ApplicationStatus/StatusMessage';
 import { useApplicationSteps } from '../hooks/useApplicationSteps';
 import { formatIndianNumber, formatDate } from '../lib/utils';
+import axiosInstance from '@/lib/axiosInstance';
+import axios from 'axios';
 
 const ApplicationDetailsContent = () => {
   const [applicationData, setApplicationData] = useState<any | null>(null);
@@ -34,27 +36,19 @@ const ApplicationDetailsContent = () => {
     const fetchLoanApplicationDetails = async () => {
       setLoading(true);
       setError(null);
-      try {
-        const response = await fetch(`${config.baseURL}loan-application/${id}/details`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: 'Failed to fetch loan application details.' }));
-          throw new Error(errorData.message || 'Failed to fetch loan application details.');
+      axios.get(`${config.baseURL}loan-application/${id}/details`)
+      .then(
+        (res:any) => {
+          setLoading(false);
+          setApplicationData(res.data.data);
         }
-        const result = await response.json();
-        setApplicationData(result.data);
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred.';
-        setError(errorMessage);
-        toast.error(errorMessage);
-      } finally {
-        setLoading(false);
-      }
+      )
+      .catch(
+        (err:any) => {
+          setLoading(false);
+          toast.error(err.response.data.message || err.response.data.detail)
+        }
+      )
     };
 
     fetchLoanApplicationDetails();

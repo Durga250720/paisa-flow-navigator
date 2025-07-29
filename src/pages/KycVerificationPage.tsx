@@ -14,7 +14,7 @@ const KycVerificationPage: React.FC = () => {
 
     // Handler for successful KYC verification
     const handleKycSuccess = (digioDocId: string) => {
-        console.log(`KYC process successful with document ID: ${digioDocId}`);
+        // console.log(`KYC process successful with document ID: ${digioDocId}`);
         // On successful KYC, navigate the user to the KYCVerified success screen
         navigate('/kyc-verified');
     };
