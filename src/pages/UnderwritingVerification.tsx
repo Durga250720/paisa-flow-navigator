@@ -31,37 +31,28 @@ const UnderwritingVerification = () => {
   }, [verificationToken, applicationId, navigate]);
 
   const handleVerify = async () => {
-
     setLoading(true);
     setError('');
 
     try {
-      // Simulate API call for verification
-      const response = await axiosInstance.get(`${config.baseURL}loan-application/${applicationId}/verify-underwriting-mail`);
-
-    //   if (!response.ok) {
-    //   const errorData = await response.json();
-    //   throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-    // }
-
-      const results = await response.data;
+      const response = await axiosInstance.get(`/loan-application/${applicationId}/verify-underwriting-mail`);
+      const results = response.data;
 
       if (results != null) {
         if (results?.data.underwriting === 'COMPLETED') {
           setVerified(true);
           setTimeout(() => {
-            navigate('/admin/my-application')
+            navigate('/admin/my-application');
           }, 2000);
-        }
-        else {
+        } else {
           setVerified(true);
           toast.success(results.data.details);
         }
       }
 
     } catch (err) {
-      const errorMessage = err.message || 'Verification failed. Please try again or contact support.';
-      toast.error(errorMessage)
+      const errorMessage = err?.response?.data?.message || err.message || 'Verification failed. Please try again or contact support.';
+      toast.error(errorMessage);
       setError('Verification failed. Please try again or contact support.');
     } finally {
       setLoading(false);
