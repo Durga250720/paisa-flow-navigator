@@ -339,37 +339,33 @@ const fetchRepaymentDetails = useCallback(async () => {
 
   const handlePayNow = async () => {
     if (!details || details.pendingAmount <= 0) {
-      toast({ variant: "default", title: "No Pending Amount", description: "This repayment has no pending amount to be paid." });
+      toast({
+        variant: "default",
+        title: "No Pending Amount",
+        description: "This repayment has no pending amount to be paid.",
+      });
       return;
     }
     if (!isRazorpayLoaded) {
-      toast({ title: "Payment Gateway Loading", description: "Please wait a moment and try again." });
+      toast({
+        title: "Payment Gateway Loading",
+        description: "Please wait a moment and try again.",
+      });
       return;
     }
     if (isPaying) return;
 
     setIsPaying(true);
+
     try {
-      // Create a Razorpay Order from your backend
-      const orderResponse = await fetch(`${config.baseURL}payment/razorpay/create-order`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'accept': '*/*' },
-        body: JSON.stringify({
-          amount: details.pendingAmount,
-          repaymentId: details.id,
-        }),
+      const orderResponse = await axiosInstance.post("payment/razorpay/create-order", {
+        amount: details.pendingAmount,
+        repaymentId: details.id,
       });
 
-      if (!orderResponse.ok) {
-        const errorData = await orderResponse.json().catch(() => ({}));
-        throw new Error(errorData.message || 'Failed to create payment order.');
-      }
-
-      const result = await orderResponse.json();
-      const orderData = result.data;
+      const orderData = orderResponse.data.data;
       const CALLBACK_BASE_URL = import.meta.env.VITE_CALLBACK_BASE_URL;
 
-      // Configure Razorpay options
       const options = {
         key: "rzp_test_IoCHSYZRCKWYsq", // Replace with your actual key
         amount: orderData.amount,
@@ -378,23 +374,14 @@ const fetchRepaymentDetails = useCallback(async () => {
         description: `Repayment for Loan ${details.loanDisplayId}`,
         image: "/lovable-uploads/53f43cc9-5dc2-4799-81fd-84c9577132eb.png",
         order_id: orderData.id,
-        // callback_url:window.location.origin+`/admin/payment-success?orderId=${orderData.id}`,
-        callback_url:`${CALLBACK_BASE_URL}/admin/payment-success?orderId=${orderData.id}`,
+        callback_url: `${CALLBACK_BASE_URL}/admin/payment-success?orderId=${orderData.id}`,
         handler: async function (response: RazorpayResponse) {
           try {
-            const verificationResponse = await fetch(`${config.baseURL}payment/razorpay/verify-payment`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                razorpayOrderId: response.razorpay_order_id,
-                razorpayPaymentId: response.razorpay_payment_id,
-                razorpaySignature: response.razorpay_signature,
-              }),
+            await axiosInstance.post("payment/razorpay/verify-payment", {
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
             });
-
-            if (!verificationResponse.ok) {
-              throw new Error('Payment verification failed on the server.');
-            }
 
             toast({
               variant: "default",
@@ -402,7 +389,8 @@ const fetchRepaymentDetails = useCallback(async () => {
               title: "Payment Successful!",
               description: "Your payment has been verified and recorded.",
             });
-            navigate(window.location.origin+`/admin/payment-status?orderId=${orderData.id}&status=SUCCESS`)
+
+            navigate(`${window.location.origin}/admin/payment-status?orderId=${orderData.id}&status=SUCCESS`);
             fetchRepaymentDetails();
           } catch (error) {
             const typedErr = error as Error;
@@ -426,16 +414,16 @@ const fetchRepaymentDetails = useCallback(async () => {
           color: "#3B82F6",
         },
         modal: {
-          ondismiss: function() {
+          ondismiss: function () {
             setIsPaying(false);
-          }
-        }
+          },
+        },
       };
 
       const paymentObject = new window.Razorpay(options);
       paymentObject.open();
-      paymentObject.on('payment.failed', function (response) {
-        console.error('Payment Failed:', response.error);
+      paymentObject.on("payment.failed", function (response) {
+        console.error("Payment Failed:", response.error);
         toast({
           variant: "destructive",
           title: "Payment Failed",
@@ -454,6 +442,7 @@ const fetchRepaymentDetails = useCallback(async () => {
       setIsPaying(false);
     }
   };
+
 
 
   if (loading) {
