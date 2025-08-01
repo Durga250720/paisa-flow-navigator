@@ -342,17 +342,19 @@ const fetchRepaymentDetails = useCallback(async () => {
       toast({
         variant: "default",
         title: "No Pending Amount",
-        description: "This repayment has no pending amount to be paid.",
+        description: "You have no outstanding dues for this repayment.",
       });
       return;
     }
+
     if (!isRazorpayLoaded) {
       toast({
         title: "Payment Gateway Loading",
-        description: "Please wait a moment and try again.",
+        description: "Please wait a moment for Razorpay to initialize.",
       });
       return;
     }
+
     if (isPaying) return;
 
     setIsPaying(true);
@@ -367,38 +369,56 @@ const fetchRepaymentDetails = useCallback(async () => {
       const CALLBACK_BASE_URL = import.meta.env.VITE_CALLBACK_BASE_URL;
 
       const options = {
-        key: "rzp_test_IoCHSYZRCKWYsq", // Replace with your actual key
+        key: "rzp_test_IoCHSYZRCKWYsq",
         amount: orderData.amount,
         currency: orderData.currency,
         name: "Paisa108",
         description: `Repayment for Loan ${details.loanDisplayId}`,
         image: "/lovable-uploads/53f43cc9-5dc2-4799-81fd-84c9577132eb.png",
         order_id: orderData.id,
-        callback_url: `${CALLBACK_BASE_URL}/admin/payment-success?orderId=${orderData.id}`,
         handler: async function (response: RazorpayResponse) {
           try {
-            await axiosInstance.post("payment/razorpay/verify-payment", {
+            const res = await axiosInstance.post("payment/razorpay/verify-payment", {
               razorpayOrderId: response.razorpay_order_id,
               razorpayPaymentId: response.razorpay_payment_id,
               razorpaySignature: response.razorpay_signature,
             });
 
-            toast({
-              variant: "default",
-              className: "bg-green-100 text-green-800",
-              title: "Payment Successful!",
-              description: "Your payment has been verified and recorded.",
-            });
+            const data = res.data?.data;
 
-            navigate(`${window.location.origin}/admin/payment-status?orderId=${orderData.id}&status=SUCCESS`);
-            fetchRepaymentDetails();
+            if (data?.status === "paid") {
+              toast({
+                variant: "default",
+                className: "bg-green-100 text-green-800",
+                title: "Payment Confirmed ✅",
+                description: "Your payment was successfully received. Thank you!",
+              });
+              fetchRepaymentDetails(); // Reflects paid state
+            } else {
+              toast({
+                variant: "default",
+                className: "bg-yellow-100 text-yellow-800",
+                title: "Payment Received ⏳",
+                description:
+                    "Your payment has been verified. It will be confirmed shortly. Please check again in a few seconds.",
+              });
+
+              setTimeout(() => {
+                fetchRepaymentDetails();
+              }, 3000);
+            }
+
           } catch (error) {
             const typedErr = error as Error;
             toast({
               variant: "destructive",
-              title: "Verification Failed",
-              description: typedErr.message || "Could not verify your payment. Please contact support.",
+              title: "Verification Failed ❌",
+              description:
+                  typedErr.message ||
+                  "We couldn't confirm your payment. Please contact support if money has been deducted.",
             });
+          } finally {
+            setIsPaying(false);
           }
         },
         prefill: {
@@ -422,11 +442,12 @@ const fetchRepaymentDetails = useCallback(async () => {
 
       const paymentObject = new window.Razorpay(options);
       paymentObject.open();
+
       paymentObject.on("payment.failed", function (response) {
         console.error("Payment Failed:", response.error);
         toast({
           variant: "destructive",
-          title: "Payment Failed",
+          title: "Payment Failed ❌",
           description: response.error.description || "Your payment could not be processed.",
         });
         setIsPaying(false);
@@ -437,11 +458,12 @@ const fetchRepaymentDetails = useCallback(async () => {
       toast({
         variant: "destructive",
         title: "Payment Error",
-        description: typedErr.message || "An unexpected error occurred.",
+        description: typedErr.message || "An unexpected error occurred while processing your payment.",
       });
       setIsPaying(false);
     }
   };
+
 
 
 
