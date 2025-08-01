@@ -25,7 +25,9 @@ axiosInstance.interceptors.response.use(
             sessionStorage.clear();
             localStorage.clear();
             toast.info("Session Expired! Please Login Again")
-            window.location.replace('/');
+            setTimeout(() => {
+                window.location.replace('/');
+            }, 3000);
         }
         return Promise.reject(error);
     }
