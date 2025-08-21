@@ -40,9 +40,9 @@ const UnderwritingVerification = () => {
       if (!applicationId) return;
       setDataLoading(true);
       try {
-        const response = await axiosInstance.get(`/loan-application/${applicationId}/details`);
+        const response = await axiosInstance.get(`/api/auth/${applicationId}/details`);
         setApplicationData(response.data.data);
-      } catch (err: any) {
+      } catch (err) {
         const errorMessage = err?.response?.data?.message || 'Failed to load application details.';
         toast.error(errorMessage);
         setError('Could not load application details. Please try again later.');
