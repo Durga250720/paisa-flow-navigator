@@ -24,11 +24,11 @@
 }
 
 .rightPanel {
-  @apply w-full lg:w-1/2 flex items-center justify-center;
+  @apply w-full lg:w-1/2 flex justify-center overflow-y-auto;
 }
 
 .formWrapper {
-  @apply w-full max-w-lg flex lg:bg-white h-[85%] flex-col lg:p-8 lg:shadow-lg lg:rounded-lg justify-center;
+  @apply w-full max-w-lg flex lg:bg-white h-auto flex-col lg:p-8 lg:shadow-lg lg:rounded-lg overflow-y-scroll;
 }
 
 .innerContainer {
@@ -61,14 +61,6 @@
 
 .description {
   @apply text-sm text-gray-600 mt-4;
-}
-
-.errorContainer {
-  @apply flex items-center justify-center bg-red-50 border border-red-200 rounded-lg p-3 text-red-700;
-}
-
-.errorText {
-  @apply text-sm;
 }
 
 .infoCard {
@@ -105,4 +97,75 @@
 
 .verificationGif {
   @apply w-16 h-16 lg:w-20 lg:h-20;
+}
+
+.detailsSection {
+  width: 100%;
+  border: 1px solid #e5e7eb; /* gray-200 */
+  border-radius: 0.75rem; /* 12px */
+  padding: 1rem; /* 16px */
+  margin-top: 1.5rem; /* 24px */
+  margin-bottom: 1.5rem; /* 24px */
+  background-color: #f9fafb; /* gray-50 */
+}
+
+.detailsTitle {
+  font-size: 1rem; /* 16px */
+  font-weight: 600;
+  color: #4b5563; /* gray-600 */
+  margin-bottom: 1rem; /* 16px */
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.detailItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem; /* 14px */
+  color: #6b7280; /* gray-500 */
+  padding: 0.75rem 0; /* 12px */
+}
+
+.detailItem:not(:last-child) {
+  border-bottom: 1px dashed #e5e7eb;
+}
+
+.detailItem strong {
+  font-weight: 600;
+  color: #1f2937; /* gray-800 */
+}
+
+.totalRepayment {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem; /* 16px */
+  font-weight: 600;
+  color: #059669; /* green-600 */
+  padding-top: 1rem; /* 16px */
+  margin-top: 0.5rem;
+  border-top: 1px solid #d1d5db; /* gray-300 */
+}
+
+.totalRepayment strong {
+  font-size: 1.125rem; /* 18px */
+}
+
+/* Consolidated and corrected error styles */
+.errorContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fef2f2; /* red-50 */
+  color: #b91c1c; /* red-700 */
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #fecaca; /* red-200 */
+  margin: 1.5rem 0;
+  font-size: 0.875rem;
+}
+
+.errorText {
+  margin-left: 0.5rem;
 }
