@@ -25,34 +25,31 @@ const UnderwritingVerification = () => {
   const applicationId = searchParams.get('appId');
 
   useEffect(() => {
-    // Redirect if required params are missing
-    if (!verificationToken || !applicationId) {
-      navigate('/404', { replace: true });
-      return;
-    }
+  if (!verificationToken || !applicationId) {
+    navigate('/404', { replace: true });
+    return;
+  }
 
-    if (verificationToken === 'COMPLETED') {
-      setVerified(true);
-    }
+  if (verificationToken === 'COMPLETED') {
+    setVerified(true);
+  }
 
-    // Fetch application details to show for review
-    const fetchDetails = async () => {
-      if (!applicationId) return;
+  const fetchDetails = async () => {
+    try {
       setDataLoading(true);
-      try {
-        const response = await axiosInstance.get(`/api/auth/${applicationId}/details`);
-        setApplicationData(response.data.data);
-      } catch (err) {
-        const errorMessage = err?.response?.data?.message || 'Failed to load application details.';
-        toast.error(errorMessage);
-        setError('Could not load application details. Please try again later.');
-      } finally {
-        setDataLoading(false);
-      }
-    };
+      const response = await axiosInstance.get(`/api/auth/${applicationId}/details`);
+      setApplicationData(response.data.data);
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Failed to load application details.');
+      setError('Could not load application details. Please try again later.');
+    } finally {
+      setDataLoading(false);
+    }
+  };
 
-    fetchDetails();
-  }, [verificationToken, applicationId, navigate]);
+  fetchDetails();
+}, [verificationToken, applicationId, navigate]);
+
 
   const handleVerify = async () => {
     setLoading(true);
