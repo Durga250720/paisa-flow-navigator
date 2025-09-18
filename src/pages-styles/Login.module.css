@@ -1,18 +1,21 @@
 .container {
-  @apply min-h-screen bg-white bg-gray-50;
+  @apply min-h-screen bg-gray-50;
   height: calc(100vh - 0px);
 }
 
 .navbarWrapper {
-    height: 9%;
+  height: 9%;
+}
+
+.mainContainer {
+  @apply flex h-[calc(100%-9%)] p-8;
 }
 
 .leftPanel {
   @apply hidden lg:flex lg:w-1/2 items-center justify-center;
-}
-
-.mainContainer{
-     @apply flex h-[calc(100%-9%)] p-8;
+  opacity: 0;
+  transform: translateX(-50px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
 }
 
 .imageContainer {
@@ -25,26 +28,22 @@
 
 .rightPanel {
   @apply w-full lg:w-1/2 flex items-center justify-center;
+  opacity: 0;
+  transform: translateX(50px);
+  transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+  transition-delay: 0.2s;
 }
 
-.formWrapper {
-  @apply w-full max-w-md flex lg:bg-white h-[85%] flex-col lg:p-7 flex-col justify-center;
+.loginFormWrapper {
+  @apply w-full max-w-md flex lg:bg-white h-auto flex-col lg:p-7 justify-center;
 }
 
-.loginFormWrapper{
-  @apply w-full max-w-md flex lg:bg-white h-auto flex-col lg:p-7 flex-col justify-center;
-}
 .heading {
   @apply text-2xl font-normal mb-8 text-center;
 }
 
-.formFieldsContainer {
-  @apply space-y-6;
-}
-
 .fieldGroup {
-  /* This div wraps a label, input, and error message.
-     It didn't have specific classes before, but it's good for structure. */
+  /* Wrapper for label, input, and error message */
 }
 
 .label {
@@ -71,10 +70,125 @@
   @apply flex items-center justify-center text-sm text-gray-600 text-[var(--text-3)];
 }
 
-.secureInfoDot {
-  @apply w-2 h-2 bg-green-500 rounded-full mr-2;
+.dontHaveAccount {
+  @apply text-sm mt-3 text-center text-gray-600;
 }
 
-.dontHaveAccount{
-  @apply text-sm mt-3 text-center text-gray-600
+/* === Accordion Styles === */
+.accordionContainer {
+  width: 100%;
+  border: 1px solid #e5e7eb; /* light gray border */
+  border-radius: 0.5rem;
+  overflow: hidden; /* Ensures child border-radius looks clean */
+}
+
+.accordionItem {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.accordionItem:last-child {
+  border-bottom: none;
+}
+
+.accordionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  font-size: 1rem; /* 16px */
+  font-weight: 600;
+  text-align: left;
+  color: #1f2937; /* gray-800 */
+  background-color: #fff;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: background-color 0.2s ease;
+}
+
+.accordionHeader:hover {
+  background-color: #f9fafb; /* very light gray */
+}
+
+.accordionIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  transition: transform 0.3s ease;
+  color: #4f46e5; /* primary color */
+}
+
+.accordionIcon.open {
+  transform: rotate(180deg);
+}
+
+/* --- Accordion Content with Animation --- */
+.accordionContent {
+  max-height: 0;
+  overflow: hidden;
+  padding: 0 1rem; /* No vertical padding when closed */
+  background-color: #f9fafb;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #4b5563;
+  /* Smooth transition for height and padding */
+  transition: max-height 0.4s ease-in-out, padding-top 0.4s ease-in-out, padding-bottom 0.4s ease-in-out;
+}
+
+/* This class is added via React to open the content */
+.accordionContent.open {
+  max-height: 500px; /* A value larger than any expected content height */
+  padding: 0.5rem 1rem 1.25rem 1rem; /* Restore vertical padding when open */
+}
+
+/* === List Styles (Used inside Accordion) === */
+.detailsList {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.detailsList > li {
+  position: relative;
+  padding-left: 1.5rem; /* Space for the bullet */
+  margin-bottom: 0.5rem;
+}
+
+.detailsList > li:last-child {
+  margin-bottom: 0;
+}
+
+.detailsList > li::before {
+  content: '•';
+  position: absolute;
+  left: 0.5rem;
+  color: #4f46e5; /* Your primary color */
+  font-weight: bold;
+}
+
+.nestedList {
+  list-style-type: none;
+  padding-left: 1.25rem; /* Indent nested list */
+  margin-top: 0.5rem;
+}
+
+.nestedList li {
+  position: relative;
+  padding-left: 1.25rem;
+  margin-bottom: 0.35rem;
+}
+
+.nestedList li:last-child {
+  margin-bottom: 0;
+}
+
+.nestedList li::before {
+  content: '◦'; /* Open circle for nested items */
+  position: absolute;
+  left: 0.25rem;
+  color: #6366f1; /* Lighter primary color */
+}
+
+.visible {
+  opacity: 1;
+  transform: none;
 }

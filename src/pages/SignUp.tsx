@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { config } from '../config/environment';
 import styles from '../pages-styles/Login.module.css';
-import { CheckCircle } from 'lucide-react';
-import {toast } from 'react-toastify';
+import { CheckCircle, ChevronDown } from 'lucide-react';
+import { toast } from 'react-toastify';
 
 const SignUp = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -12,19 +12,20 @@ const SignUp = () => {
   const [uMail, setMailId] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [openSection, setOpenSection] = useState<string | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false); // State for load animation
   const navigate = useNavigate();
 
   useEffect(() => {
     const authToken = localStorage.getItem('authToken');
-    const phoneNumber = localStorage.getItem('phoneNumber');
-
-    if(phoneNumber){
-      setPhoneNumber(phoneNumber);
-    }
-
     if (authToken) {
       navigate('/admin/my-application');
       return;
+    }
+
+    const storedPhoneNumber = localStorage.getItem('phoneNumber');
+    if (storedPhoneNumber) {
+      setPhoneNumber(storedPhoneNumber);
     }
 
     localStorage.removeItem('authToken');
@@ -33,6 +34,14 @@ const SignUp = () => {
     localStorage.removeItem('aadhaarVerified');
     localStorage.removeItem('kycVerified');
   }, [navigate]);
+
+  // Effect for the entry animation
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoaded(true);
+    }, 100); // Small delay to ensure animation triggers
+    return () => clearTimeout(timer);
+  }, []);
 
   const validatePhoneNumber = (phone: string) => {
     const phoneRegex = /^[6-9]\d{9}$/;
@@ -44,27 +53,18 @@ const SignUp = () => {
     return emailRegex.test(email);
   };
 
-
   const handleGetOTP = async () => {
     const newErrors: Record<string, string> = {};
 
-    if (!phoneNumber) {
-      newErrors.phoneNumber = 'Please enter your phone number';
-    }
-
-    if (!uName) {
-      newErrors.name = 'Please enter your name';
-    }
-
-    if (!uMail) {
-      newErrors.uMail = 'Please enter E-mail ID';
-    }
+    if (!uName) newErrors.name = 'Please enter your name';
+    if (!phoneNumber) newErrors.phoneNumber = 'Please enter your phone number';
+    if (!uMail) newErrors.uMail = 'Please enter E-mail ID';
 
     if (phoneNumber && !validatePhoneNumber(phoneNumber)) {
       newErrors.phoneNumber = 'Please enter a valid 10-digit mobile number';
     }
 
-    if(uMail && !validateEmail(uMail)){
+    if (uMail && !validateEmail(uMail)) {
       newErrors.uMail = 'Please enter a valid E-mail ID';
     }
 
@@ -73,9 +73,7 @@ const SignUp = () => {
       return;
     }
 
-    // Clear errors if validation passes
     setErrors({});
-
     setLoading(true);
 
     try {
@@ -87,8 +85,8 @@ const SignUp = () => {
         body: JSON.stringify({
           mobile: phoneNumber,
           name: uName,
-          email:uMail,
-          source: "WEBSITE"
+          email: uMail,
+          source: 'WEBSITE',
         }),
       });
 
@@ -100,120 +98,206 @@ const SignUp = () => {
             errorMessage = errorData.message;
           }
         } catch (parseError) {
+          // Ignore parsing error
         }
         throw new Error(errorMessage);
       }
 
       toast.success(`OTP sent to ${phoneNumber}`);
-      // If API call is successful
-      localStorage.setItem('from', 'signup')
+      localStorage.setItem('from', 'signup');
       localStorage.setItem('phoneNumber', phoneNumber);
       localStorage.setItem('name', uName);
-      localStorage.setItem('email', uMail)
-      navigate('/otp'); // Navigate only on successful OTP send
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Invalid OTP. Please try again.');
-      setErrors({ submit: err instanceof Error ? err.message : 'An unexpected error occurred.' });
+      localStorage.setItem('email', uMail);
+      navigate('/otp');
+    } catch (err: any) {
+      toast.error(err.message || 'An unexpected error occurred.');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleToggleAccordion = (section: string) => {
+    setOpenSection(openSection === section ? null : section);
+  };
+
   return (
-    <div className={`${styles.container}`}>
-      <div className={styles.navbarWrapper}>
-        <Navbar />
-      </div>
-
-      <div className={`${styles.mainContainer}`}>
-        <div className={styles.leftPanel}>
-          <div className={styles.imageContainer}>
-            <img
-              src="/lovable-uploads/8f598013-7362-496b-96a6-8a285565f544.png"
-              alt="Happy customer with phone"
-              className={styles.heroImage}
-            />
-          </div>
+      <div className={`${styles.container}`}>
+        <div className={styles.navbarWrapper}>
+          <Navbar />
         </div>
 
-        <div className={styles.rightPanel}>
-          <div className={styles.formWrapper}>
-            <div className={styles.heading}>SIGN-UP</div>
-
-            <div className={styles.fieldGroup}>
-              <label htmlFor="phone" className={styles.label}>
-                Full Name <sup>*</sup>
-              </label>
-              <input
-                id="name"
-                type="text"
-                value={uName}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Please Enter Your Full Name"
-                className='inputField'
+        <div className={`${styles.mainContainer}`}>
+          {/* Left Panel with Animation Class */}
+          <div className={`${styles.leftPanel} ${isLoaded ? styles.visible : ''}`}>
+            <div className={styles.imageContainer}>
+              <img
+                  src="/lovable-uploads/8f598013-7362-496b-96a6-8a285565f544.png"
+                  alt="Happy customer with phone"
+                  className={styles.heroImage}
               />
-              {errors.name && <p className={styles.errorMessage}>{errors.name}</p>}
             </div>
+          </div>
 
+          {/* Right Panel with Animation Class */}
+          <div className={`${styles.rightPanel} ${isLoaded ? styles.visible : ''}`}>
+            <div className={styles.loginFormWrapper}>
+              <div className={styles.heading}>Let’s get started</div>
 
-            {/* <div className={`${styles.formFieldsContainer} mt-4`}> */}
-            <div className={`${styles.fieldGroup} mt-4`}>
-              <label htmlFor="phone" className={styles.label}>
-                Phone Number <sup>*</sup>
-              </label>
-              <input
-                id="phone"
-                type="tel"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder="Please Enter Your Phone number"
-                className='inputField'
-                maxLength={10}
-              />
-              {errors.phoneNumber && <p className={styles.errorMessage}>{errors.phoneNumber}</p>}
+              <div className={styles.fieldGroup}>
+                <label htmlFor="name" className={styles.label}>
+                  Full Name <sup>*</sup>
+                </label>
+                <input
+                    id="name"
+                    type="text"
+                    value={uName}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Please Enter Your Full Name"
+                    className="inputField"
+                />
+                {errors.name && <p className={styles.errorMessage}>{errors.name}</p>}
+              </div>
+
+              <div className={`${styles.fieldGroup} mt-4`}>
+                <label htmlFor="phone" className={styles.label}>
+                  Phone Number <sup>*</sup>
+                </label>
+                <input
+                    id="phone"
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="Please Enter Your Phone number"
+                    className="inputField"
+                    maxLength={10}
+                />
+                {errors.phoneNumber && <p className={styles.errorMessage}>{errors.phoneNumber}</p>}
+              </div>
+
+              <div className={`${styles.fieldGroup} mt-4`}>
+                <label htmlFor="email" className={styles.label}>
+                  E-mail ID <sup>*</sup>
+                </label>
+                <input
+                    id="email"
+                    type="email"
+                    value={uMail}
+                    onChange={(e) => setMailId(e.target.value)}
+                    placeholder="Please Enter E-mail ID"
+                    className="inputField"
+                />
+                {errors.uMail && <p className={styles.errorMessage}>{errors.uMail}</p>}
+              </div>
+
+              <button onClick={handleGetOTP} disabled={loading} className={`${styles.submitButton} mt-4`}>
+                {loading ? 'Sending...' : 'Get OTP'}
+              </button>
+
+              <p className={`${styles.dontHaveAccount} mt-2 mb-2`}>
+                Already Have an Account?{' '}
+                <span
+                    className="text-primary font-medium text-md cursor-pointer border-b-2 border-primary"
+                    onClick={() => navigate('/')}
+                >
+                Login
+              </span>
+              </p>
+
+              <p className={styles.infoText}>Paisa108 – Get instant personal loans, anytime, anywhere</p>
+
+              <div className={`${styles.secureInfoContainer} mt-2`}>
+                <CheckCircle className="w-5 h-5 fill-green-500 text-white mr-2" />
+                Secure, simple, 100% paperless
+              </div>
+
+              {/* Accordion Details Section */}
+              <div className={`${styles.accordionContainer} mt-4`}>
+                {/* Eligibility Criteria */}
+                <div className={styles.accordionItem}>
+                  <button onClick={() => handleToggleAccordion('eligibility')} className={styles.accordionHeader}>
+                    <span>📌 Eligibility Criteria</span>
+                    <ChevronDown
+                        className={`${styles.accordionIcon} ${openSection === 'eligibility' ? styles.open : ''}`}
+                    />
+                  </button>
+                  <div className={`${styles.accordionContent} ${openSection === 'eligibility' ? styles.open : ''}`}>
+                    <ul className={styles.detailsList}>
+                      <li>Must be an Indian Resident</li>
+                      <li>Should be a Salaried Employee</li>
+                      <li>Age above 25 years</li>
+                      <li>Must have a Savings Bank Account</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Documents Required */}
+                <div className={styles.accordionItem}>
+                  <button onClick={() => handleToggleAccordion('documents')} className={styles.accordionHeader}>
+                    <span>📑 Documents Required</span>
+                    <ChevronDown
+                        className={`${styles.accordionIcon} ${openSection === 'documents' ? styles.open : ''}`}
+                    />
+                  </button>
+                  <div className={`${styles.accordionContent} ${openSection === 'documents' ? styles.open : ''}`}>
+                    <ul className={styles.detailsList}>
+                      <li>Completed Personal Loan Application with your latest photograph</li>
+                      <li>PAN Card</li>
+                      <li>
+                        Residence Proof (any one):
+                        <ul className={styles.nestedList}>
+                          <li>Driving Licence</li>
+                          <li>Voter ID</li>
+                          <li>Passport</li>
+                          <li>Utility Bills (Electricity / Water / Gas)</li>
+                          <li>Post-paid / Landline Bill</li>
+                        </ul>
+                      </li>
+                      <li>Last 3 Months’ Bank Statements of your salary account</li>
+                      <li>Last 3 Months’ Salary Slips</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Personal Loan Details */}
+                <div className={styles.accordionItem}>
+                  <button onClick={() => handleToggleAccordion('loanDetails')} className={styles.accordionHeader}>
+                    <span>💰 Personal Loan Details</span>
+                    <ChevronDown
+                        className={`${styles.accordionIcon} ${openSection === 'loanDetails' ? styles.open : ''}`}
+                    />
+                  </button>
+                  <div className={`${styles.accordionContent} ${openSection === 'loanDetails' ? styles.open : ''}`}>
+                    <ul className={styles.detailsList}>
+                      <li>Interest Rate: Up to 1% per day</li>
+                      <li>Annual Percentage Rate (APR): 18% – 45%</li>
+                      <li>Processing Fees: 5% – 10% of the loan amount</li>
+                      <li>Tenure: 10 days – 45 days</li>
+                      <li>GST: Applicable on processing fees as per Government rates</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Note */}
+                <div className={styles.accordionItem}>
+                  <button onClick={() => handleToggleAccordion('note')} className={styles.accordionHeader}>
+                    <span>📌 Note</span>
+                    <ChevronDown className={`${styles.accordionIcon} ${openSection === 'note' ? styles.open : ''}`} />
+                  </button>
+                  <div className={`${styles.accordionContent} ${openSection === 'note' ? styles.open : ''}`}>
+                    <ul className={styles.detailsList}>
+                      <li>
+                        Interest rates may vary based on factors like income consistency, employment stability, spending &
+                        saving habits, and credit history.
+                      </li>
+                      <li>Processing fees are deducted at the time of loan disbursement.</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
             </div>
-
-            <div className={`${styles.fieldGroup} mt-4`}>
-              <label htmlFor="phone" className={styles.label}>
-                E-mail ID <sup>*</sup>
-              </label>
-              <input
-                id="name"
-                type="mail"
-                value={uMail}
-                onChange={(e) => setMailId(e.target.value)}
-                placeholder="Please Enter E-mail ID"
-                className='inputField'
-              />
-              {errors.uMail && <p className={styles.errorMessage}>{errors.uMail}</p>}
-            </div>
-
-
-            <button
-              onClick={handleGetOTP}
-              disabled={loading}
-              className={`${styles.submitButton} mt-4`}
-            >
-              {loading ? 'Sending...' : 'Get OTP'}
-            </button>
-
-            <p className={`${styles.dontHaveAccount} mt-2 mb-2`}>
-              Already Have an Account? <span className='text-primary font-medium text-md cursor-pointer border-b-2 border-primary' onClick={() => navigate('/')}>Login</span>
-            </p>
-
-            <p className={styles.infoText}>
-              Paisa108 Get instant personal loan up to ₹ 25000
-            </p>
-
-            <div className={styles.secureInfoContainer}>
-              <CheckCircle className="w-5 h-5 fill-green-500 text-white mr-2" />
-              Secure, simple, 100% paperless
-            </div>
-            {/* </div> */}
           </div>
         </div>
       </div>
-    </div>
   );
 };
 
