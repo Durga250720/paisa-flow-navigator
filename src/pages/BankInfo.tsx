@@ -7,6 +7,7 @@ import styles from '../pages-styles/EmployemntInfo.module.css';
 import {toast } from 'react-toastify';
 import axios from 'axios';
 import axiosInstance from '@/lib/axiosInstance';
+import { Eye, EyeOff } from "lucide-react";
 
 const BankInfo = () => {
     const [formData, setFormData] = useState({
@@ -19,6 +20,8 @@ const BankInfo = () => {
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const [showAccountNumber, setShowAccountNumber] = useState(false);
+    const [showReEnterAccountNumber, setShowReEnterAccountNumber] = useState(false);
 
     useEffect(() => {
         const authToken = localStorage.getItem('authToken');
@@ -201,13 +204,24 @@ const handleContinue = async () => {
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Bank Account Number <sup className="text-red-500">*</sup>
                                 </label>
-                                <input
-                                    type="number"
-                                    value={formData.bankAccountNumber}
-                                    onChange={(e) => handleInputChange('bankAccountNumber', e.target.value)}
-                                    placeholder="Enter the Account Number"
-                                    className="inputField1"
-                                />
+                                <div className="relative">
+    <input
+      type={showAccountNumber ? "text" : "password"}
+      value={formData.bankAccountNumber}
+      onChange={(e) => handleInputChange("bankAccountNumber", e.target.value)}
+      placeholder="Enter the Account Number"
+      className="inputField1 pr-10"
+      onCopy={(e) => e.preventDefault()}
+      onPaste={(e) => e.preventDefault()}
+    />
+    <button
+      type="button"
+      onClick={() => setShowAccountNumber(!showAccountNumber)}
+      className="relative right-7 top-1 text-gray-500 hover:text-gray-700"
+    >
+      {showAccountNumber ? <EyeOff size={18} /> : <Eye size={18} />}
+    </button>
+  </div>
                                 {errors.bankAccountNumber && <p className="error-message">{errors.bankAccountNumber}</p>}
                             </div>
 
@@ -215,13 +229,24 @@ const handleContinue = async () => {
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Re-Enter Bank Account Number
                                 </label>
-                                <input
-                                    type="number"
-                                    value={formData.reEnterBankAccountNumber}
-                                    onChange={(e) => handleInputChange('reEnterBankAccountNumber', e.target.value)}
-                                    placeholder="Enter the Account Number Again"
-                                    className="inputField1"
-                                />
+                                <div className="relative">
+    <input
+      type={showReEnterAccountNumber ? "text" : "password"}
+      value={formData.reEnterBankAccountNumber}
+      onChange={(e) => handleInputChange("reEnterBankAccountNumber", e.target.value)}
+      placeholder="Enter the Account Number Again"
+      className="inputField1 pr-10"
+      onCopy={(e) => e.preventDefault()}
+      onPaste={(e) => e.preventDefault()}
+    />
+    <button
+      type="button"
+      onClick={() => setShowReEnterAccountNumber(!showReEnterAccountNumber)}
+      className="relative right-7 top-1 text-gray-500 hover:text-gray-700"
+    >
+      {showReEnterAccountNumber ? <EyeOff size={18} /> : <Eye size={18} />}
+    </button>
+  </div>
                                 {errors.reEnterBankAccountNumber && <p className="error-message">{errors.reEnterBankAccountNumber}</p>}
                             </div>
 

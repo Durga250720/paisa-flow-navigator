@@ -33,7 +33,10 @@
 }
 
 .employmentFormContainer1 {
-    @apply w-full max-w-md flex lg:bg-white h-full flex-col lg:p-7 justify-between;
+    @apply w-full max-w-md flex lg:bg-white h-full flex-col lg:p-7 justify-between overflow-auto;
+    border-radius: 0.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: #347dd7 transparent;
 }
 
 .heading {
