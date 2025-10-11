@@ -87,8 +87,7 @@ const SignUp = () => {
           mobile: phoneNumber,
           name: uName,
           email: uMail,
-          source: 'WEBSITE',
-          "termsAccepted": isAgreed
+          source: 'WEBSITE'
         }),
       });
 

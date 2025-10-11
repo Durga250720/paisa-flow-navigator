@@ -83,7 +83,8 @@ const OTP = () => {
             name: name,
             email: email,
             source: "WEBSITE",
-            otp: otp
+            otp: otp,
+            "termsAccepted": true
           }),
         });
       }
