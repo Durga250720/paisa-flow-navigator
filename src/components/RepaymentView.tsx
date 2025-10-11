@@ -369,7 +369,8 @@ const fetchRepaymentDetails = useCallback(async () => {
       const CALLBACK_BASE_URL = import.meta.env.VITE_CALLBACK_BASE_URL;
 
       const options = {
-        key: "rzp_test_IoCHSYZRCKWYsq",
+        // key: "rzp_test_IoCHSYZRCKWYsq",
+        key: "rzp_live_RS75mBWM0Z6eU7",
         amount: orderData.amount,
         currency: orderData.currency,
         name: "Paisa108",
