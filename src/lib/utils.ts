@@ -17,9 +17,9 @@ export const toTitleCase = (str = '') => {
     .join(' ');
 };
 
-export const getCibilColor = (cibil: string | undefined) => {
+export const getCibilColor = (cibil: number | undefined) => {
   if (!cibil) return 'text-gray-600';
-  const score = parseInt(cibil, 10);
+  const score = cibil;
   if (isNaN(score)) return 'text-gray-600';
   if (score >= 750) return 'text-green-600';
   if (score >= 650) return 'text-yellow-600';
