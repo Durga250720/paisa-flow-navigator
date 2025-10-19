@@ -13,6 +13,7 @@ interface IncomeVerificationFormProps {
     onNext: (data: { 
         paySlipsUrls: { url: string, passCode: string }[], 
         bankStatementUrl: { url: string, passCode: string } | null 
+        residenceProofUrl: { url: string, passCode: string } | null
     }) => void;
     onPrevious: () => void;
     loading: boolean;
@@ -83,9 +84,11 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
     const [files, setFiles] = useState<{
         payslips: File[];
         bankStatement: File | null;
+        residenceProof: File | null;
     }>({
         payslips: [],
         bankStatement: null,
+        residenceProof: null,
     });
     
     const [payslipAccessCodes, setPayslipAccessCodes] = useState<string[]>([]);
@@ -100,6 +103,9 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
         }
         if (!files.bankStatement) {
             newErrors.bankStatement = 'Bank statement is required.';
+        }
+        if (!files.residenceProof) {
+            newErrors.residenceProof = 'Address proof is required.';
         }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -143,6 +149,16 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
         setBankStatementAccessCode('');
     }, []);
 
+    const handleResidenceProofUpload = useCallback((selectedFile: File | null) => {
+        if (!selectedFile) return;
+        setFiles(prev => ({ ...prev, residenceProof: selectedFile }));
+        if (errors.residenceProof) setErrors(prev => ({ ...prev, residenceProof: '' }));
+    }, [errors.residenceProof]);
+
+    const removeResidenceProof = useCallback(() => {
+        setFiles(prev => ({ ...prev, residenceProof: null }));
+    }, []);
+
     const updatePayslipAccessCode = useCallback((index: number, value: string) => {
         setPayslipAccessCodes(prev => {
             const newCodes = [...prev];
@@ -174,10 +190,15 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
             uploadPromises.push(uploadFileToS3(files.bankStatement, 'bankStatements', sanitizedUserName));
         }
 
+        if (files.residenceProof) {
+            uploadPromises.push(uploadFileToS3(files.residenceProof, 'residenceProofs', sanitizedUserName));
+        }
+
         try {
             const results = await Promise.all(uploadPromises);
             const paySlipsResults = results.filter(r => r.type === 'payslips');
             const bankStatementResult = results.find(r => r.type === 'bankStatements');
+            const residenceProofResult = results.find(r => r.type === 'residenceProofs');
 
             // Format payslips with access codes
             const paySlipsUrls = paySlipsResults.map((result, index) => ({
@@ -191,9 +212,16 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
                 passCode: bankStatementAccessCode || ''
             } : null;
 
+            // Format residence proof
+            const residenceProofUrl = residenceProofResult ? {
+                url: residenceProofResult.url,
+                passCode: ''
+            } : null;
+
             onNext({ 
                 paySlipsUrls,
                 bankStatementUrl,
+                residenceProofUrl
             });
         } catch (error: any) {
             toast.error(`Upload failed: ${error.message}`);
@@ -295,6 +323,39 @@ const IncomeVerificationForm: React.FC<IncomeVerificationFormProps> = ({ onNext,
                         </div>
                     )}
                     {errors.bankStatement && <p className="text-red-500 text-xs mt-1">{errors.bankStatement}</p>}
+                </div>
+
+                {/* Residence Proof Upload Area */}
+                <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                        Residence Proof (Any one) <span className="text-red-500">*</span>
+                    </label>
+                    {!files.residenceProof ? (
+                        <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-primary transition-colors">
+                            <input
+                                type="file"
+                                accept=".pdf"
+                                onChange={(e) => handleResidenceProofUpload(e.target.files?.[0] || null)}
+                                className="hidden"
+                                id="residenceproof-upload-modal"
+                            />
+                            <label htmlFor="residenceproof-upload-modal" className="cursor-pointer flex items-center justify-center space-x-2">
+                                <Upload className="h-5 w-5 text-gray-500" />
+                                <span className="text-sm text-gray-600">Click to upload residence proof</span>
+                            </label>
+                        </div>
+                    ) : (
+                        <div className="border p-2 rounded-lg border-primary space-y-2">
+                            <div className="flex items-center justify-between bg-gray-50 p-2 rounded-md border">
+                                <FileText className="h-5 w-5 text-gray-500 mr-2" />
+                                <span className="text-sm text-gray-700 truncate" title={files.residenceProof.name}>{files.residenceProof.name}</span>
+                                <button onClick={removeResidenceProof} className="ml-2 text-red-500 hover:text-red-700">
+                                    <Trash2 size={18} />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                    {errors.residenceProof && <p className="text-red-500 text-xs mt-1">{errors.residenceProof}</p>}
                 </div>
             </div>
 

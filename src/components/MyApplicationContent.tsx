@@ -47,6 +47,10 @@ const MyApplicationContent = () => {
       documentType: "BANK_STATEMENT",
       documentUrls: [],
     },
+    residenceProof: { // For payload consistency
+      documentType: "RESIDENCE_PROOF",
+      documentUrls: [],
+    },
     bankDetail: { // To collect data from BankInfoForm
       accountNumber: "", ifscCode: "", accountHolderName: "", bankName: ""
     }
@@ -261,7 +265,8 @@ const MyApplicationContent = () => {
                     onNext={(data) => {
                       handleModalNext({
                         paySlips: { ...initialNewApplicationData.paySlips, documentUrls: data.paySlipsUrls },
-                        bankStatement: { ...initialNewApplicationData.bankStatement, documentUrls: data.bankStatementUrl ? [data.bankStatementUrl] : [] }
+                        bankStatement: { ...initialNewApplicationData.bankStatement, documentUrls: data.bankStatementUrl ? [data.bankStatementUrl] : [] },
+                        residenceProof: { ...initialNewApplicationData.residenceProof, documentUrls: data.residenceProofUrl ? [data.residenceProofUrl] : [] }
                       });
                     }}
                     onPrevious={handleModalPrevious}
