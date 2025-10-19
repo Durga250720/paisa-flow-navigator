@@ -28,9 +28,11 @@ const IncomeVerification = () => {
   const [files, setFiles] = useState<{
     payslips: File[];
     bankStatement: File | null;
+    residenceProof: File | null;
   }>({
     payslips: [],
     bankStatement: null,
+    residenceProof: null,
   });
 
   const [payslipAccessCodes, setPayslipAccessCodes] = useState<string[]>([]);
@@ -68,6 +70,7 @@ const IncomeVerification = () => {
     if (files.payslips.length === 0) newErrors.payslips = 'At least one payslip is required.';
     if (files.payslips.length > 6) newErrors.payslips = 'Maximum 6 payslips allowed.';
     if (!files.bankStatement) newErrors.bankStatement = 'Bank statement is required';
+    if (!files.residenceProof) newErrors.residenceProof = 'Address proof is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -122,6 +125,16 @@ const IncomeVerification = () => {
     setBankStatementAccessCode('');
   }, []);
 
+  const handleResidenceProofUpload = useCallback((file: File | null) => {
+    if (!file) return;
+    setFiles(prev => ({ ...prev, residenceProof: file }));
+    setErrors(prev => ({ ...prev, residenceProof: '' }));
+  }, []);
+
+  const removeResidenceProof = useCallback(() => {
+    setFiles(prev => ({ ...prev, residenceProof: null }));
+  }, []);
+
   const updatePayslipAccessCode = useCallback((index: number, value: string) => {
     setPayslipAccessCodes(prev => {
       const newCodes = [...prev];
@@ -146,11 +159,13 @@ const handleContinue = async () => {
     const uploadPromises = [
       ...files.payslips.map(f => uploadFileToS3(f, 'payslips', userName)),
       ...(files.bankStatement ? [uploadFileToS3(files.bankStatement, 'bankStatements', userName)] : []),
+      ...(files.residenceProof ? [uploadFileToS3(files.residenceProof, 'residenceProofs', userName)] : []),
     ];
     const uploaded = await Promise.all(uploadPromises);
 
     const payslipDocs = uploaded.filter(d => d.type === 'payslips');
     const bankDoc = uploaded.find(d => d.type === 'bankStatements');
+    const residenceDoc = uploaded.find(d => d.type === 'residenceProofs');
 
     // Payslip API with axios
     if (payslipDocs.length) {
@@ -184,6 +199,24 @@ const handleContinue = async () => {
       await axiosInstance.post(`${config.baseURL}kyc-docs/add`, bankStatementPayload, {
         headers: { 
           'Content-Type': 'application/json' 
+        }
+      });
+    }
+
+    // Residence proof API with axios
+    if (residenceDoc) {
+      const residenceProofPayload = {
+        borrowerId,
+        documentType: 'RESIDENCE_PROOF',
+        documents: [{
+          url: residenceDoc.url,
+          passCode: '',
+        }],
+      };
+
+      await axiosInstance.post(`${config.baseURL}kyc-docs/add`, residenceProofPayload, {
+        headers: {
+          'Content-Type': 'application/json'
         }
       });
     }
@@ -252,6 +285,7 @@ const handleContinue = async () => {
             <div className={`space-y-3 ${styles.formContainer} h-[75%]`}>
               {/* <PayslipUploadArea /> */}
               {/* <BankStatementUploadArea /> */}
+              {/* <ResidenceProofUploadArea /> */}
 
               {/* Payslips Uploading Area */}
 
@@ -343,6 +377,48 @@ const handleContinue = async () => {
                 )}
 
                 {errors.bankStatement && <p className="error-message">{errors.bankStatement}</p>}
+              </div>
+
+              {/* Residence Proof Uploading Area */}
+              <div className="space-y-3 w-[95%]">
+                <label className="block text-sm font-medium text-gray-700">
+                  Residence Proof (Any one) <sup className="text-red-500">*</sup>
+                </label>
+
+                {!files.residenceProof ? (
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
+                      <input
+                          type="file"
+                          accept=".pdf"
+                          className="hidden"
+                          id="residenceProof-upload"
+                          onChange={(e) => handleResidenceProofUpload(e.target.files?.[0] || null)}
+                      />
+                      <label htmlFor="residenceProof-upload" className="cursor-pointer">
+                        <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                        <p className="text-xs text-gray-600">Click to upload your residence proof</p>
+                      </label>
+                    </div>
+                ) : (
+                    <div className="border border-primary rounded-lg p-2 space-y-2">
+                      <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border">
+                        <div className="flex items-center space-x-2">
+                          <FileText className="h-4 w-4 text-gray-500" />
+                          <span className="text-sm text-gray-700 truncate">{files.residenceProof.name}</span>
+                        </div>
+                        <div className="flex space-x-2">
+                          <button className="text-blue-500 hover:text-blue-700 text-sm" onClick={() => document.getElementById('residenceProof-upload')?.click()}>
+                            Change
+                          </button>
+                          <button className="text-red-500 hover:text-red-700" onClick={removeResidenceProof}>
+                            <X className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                )}
+
+                {errors.residenceProof && <p className="error-message">{errors.residenceProof}</p>}
               </div>
 
             </div>
