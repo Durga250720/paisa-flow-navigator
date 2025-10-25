@@ -13,7 +13,7 @@ const SignUp = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false); 
+  const [isLoaded, setIsLoaded] = useState(false);
   const [isAgreed, setIsAgreed] = useState(false);
   const navigate = useNavigate();
 
@@ -190,19 +190,36 @@ const SignUp = () => {
                 {errors.uMail && <p className={styles.errorMessage}>{errors.uMail}</p>}
               </div>
 
-            <div className={`${styles.checkboxContainer} mt-4`}>
-              <input
-                id="terms"
-                type="checkbox"
-                checked={isAgreed}
-                onChange={(e) => setIsAgreed(e.target.checked)}
-                className={`${styles.checkbox} relative top-1`}
-              />
-              <label htmlFor="terms" className={`${styles.checkboxLabel} text-xs ml-2`}>
-                I agree to the <span className="text-primary cursor-pointer">Terms & Conditions</span> and
-                <span className="text-primary cursor-pointer"> Privacy Policy</span> of Paisa108 and consent to receive important updates, loan information, and promotional messages via SMS, RCS, WhatsApp, email, or phone from Paisa108 (Dytron Finvest Pvt. Ltd.).
-              </label>
-            </div>
+              <div className={`${styles.checkboxContainer} mt-4`}>
+                <input
+                    id="terms"
+                    type="checkbox"
+                    checked={isAgreed}
+                    onChange={(e) => setIsAgreed(e.target.checked)}
+                    className={`${styles.checkbox} relative top-1`}
+                />
+                <label htmlFor="terms" className={`${styles.checkboxLabel} text-xs ml-2`}>
+                  I agree to the{' '}
+                  <a
+                      href="https://paisa108.com/terms-and-conditions"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary cursor-pointer"
+                  >
+                    Terms & Conditions
+                  </a>
+                  {' '}and{' '}
+                  <a
+                      href="https://paisa108.com/privacy-policy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary cursor-pointer"
+                  >
+                    Privacy Policy
+                  </a>
+                  {' '}of Paisa108 and consent to receive important updates, loan information, and promotional messages via SMS, RCS, WhatsApp, email, or phone from Paisa108 (Dytron Finvest Pvt. Ltd.).
+                </label>
+              </div>
 
               <button onClick={handleGetOTP} disabled={loading || !isAgreed} className={`${styles.submitButton} mt-4`}>
                 {loading ? 'Sending...' : 'Get OTP'}
